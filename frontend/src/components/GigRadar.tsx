@@ -46,24 +46,51 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
         setError(null);
         setGigs([]);
         try {
-            const response = await fetch('http://localhost:8000/api/scout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ city, genre, tier, radius, timeframe })
-            });
-            const data = await response.json();
-            if (data.status === 'success' && data.gigs) {
-                // Handle both {venues: [...]} and direct [...] array structures from Gemini
-                const venuesList = Array.isArray(data.gigs) ? data.gigs : (data.gigs.venues || []);
-                if (venuesList.length > 0) {
-                    const enhancedGigs = venuesList.map((g: any) => ({ ...g, pipeline_status: 'INTERCEPTED' }));
-                    setGigs(enhancedGigs);
-                } else {
-                    throw new Error("Zero viable intercepts detected after parsing radar sweeps.");
+            // Simulate network request for static deployment
+            await new Promise(resolve => setTimeout(resolve, 10000));
+
+            const mockGigs = [
+                {
+                    name: "Neon District Underground",
+                    tier: "Mid-Size Touring",
+                    reputation_score: "92",
+                    reputation_explanation: "High integrity establishment. Consistent payouts and strong historic leverage for ascending artists.",
+                    active_search_signal: true,
+                    payout_model: "$1,500 Guar. + 70% Door > 200 Cap",
+                    lead_time: "4-6 Weeks",
+                    contact_persona: "Marcus Vance (Head Buyer)",
+                    contact_source: "Live Nation Int.",
+                    similar_acts: ["Tale of Us", "CamelPhat", "ARTBAT"],
+                    capacity: "850",
+                    avg_ticket_price_usd: "35",
+                    gross_potential_usd: 29750,
+                    leverage_point: "Venue recently lost their resident Friday DJ. High desperation for melodic house acts.",
+                    strategy: "Press for higher guarantee. They need reliable talent to anchor the weekend. Offer a 3-gig package deal to lock in premium placement.",
+                    contact: "booking@neondistrict.com",
+                    pipeline_status: 'INTERCEPTED'
+                },
+                {
+                    name: "The Obsidian Room",
+                    tier: "Top-Tier Theater",
+                    reputation_score: "85",
+                    reputation_explanation: "Prestigious but highly corporate. Negotiations are rigid. Great for brand building, less flexible on backend points.",
+                    active_search_signal: false,
+                    payout_model: "$5,000 Flat Guarantee",
+                    lead_time: "3-4 Months",
+                    contact_persona: "Elena Rostova (Talent VP)",
+                    contact_source: "AEG Presents",
+                    similar_acts: ["Rinzen", "Yotto"],
+                    capacity: "2,200",
+                    avg_ticket_price_usd: "55",
+                    gross_potential_usd: 121000,
+                    leverage_point: "Looking for direct support for upcoming major international headliner.",
+                    strategy: "Accept flat fee but fiercely negotiate for outsized marketing reciprocity and email list data sharing.",
+                    contact: "elena@obsidianroom.co",
+                    pipeline_status: 'INTERCEPTED'
                 }
-            } else {
-                throw new Error(data.error || "Failed to parse scout data.");
-            }
+            ];
+
+            setGigs(mockGigs);
         } catch (err: any) {
             console.error(err);
             setError(`Intercept Failed: ${err.message}`);
@@ -78,25 +105,26 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
         setGeneratedPitch('');
         setIsDrafting(true);
         try {
-            const response = await fetch('http://localhost:8000/api/draft-pitch', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    venue_name: targetGig.name,
-                    venue_tier: targetGig.tier || tier,
-                    genre: genre,
-                    contact_persona: targetGig.contact_persona || targetGig.contact || 'Booking Manager',
-                    payout_model: targetGig.payout_model || 'Unknown',
-                    artist_name: artistAlias,
-                    agent_name: agentName
-                })
-            });
-            const data = await response.json();
-            if (data.status === 'success') {
-                setGeneratedPitch(data.pitch);
-            } else {
-                setGeneratedPitch('ERROR GENERATING PITCH. MANUAL OVERRIDE REQUIRED.\n\n' + data.error);
-            }
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            const mockPitch = `Subject: Inquiry: ${artistAlias} x ${targetGig.name || 'Your Venue'} // ${timeframe}
+
+Hi ${targetGig.contact_persona ? targetGig.contact_persona.split(' ')[0] : 'there'},
+
+I'm ${agentName}, representing the electronic act ${artistAlias}. We're currently routing our ${timeframe} dates and are looking closely at ${city} as a primary target market.
+
+Based on our recent data telemetry, we noted that you regularly host similar tier acts (like ${targetGig.similar_acts ? (Array.isArray(targetGig.similar_acts) ? targetGig.similar_acts[0] : targetGig.similar_acts) : 'other leading artists'}) and have an open capacity of ${targetGig.capacity || 'your venue size'}. 
+
+We have a strong marketing package and established streaming metrics in the region that we believe can comfortably hit a ${targetGig.payout_model ? 'solid guarantee and backend split' : 'profitable arrangement for both parties'}.
+
+Could we schedule a quick call next week to discuss dates and a potential hold?
+
+Best regards,
+
+${agentName}
+Agent, ${artistAlias}`;
+
+            setGeneratedPitch(mockPitch);
         } catch (err: any) {
             setGeneratedPitch('NETWORK ERROR GENERATING PITCH. OFFLINE MANUAL OVERRIDE REQUIRED.');
         } finally {

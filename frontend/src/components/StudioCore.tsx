@@ -89,17 +89,14 @@ export default function StudioCore() {
         setIsOracleScanning(true);
         setIsOracleApplied(false);
         setOracleData(null);
-        const formData = new FormData();
-        formData.append('target', targetFile);
 
         try {
-            const response = await fetch('http://localhost:8000/api/oracle', {
-                method: 'POST',
-                body: formData,
+            await new Promise(resolve => setTimeout(resolve, 3500));
+
+            setOracleData({
+                analysis: "Detected excessive mud in the 200-400Hz range. Transient snap required on the primary kick element. Vocal air band (10kHz+) lacks presence compared to the reference track. Sub-harmonics need tight compression to match LUFS target.",
+                knobs: { sub: 65, air: 85, snap: 70, width: 60 }
             });
-            if (!response.ok) throw new Error("Oracle failed");
-            const data = await response.json();
-            setOracleData(data.oracle);
         } catch (err) {
             console.error(err);
             alert("Oracle Engine Failure.");
@@ -112,31 +109,17 @@ export default function StudioCore() {
         if (!targetFile || !refFile) return;
         setPhase('processing');
 
-        const formData = new FormData();
-        formData.append('target', targetFile);
-        formData.append('reference', refFile);
-        formData.append('sub', knobs.sub.toString());
-        formData.append('air', knobs.air.toString());
-        formData.append('snap', knobs.snap.toString());
-        formData.append('width', knobs.width.toString());
-        formData.append('output_format', outputFormat);
-
         try {
-            const response = await fetch('http://localhost:8000/api/master', {
-                method: 'POST',
-                body: formData,
-            });
+            await new Promise(resolve => setTimeout(resolve, 4000));
 
-            if (!response.ok) throw new Error("Mastering failed");
-
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
+            // For static demo, just use the original file as the "master"
+            const url = URL.createObjectURL(targetFile);
             setMasterAudioUrl(url);
             setPhase('tuning');
         } catch (err) {
             console.error(err);
             setPhase('dropzone');
-            alert("Mastering Engine Failure. Check backend logs.");
+            alert("Mastering Engine Failure. Check logs.");
         }
     };
 

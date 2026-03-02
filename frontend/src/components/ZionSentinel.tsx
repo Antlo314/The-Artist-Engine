@@ -12,19 +12,26 @@ export default function ZionSentinel() {
         setIsScanning(true);
         setAnalysis(null);
         try {
-            const formData = new FormData();
-            formData.append('text', contractText);
+            await new Promise(resolve => setTimeout(resolve, 3500));
 
-            const res = await fetch('http://localhost:8000/api/analyze-contract', {
-                method: 'POST',
-                body: formData
+            // Mock Data for Static Deployment
+            setAnalysis({
+                integrity_score: 35,
+                summary: "This contract heavily favors the label, granting them perpetual rights to master recordings across all known and yet-to-be-invented universes, while capping artist royalties below industry standard.",
+                red_flags: [
+                    {
+                        clause: "Company shall have the right to exploit the Masters in perpetuity throughout the Universe",
+                        risk: "Grants permanent ownership of your recordings. You will never own these masters.",
+                        fix: "Negotiate a reversion clause (e.g., masters revert to Artist after 5 years or recoupment)."
+                    },
+                    {
+                        clause: "All recording costs, marketing, and tour support are 100% recoupable from Artist royalties",
+                        risk: "Standard practice, but ensures you don't see a dime until the label makes back all their money.",
+                        fix: "Cap recoupable marketing costs or negotiate a higher royalty rate to offset the debt."
+                    }
+                ],
+                shark_rebuttal: "Dear [Label/Lawyer],\n\nWhile we appreciate the offer, section 4(b) granting perpetuity rights is a non-starter for my client. We are open to a 7-year licensing period, after which the Masters revert to the Artist. Additionally..."
             });
-            const data = await res.json();
-            if (data.status === 'success') {
-                setAnalysis(data.analysis);
-            } else {
-                throw new Error("Failed to parse contract logic.");
-            }
         } catch (err) {
             console.error(err);
         } finally {
