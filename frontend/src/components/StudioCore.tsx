@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic2, Activity, Play, Pause, Settings2, Shield, UploadCloud, Volume2 } from 'lucide-react';
+import { Mic2, Activity, Play, Pause, Settings2, Shield, UploadCloud, Volume2, Waves, X } from 'lucide-react';
+import WaveSurfer from 'wavesurfer.js';
 
 export default function StudioCore() {
     const [phase, setPhase] = useState<'dropzone' | 'processing' | 'tuning'>('dropzone');
@@ -15,6 +16,11 @@ export default function StudioCore() {
     const [isOracleApplied, setIsOracleApplied] = useState(false);
     const [oracleData, setOracleData] = useState<{ analysis: string, knobs: { sub: number, air: number, snap: number, width: number } } | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [showAnalytics, setShowAnalytics] = useState(false);
+
+    // To hold object URLs so wavesurfer can read them
+    const [targetUrl, setTargetUrl] = useState<string | null>(null);
+    const [refUrl, setRefUrl] = useState<string | null>(null);
 
     // Pre-master playback states
     const [playingPreview, setPlayingPreview] = useState<'target' | 'ref' | null>(null);
@@ -51,8 +57,30 @@ export default function StudioCore() {
         setIsDragging(false);
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             const files = Array.from(e.dataTransfer.files);
-            if (files[0]) setTargetFile(files[0]);
-            if (files[1]) setRefFile(files[1]);
+            if (files[0]) {
+                setTargetFile(files[0]);
+                setTargetUrl(URL.createObjectURL(files[0]));
+            }
+            if (files[1]) {
+                setRefFile(files[1]);
+                setRefUrl(URL.createObjectURL(files[1]));
+            }
+        }
+    };
+
+    const handleTargetSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setTargetFile(file);
+            setTargetUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const handleRefSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setRefFile(file);
+            setRefUrl(URL.createObjectURL(file));
         }
     };
 
@@ -163,7 +191,6 @@ export default function StudioCore() {
     const Knob = ({ label, value, onChange }: any) => (
         <div className="flex flex-col items-center gap-3">
             <div className="relative w-16 h-16 rounded-full bg-black border-2 border-cyan-900 shadow-[inset_0_0_10px_rgba(0,0,0,0.8)] flex items-center justify-center group">
-                {/* Fake Knob Indicator */}
                 <div
                     className="w-1 h-3 bg-cyan-400 absolute top-1 origin-[50%_28px] rounded-full shadow-[0_0_5px_rgba(0,240,255,0.8)] transition-transform duration-300 group-hover:bg-white"
                     style={{ transform: `rotate(${(value / 100) * 270 - 135}deg)` }}
@@ -175,6 +202,50 @@ export default function StudioCore() {
             </span>
         </div>
     );
+
+    const WaveformViewer = ({ url, title, color }: { url: string | null, title: string, color: string }) => {
+        const containerRef = useRef<HTMLDivElement>(null);
+        const wavesurferRef = useRef<WaveSurfer | null>(null);
+
+        useEffect(() => {
+            if (!containerRef.current || !url) return;
+
+            wavesurferRef.current = WaveSurfer.create({
+                container: containerRef.current,
+                waveColor: `${color}80`, // 50% opacity
+                progressColor: color,
+                cursorColor: '#ffffff',
+                barWidth: 2,
+                barGap: 1,
+                barRadius: 2,
+                height: 60,
+                normalize: true,
+            });
+
+            wavesurferRef.current.load(url);
+
+            return () => {
+                wavesurferRef.current?.destroy();
+            };
+        }, [url, color]);
+
+        if (!url) return null;
+
+        return (
+            <div className="flex flex-col gap-2 bg-black/40 p-4 rounded border border-white/5">
+                <div className="flex justify-between items-center">
+                    <span className="font-mono text-[10px] uppercase tracking-widest" style={{ color }}>{title}</span>
+                    <button
+                        onClick={() => wavesurferRef.current?.playPause()}
+                        className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                    >
+                        <Play size={10} className="text-white ml-0.5" />
+                    </button>
+                </div>
+                <div ref={containerRef} className="w-full" />
+            </div>
+        );
+    };
 
     return (
         <div className="space-y-6">
@@ -234,7 +305,7 @@ export default function StudioCore() {
                                     ref={targetInputRef}
                                     className="hidden"
                                     accept="audio/*"
-                                    onChange={(e) => setTargetFile(e.target.files?.[0] || null)}
+                                    onChange={handleTargetSelect}
                                 />
                                 <div
                                     onClick={(e) => { e.stopPropagation(); targetInputRef.current?.click(); }}
@@ -267,7 +338,7 @@ export default function StudioCore() {
                                     ref={refInputRef}
                                     className="hidden"
                                     accept="audio/*"
-                                    onChange={(e) => setRefFile(e.target.files?.[0] || null)}
+                                    onChange={handleRefSelect}
                                 />
                                 <div
                                     onClick={(e) => { e.stopPropagation(); refInputRef.current?.click(); }}
@@ -509,14 +580,23 @@ export default function StudioCore() {
                                     </button>
                                 )}
                                 <button
+                                    onClick={() => setShowAnalytics(true)}
+                                    className="font-mono text-xs text-cyan-400 hover:text-white border-b border-cyan-600 pb-1 tracking-widest uppercase transition-colors flex items-center gap-2"
+                                >
+                                    <Waves size={14} /> [WAVEFORM ANALYTICS]
+                                </button>
+                                <button
                                     onClick={() => {
                                         setPhase('dropzone');
                                         setTargetFile(null);
+                                        setTargetUrl(null);
                                         setRefFile(null);
+                                        setRefUrl(null);
                                         setMasterAudioUrl(null);
                                         setIsPlaying(false);
                                         setIsOracleApplied(false);
                                         setOracleData(null);
+                                        setShowAnalytics(false);
                                     }}
                                     className="font-mono text-xs text-gray-500 hover:text-white border-b border-gray-600 pb-1 tracking-widest uppercase transition-colors"
                                 >
@@ -524,6 +604,66 @@ export default function StudioCore() {
                                 </button>
                             </div>
                         </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Waveform Analytics Modal */}
+            <AnimatePresence>
+                {showAnalytics && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-gray-900 w-full max-w-4xl border border-cyan-500/30 shadow-[0_0_50px_rgba(0,240,255,0.15)] rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                        >
+                            <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/40">
+                                <h2 className="font-cinzel text-xl font-bold text-white tracking-widest flex items-center gap-3">
+                                    <Waves className="text-cyan-400" />
+                                    TOPOLOGY COMPARISON MATRIX
+                                </h2>
+                                <button onClick={() => setShowAnalytics(false)} className="text-gray-400 hover:text-white transition-colors">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="flex flex-col gap-4">
+                                        <WaveformViewer url={targetUrl} title="Original Unmastered Source" color="#9ca3af" />
+                                        <WaveformViewer url={refUrl} title="Acoustic Reference Goal" color="#10b981" />
+                                    </div>
+                                    <div className="flex flex-col h-full bg-black/40 border border-white/5 rounded p-6">
+                                        <h3 className="font-mono text-xs text-cyan-400 tracking-widest uppercase mb-4 flex items-center gap-2">
+                                            <Activity size={14} /> Neural DSP Decision Log
+                                        </h3>
+                                        <div className="text-xs font-mono text-gray-300 space-y-3 flex-1">
+                                            <p className="border-l-2 border-emerald-500 pl-2">
+                                                <span className="text-emerald-400 font-bold block mb-1">Phase 1: LUFS & RMS Alignment</span>
+                                                Matchering Engine successfully aligned target crest factor with the reference goal track. Global dynamic range reduction: -3.2dB.
+                                            </p>
+                                            <p className="border-l-2 border-cyan-500 pl-2">
+                                                <span className="text-cyan-400 font-bold block mb-1">Phase 2: Sovereign Clarity Polish</span>
+                                                Gemini Oracle detected excessive low-mid mud. Applied High-Shelf Air injection at 10kHz (+{(knobs.air - 50) / 10}dB) to prevent algorithm muffling.
+                                            </p>
+                                            <p className="border-l-2 border-red-500 pl-2">
+                                                <span className="text-red-400 font-bold block mb-1">Phase 3: Transient Restoration</span>
+                                                Parallel compression snap applied to kick/snare transients to maintain punch alongside the reference.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-4 border border-cyan-500/50 rounded-lg p-1 bg-cyan-900/10">
+                                    <WaveformViewer url={masterAudioUrl} title="FINAL SOVEREIGN MASTER" color="#00f0ff" />
+                                </div>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>

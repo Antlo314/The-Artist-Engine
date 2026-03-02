@@ -9,7 +9,6 @@ def process_audio(target_path, reference_path, output_path, sub, air, snap, widt
     print(f"TARGET: {target_path}")
     print(f"REFERENCE: {reference_path}")
     
-    # Validation
     if not os.path.exists(target_path):
         print(f"ERROR: Target file not found at {target_path}")
         sys.exit(1)
@@ -18,7 +17,24 @@ def process_audio(target_path, reference_path, output_path, sub, air, snap, widt
         print(f"ERROR: Reference file not found at {reference_path}")
         sys.exit(1)
 
-    print(f"MATCHERING WORKER: Applying Sovereign DSP Engine (Sub:{sub} Air:{air} Snap:{snap} Width:{width}).")
+    print("MATCHERING WORKER: Phase 1 - Initializing AI Matchering Engine...")
+    temp_matched_path = target_path + "_matched.wav"
+    
+    try:
+        # MatchRMS & EQ Match
+        mg.process(
+            target=target_path,
+            reference=reference_path,
+            results=[
+                mg.pcm24(temp_matched_path)
+            ]
+        )
+        print("MATCHERING WORKER: Phase 1 complete. Base LUFS achieved.")
+    except Exception as e:
+        print(f"CRITICAL ERROR in Matchering Engine: {str(e)}")
+        sys.exit(1)
+
+    print(f"MATCHERING WORKER: Phase 2 - Applying Sovereign DSP Engine (Sub:{sub} Air:{air} Snap:{snap} Width:{width}).")
     sub = float(sub)
     air = float(air)
     snap = float(snap)
@@ -43,43 +59,25 @@ def process_audio(target_path, reference_path, output_path, sub, air, snap, widt
         mix = (width - 50) / 200.0 # max 0.25
         board.append(Chorus(rate_hz=0.5, depth=0.1, centre_delay_ms=7.0, feedback=0.0, mix=mix))
 
-    temp_dsp_target = target_path + "_dsp.wav"
-
     try:
-        with AudioFile(target_path) as f:
+        with AudioFile(temp_matched_path) as f:
             audio = f.read(f.frames)
             samplerate = f.samplerate
         
         effected = board(audio, samplerate)
         
-        with AudioFile(temp_dsp_target, 'w', samplerate, effected.shape[0]) as f:
+        with AudioFile(output_path, 'w', samplerate, effected.shape[0]) as f:
             f.write(effected)
             
+        print("MATCHERING WORKER: Phase 2 complete. Master topology finalized.")
     except Exception as e:
         print(f"CRITICAL ERROR in DSP Engine: {str(e)}")
         sys.exit(1)
-
-    print("MATCHERING WORKER: Initializing AI Mastering Engine...")
-    
-    try:
-        # Output standard 24-bit processed audio
-        mg.process(
-            target=temp_dsp_target,
-            reference=reference_path,
-            results=[
-                mg.pcm24(output_path)
-            ]
-        )
-        print("MATCHERING WORKER: Mastering complete. Optimal LUFS achieved.")
-        
-        # Clean up temp DSP file
-        if os.path.exists(temp_dsp_target):
-            os.remove(temp_dsp_target)
+    finally:
+        if os.path.exists(temp_matched_path):
+            os.remove(temp_matched_path)
             
-        sys.exit(0)
-    except Exception as e:
-        print(f"CRITICAL ERROR in Matchering Engine: {str(e)}")
-        sys.exit(1)
+    sys.exit(0)
 
 if __name__ == "__main__":
     if len(sys.argv) < 8:
