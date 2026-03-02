@@ -11,16 +11,23 @@ export default function SharkProtocol() {
         setIsAnalyzing(true);
         setResult(null);
         try {
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            const response = await fetch('https://the-artist-engine.onrender.com/api/negotiate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ venue_offer: offerText })
+            });
 
-            const mockedAgentResponse = {
-                reasoning: "The promoter is trying to transfer all financial risk to the artist via a 'pay-to-play' or aggressive door-split mechanic. We need to flip the leverage by establishing your base value while offering a performance incentive.",
-                counter_offer: "Hi Team,\n\nThanks for the offer. However, my client does not accept deals tied explicitly to a hard ticket quota prior to a guarantee.\n\nWe can counter with a **$150 flat guarantee** for the 30-minute set, plus 50% of any tickets sold via our unique affiliate link. We will still promote the show heavily to our local list, but we require a baseline commitment for our time and travel.\n\nLet me know if this works for your budget.\n\nBest,\nSovereign Agent"
-            };
+            if (!response.ok) throw new Error(`Status ${response.status}`);
+            const data = await response.json();
 
-            setResult(mockedAgentResponse);
+            if (data.status === 'success') {
+                setResult(JSON.parse(data.agent_response));
+            } else {
+                throw new Error(data.error || 'Negotiation Engine Failed');
+            }
         } catch (err) {
             console.error(err);
+            alert("Shark Protocol execution failed. Check console.");
         } finally {
             setIsAnalyzing(false);
         }

@@ -91,12 +91,22 @@ export default function StudioCore() {
         setOracleData(null);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 3500));
+            const formData = new FormData();
+            formData.append('target', targetFile);
 
-            setOracleData({
-                analysis: "Detected excessive mud in the 200-400Hz range. Transient snap required on the primary kick element. Vocal air band (10kHz+) lacks presence compared to the reference track. Sub-harmonics need tight compression to match LUFS target.",
-                knobs: { sub: 65, air: 85, snap: 70, width: 60 }
+            const response = await fetch('https://the-artist-engine.onrender.com/api/oracle', {
+                method: 'POST',
+                body: formData
             });
+
+            if (!response.ok) throw new Error(`Status ${response.status}`);
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                setOracleData(data.oracle);
+            } else {
+                throw new Error(data.error || 'Oracle Engine Failure');
+            }
         } catch (err) {
             console.error(err);
             alert("Oracle Engine Failure.");
@@ -110,10 +120,27 @@ export default function StudioCore() {
         setPhase('processing');
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 4000));
+            const formData = new FormData();
+            formData.append('target', targetFile);
+            formData.append('reference', refFile);
+            formData.append('sub', knobs.sub.toString());
+            formData.append('air', knobs.air.toString());
+            formData.append('snap', knobs.snap.toString());
+            formData.append('width', knobs.width.toString());
+            formData.append('output_format', outputFormat);
 
-            // For static demo, just use the original file as the "master"
-            const url = URL.createObjectURL(targetFile);
+            const response = await fetch('https://the-artist-engine.onrender.com/api/master', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || `Status ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
             setMasterAudioUrl(url);
             setPhase('tuning');
         } catch (err) {

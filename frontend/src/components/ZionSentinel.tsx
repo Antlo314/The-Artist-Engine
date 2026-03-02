@@ -12,28 +12,25 @@ export default function ZionSentinel() {
         setIsScanning(true);
         setAnalysis(null);
         try {
-            await new Promise(resolve => setTimeout(resolve, 3500));
+            const formData = new FormData();
+            formData.append('text', contractText);
 
-            // Mock Data for Static Deployment
-            setAnalysis({
-                integrity_score: 35,
-                summary: "This contract heavily favors the label, granting them perpetual rights to master recordings across all known and yet-to-be-invented universes, while capping artist royalties below industry standard.",
-                red_flags: [
-                    {
-                        clause: "Company shall have the right to exploit the Masters in perpetuity throughout the Universe",
-                        risk: "Grants permanent ownership of your recordings. You will never own these masters.",
-                        fix: "Negotiate a reversion clause (e.g., masters revert to Artist after 5 years or recoupment)."
-                    },
-                    {
-                        clause: "All recording costs, marketing, and tour support are 100% recoupable from Artist royalties",
-                        risk: "Standard practice, but ensures you don't see a dime until the label makes back all their money.",
-                        fix: "Cap recoupable marketing costs or negotiate a higher royalty rate to offset the debt."
-                    }
-                ],
-                shark_rebuttal: "Dear [Label/Lawyer],\n\nWhile we appreciate the offer, section 4(b) granting perpetuity rights is a non-starter for my client. We are open to a 7-year licensing period, after which the Masters revert to the Artist. Additionally..."
+            const response = await fetch('https://the-artist-engine.onrender.com/api/analyze-contract', {
+                method: 'POST',
+                body: formData
             });
+
+            if (!response.ok) throw new Error(`Status ${response.status}`);
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                setAnalysis(data.analysis);
+            } else {
+                throw new Error(data.error || 'Legal Scan Failed');
+            }
         } catch (err) {
             console.error(err);
+            alert("Forensic scan failed. Check console.");
         } finally {
             setIsScanning(false);
         }
