@@ -17,11 +17,8 @@ export default function App() {
     const [artistAlias, setArtistAlias] = useState('ECHOVELOCITY');
 
     useEffect(() => {
-        // Ping Backend for Status
-        fetch('http://localhost:8000/api/system-status')
-            .then(res => res.json())
-            .then(data => setSystemStatus(data))
-            .catch(err => console.error("Backend offline", err));
+        // Simulate Backend Online Status for static deployment
+        setSystemStatus({ status: 'online' });
     }, []);
 
     const navItems = [
