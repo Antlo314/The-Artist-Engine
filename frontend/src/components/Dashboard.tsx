@@ -65,8 +65,16 @@ export default function Dashboard() {
             </div>
 
             {/* Main Graph Area */}
-            <div className="glass-card p-8 rounded-xl min-h-[400px] border-glow flex flex-col relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4">
+            <div className="glass-card p-8 rounded-xl min-h-[400px] border-glow flex flex-col relative overflow-hidden group">
+                {/* Background Art */}
+                <div
+                    className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity z-0 group-hover:opacity-40 transition-opacity duration-700"
+                    style={{ backgroundImage: "url('/cmd_center.png')" }}
+                />
+                {/* Gradient fade to integrate into layout */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-[#0a0a0a]/80 to-transparent z-0" />
+
+                <div className="absolute top-0 right-0 p-4 z-10">
                     <div className="h-4 w-4 rounded-sm border border-cyan-500/20 bg-cyan-900/10 flex items-center justify-center">
                         <BarChart size={10} className="text-cyan-500" />
                     </div>

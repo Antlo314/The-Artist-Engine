@@ -41,34 +41,53 @@ export default function App() {
     return (
         <div className="flex h-screen w-full bg-[#050505] overflow-hidden relative selection:bg-cyan-900/50">
 
-            {/* Background Ambient Glows */}
-            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-cyan-900/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-emerald-900/5 rounded-full blur-[150px] pointer-events-none" />
+            {/* Global Video Background */}
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none z-0 mix-blend-screen"
+            >
+                <source src="/data_dust.mp4" type="video/mp4" />
+            </video>
 
-            {/* Mobile Header */}
-            <div className="md:hidden fixed top-0 w-full glass-panel z-50 flex items-center justify-between p-4 border-b border-white/5">
+            {/* Background Ambient Glows */}
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-cyan-900/20 rounded-full blur-[120px] pointer-events-none z-0" />
+            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-emerald-900/10 rounded-full blur-[150px] pointer-events-none z-0" />
+
+            {/* Mobile Header (Tactical Density) */}
+            <div className="md:hidden fixed top-0 w-full glass-panel z-50 flex items-center justify-between p-4 border-b border-cyan-900/40 bg-[#020202]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
                 <div className="flex items-center gap-2">
-                    <div className="h-6 w-6 rounded border border-cyan-500/50 flex items-center justify-center bg-cyan-500/10">
-                        <Activity size={12} className="text-cyan-400" />
+                    <div className="h-7 w-7 rounded bg-black border border-cyan-500/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,240,255,0.2)]">
+                        <Activity size={14} className="text-cyan-400" />
                     </div>
-                    <h1 className="font-cinzel text-sm font-bold tracking-widest text-white">THE ARTIST ENGINE</h1>
+                    <div className="flex flex-col">
+                        <h1 className="font-cinzel text-[13px] font-bold tracking-widest text-white leading-tight">THE ARTIST</h1>
+                        <span className="font-mono text-[8px] text-cyan-500 tracking-[0.3em] uppercase leading-none">ENGINE.OS</span>
+                    </div>
                 </div>
-                <div className="font-mono text-[10px] tracking-widest text-emerald-500 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> LIVE
+                <div className="font-mono text-[9px] tracking-widest text-emerald-500 flex items-center gap-1.5 bg-emerald-950/40 px-2 py-1 border border-emerald-900/50 rounded">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> SYNCED
                 </div>
             </div>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 w-full glass-panel z-50 border-t border-white/10 flex justify-around p-2 pb-safe bg-black/80 backdrop-blur-xl">
+            <nav className="md:hidden fixed bottom-0 w-full z-50 border-t border-cyan-900/30 flex justify-around p-2 pb-safe bg-[#020202]/95 backdrop-blur-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.9)]">
                 {navItems.map((item) => (
                     <button
                         key={item.id}
                         onClick={() => setActiveView(item.id)}
-                        className={`flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors ${activeView === item.id ? 'text-cyan-400' : 'text-gray-500 hover:text-gray-300'
-                            }`}
+                        className={`flex flex-col items-center gap-1 p-2 w-full transition-all duration-300 relative group
+                            ${activeView === item.id ? 'text-cyan-400' : 'text-gray-600 hover:text-gray-400'}`}
                     >
-                        <item.icon size={20} className={activeView === item.id ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]' : ''} />
-                        <span className="text-[8px] font-mono tracking-widest uppercase">{item.label}</span>
+                        <item.icon size={22} className={`transition-all duration-300 ${activeView === item.id ? 'drop-shadow-[0_0_10px_rgba(0,240,255,0.8)] -translate-y-1 scale-110' : ''}`} />
+                        <span className={`text-[8px] font-mono tracking-widest uppercase transition-all duration-300 ${activeView === item.id ? 'font-bold opacity-100' : 'opacity-70'}`}>
+                            {item.label}
+                        </span>
+                        {activeView === item.id && (
+                            <motion.div layoutId="mobile-nav-indicator" className="absolute top-0 w-8 h-[2px] bg-cyan-400 rounded-full shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
+                        )}
                     </button>
                 ))}
             </nav>

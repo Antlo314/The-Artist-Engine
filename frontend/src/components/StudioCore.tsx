@@ -288,7 +288,12 @@ export default function StudioCore() {
                             onDrop={handleDrop}
                             className={`md:col-span-2 glass-card rounded-2xl p-10 flex flex-col items-center justify-center border-dashed border-2 hover:border-cyan-400/50 transition-all min-h-[400px] relative overflow-hidden group ${isDragging ? 'border-cyan-400 bg-cyan-900/20 shadow-[0_0_30px_rgba(0,240,255,0.2)]' : 'border-cyan-900/50 hover:bg-cyan-900/5 cursor-default'}`}
                         >
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,240,255,0.05)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,240,255,0.05)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity z-0" />
+                            {/* Background Soundwaves */}
+                            <div
+                                className="absolute inset-0 bg-cover bg-center opacity-10 mix-blend-luminosity z-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"
+                                style={{ backgroundImage: "url('/audio_core_soundwaves.png')" }}
+                            />
 
                             <div className="w-20 h-20 rounded-full border-2 border-dashed border-cyan-500/50 flex items-center justify-center mb-6 group-hover:rotate-180 transition-transform duration-1000 ease-in-out">
                                 <UploadCloud size={32} className="text-cyan-400" />
@@ -467,24 +472,38 @@ export default function StudioCore() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="glass-card rounded-2xl h-[400px] flex flex-col items-center justify-center border-cyan-500 bg-cyan-900/5"
+                        className="glass-card rounded-2xl h-[400px] flex flex-col items-center justify-center border-cyan-500 bg-cyan-900/5 relative overflow-hidden"
                     >
-                        <div className="relative flex items-center justify-center p-10">
-                            <div className="absolute inset-0 border-t-2 border-cyan-400 rounded-full animate-spin [animation-duration:3s]" />
-                            <div className="absolute inset-4 border-r-2 border-emerald-400 rounded-full animate-spin [animation-duration:2s] [animation-direction:reverse]" />
-                            <Mic2 size={48} className="text-cyan-400 animate-pulse" />
-                        </div>
-                        <h3 className="font-cinzel text-xl text-white tracking-widest mt-8 mb-2">FORGING SOVEREIGN MASTER</h3>
-                        <p className="font-mono text-cyan-500 text-xs tracking-widest uppercase mb-4 text-glow">Comparing target topology to reference...</p>
+                        {/* Audio Processing Video Background */}
+                        <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-screen pointer-events-none z-0"
+                        >
+                            <source src="/the_sine_wave.mp4" type="video/mp4" />
+                        </video>
+                        <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none" />
 
-                        {/* Fake Progress */}
-                        <div className="w-64 h-1 bg-black rounded-full overflow-hidden border border-white/10">
-                            <motion.div
-                                className="h-full bg-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.8)]"
-                                initial={{ width: 0 }}
-                                animate={{ width: '100%' }}
-                                transition={{ duration: 3, ease: 'linear' }}
-                            />
+                        <div className="relative z-10 flex flex-col items-center">
+                            <div className="relative flex items-center justify-center p-10">
+                                <div className="absolute inset-0 border-t-2 border-cyan-400 rounded-full animate-spin [animation-duration:3s]" />
+                                <div className="absolute inset-4 border-r-2 border-emerald-400 rounded-full animate-spin [animation-duration:2s] [animation-direction:reverse]" />
+                                <Mic2 size={48} className="text-cyan-400 animate-pulse" />
+                            </div>
+                            <h3 className="font-cinzel text-xl text-white tracking-widest mt-8 mb-2">FORGING SOVEREIGN MASTER</h3>
+                            <p className="font-mono text-cyan-500 text-xs tracking-widest uppercase mb-4 text-glow">Comparing target topology to reference...</p>
+
+                            {/* Fake Progress */}
+                            <div className="w-64 h-1 bg-black rounded-full overflow-hidden border border-white/10 mt-8">
+                                <motion.div
+                                    className="h-full bg-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.8)]"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: '100%' }}
+                                    transition={{ duration: 3, ease: 'linear' }}
+                                />
+                            </div>
                         </div>
                     </motion.div>
                 )}

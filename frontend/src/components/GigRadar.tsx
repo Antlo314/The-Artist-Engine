@@ -119,8 +119,20 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
         <div className="space-y-8 relative">
 
             {/* Target Logic Header */}
-            <div className="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden border-glow">
-                <div className="absolute right-0 top-0 opacity-10 pointer-events-none">
+            <div className="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden border-glow group">
+                {/* Background Video Layer */}
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-screen pointer-events-none z-0 group-hover:opacity-30 transition-opacity duration-700"
+                >
+                    <source src="/global_sync.mp4" type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80 z-0" />
+
+                <div className="absolute right-0 top-0 opacity-20 pointer-events-none z-10 mix-blend-overlay">
                     <Radar size={200} className="text-cyan-400 rotate-45" />
                 </div>
 
