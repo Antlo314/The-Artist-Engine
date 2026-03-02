@@ -190,9 +190,9 @@ export default function StudioCore() {
 
     const Knob = ({ label, value, onChange }: any) => (
         <div className="flex flex-col items-center gap-3">
-            <div className="relative w-16 h-16 rounded-full bg-black border-2 border-cyan-900 shadow-[inset_0_0_10px_rgba(0,0,0,0.8)] flex items-center justify-center group">
+            <div className="relative w-16 h-16 rounded-full bg-black border-2 border-emerald-900 shadow-[inset_0_0_10px_rgba(0,0,0,0.8)] flex items-center justify-center group">
                 <div
-                    className="w-1 h-3 bg-cyan-400 absolute top-1 origin-[50%_28px] rounded-full shadow-[0_0_5px_rgba(0,240,255,0.8)] transition-transform duration-300 group-hover:bg-white"
+                    className="w-1 h-3 bg-emerald-400 absolute top-1 origin-[50%_28px] rounded-full shadow-[0_0_5px_rgba(16,185,129,0.8)] transition-transform duration-300 group-hover:bg-white"
                     style={{ transform: `rotate(${(value / 100) * 270 - 135}deg)` }}
                 />
                 <div className="text-white font-mono text-xs">{value}%</div>
@@ -253,16 +253,16 @@ export default function StudioCore() {
             <div className="flex items-end justify-between border-b border-white/10 pb-4">
                 <div>
                     <h2 className="font-cinzel text-3xl font-bold text-white tracking-widest text-glow flex items-center gap-3">
-                        <Mic2 className="text-cyan-400" />
+                        <Mic2 className="text-emerald-400" />
                         AUDIO MASTER CORE
                     </h2>
-                    <p className="font-mono text-xs text-gray-500 tracking-widest uppercase mt-1 text-cyan-500/50 drop-shadow-md">
+                    <p className="font-mono text-xs text-gray-500 tracking-widest uppercase mt-1 text-emerald-500/50 drop-shadow-md">
                         Neural Processing Engine // Matchering Framework
                     </p>
                 </div>
                 <div className="hidden md:flex flex-col items-end">
                     <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-mono text-cyan-400 border border-cyan-500/30 px-2 rounded">
+                        <span className="text-[10px] font-mono text-emerald-400 border border-emerald-500/30 px-2 rounded">
                             LUFS OMEGA
                         </span>
                     </div>
@@ -286,17 +286,17 @@ export default function StudioCore() {
                             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                             onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
                             onDrop={handleDrop}
-                            className={`md:col-span-2 glass-card rounded-2xl p-10 flex flex-col items-center justify-center border-dashed border-2 hover:border-cyan-400/50 transition-all min-h-[400px] relative overflow-hidden group ${isDragging ? 'border-cyan-400 bg-cyan-900/20 shadow-[0_0_30px_rgba(0,240,255,0.2)]' : 'border-cyan-900/50 hover:bg-cyan-900/5 cursor-default'}`}
+                            className={`md:col-span-2 glass-card rounded-2xl p-10 flex flex-col items-center justify-center border-dashed border-2 hover:border-emerald-400/50 transition-all min-h-[400px] relative overflow-hidden group ${isDragging ? 'border-emerald-400 bg-emerald-900/20 shadow-[0_0_30px_rgba(16,185,129,0.2)]' : 'border-emerald-900/50 hover:bg-emerald-900/5 cursor-default'}`}
                         >
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,240,255,0.05)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity z-0" />
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity z-0" />
                             {/* Background Soundwaves */}
                             <div
                                 className="absolute inset-0 bg-cover bg-center opacity-10 mix-blend-luminosity z-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"
                                 style={{ backgroundImage: "url('/audio_core_soundwaves.png')" }}
                             />
 
-                            <div className="w-20 h-20 rounded-full border-2 border-dashed border-cyan-500/50 flex items-center justify-center mb-6 group-hover:rotate-180 transition-transform duration-1000 ease-in-out">
-                                <UploadCloud size={32} className="text-cyan-400" />
+                            <div className="w-20 h-20 rounded-full border-2 border-dashed border-emerald-500/50 flex items-center justify-center mb-6 group-hover:rotate-180 transition-transform duration-1000 ease-in-out">
+                                <UploadCloud size={32} className="text-emerald-400" />
                             </div>
                             <h3 className="font-cinzel text-2xl text-white mb-2 tracking-wider">INITIATE INGEST SEQUENCE</h3>
                             <p className="font-mono text-gray-500 text-sm tracking-widest text-center max-w-sm mb-8">
@@ -314,14 +314,14 @@ export default function StudioCore() {
                                 />
                                 <div
                                     onClick={(e) => { e.stopPropagation(); targetInputRef.current?.click(); }}
-                                    className={`flex items-center justify-between w-full py-3 px-4 rounded border transition-all cursor-pointer ${targetFile ? 'bg-cyan-900/40 border-cyan-400 shadow-[inset_0_0_10px_rgba(0,240,255,0.2)]' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}`}
+                                    className={`flex items-center justify-between w-full py-3 px-4 rounded border transition-all cursor-pointer ${targetFile ? 'bg-emerald-900/40 border-emerald-400 shadow-[inset_0_0_10px_rgba(16,185,129,0.2)]' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}`}
                                 >
                                     <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className={`w-8 h-8 rounded flex items-center justify-center shrink-0 ${targetFile ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white/5 text-gray-500'}`}>
+                                        <div className={`w-8 h-8 rounded flex items-center justify-center shrink-0 ${targetFile ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-gray-500'}`}>
                                             <Mic2 size={14} />
                                         </div>
                                         <div className="flex flex-col truncate">
-                                            <span className={`font-mono text-[10px] tracking-widest uppercase ${targetFile ? 'text-cyan-500' : 'text-gray-500'}`}>Target Payload</span>
+                                            <span className={`font-mono text-[10px] tracking-widest uppercase ${targetFile ? 'text-emerald-500' : 'text-gray-500'}`}>Target Payload</span>
                                             <span className={`font-mono text-xs truncate ${targetFile ? 'text-white' : 'text-gray-600'}`}>
                                                 {targetFile ? targetFile.name : 'Select Unmastered Mix...'}
                                             </span>
@@ -330,7 +330,7 @@ export default function StudioCore() {
                                     {targetFile && (
                                         <button
                                             onClick={(e) => { e.stopPropagation(); togglePreview('target', targetFile); }}
-                                            className="w-8 h-8 rounded-full border border-cyan-500/50 flex items-center justify-center text-cyan-400 hover:bg-cyan-500/20 hover:scale-105 transition-all shrink-0"
+                                            className="w-8 h-8 rounded-full border border-emerald-500/50 flex items-center justify-center text-emerald-400 hover:bg-emerald-500/20 hover:scale-105 transition-all shrink-0"
                                         >
                                             {playingPreview === 'target' ? <Pause size={12} /> : <Play size={12} className="ml-1" />}
                                         </button>
@@ -472,7 +472,7 @@ export default function StudioCore() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="glass-card rounded-2xl h-[400px] flex flex-col items-center justify-center border-cyan-500 bg-cyan-900/5 relative overflow-hidden"
+                        className="glass-card rounded-2xl h-[400px] flex flex-col items-center justify-center border-emerald-500 bg-emerald-900/5 relative overflow-hidden"
                     >
                         {/* Audio Processing Video Background */}
                         <video
@@ -480,24 +480,24 @@ export default function StudioCore() {
                             loop
                             muted
                             playsInline
-                            className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none z-0"
+                            className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none z-0 mix-blend-screen hue-rotate-[110deg]"
                         >
                             <source src="/the_sine_wave.mp4" type="video/mp4" />
                         </video>
 
                         <div className="relative z-10 flex flex-col items-center">
                             <div className="relative flex items-center justify-center p-10">
-                                <div className="absolute inset-0 border-t-2 border-cyan-400 rounded-full animate-spin [animation-duration:3s]" />
-                                <div className="absolute inset-4 border-r-2 border-emerald-400 rounded-full animate-spin [animation-duration:2s] [animation-direction:reverse]" />
-                                <Mic2 size={48} className="text-cyan-400 animate-pulse" />
+                                <div className="absolute inset-0 border-t-2 border-emerald-400 rounded-full animate-spin [animation-duration:3s]" />
+                                <div className="absolute inset-4 border-r-2 border-emerald-200 rounded-full animate-spin [animation-duration:2s] [animation-direction:reverse]" />
+                                <Mic2 size={48} className="text-emerald-400 animate-pulse" />
                             </div>
                             <h3 className="font-cinzel text-xl text-white tracking-widest mt-8 mb-2">FORGING SOVEREIGN MASTER</h3>
-                            <p className="font-mono text-cyan-500 text-xs tracking-widest uppercase mb-4 text-glow">Comparing target topology to reference...</p>
+                            <p className="font-mono text-emerald-500 text-xs tracking-widest uppercase mb-4 text-glow">Comparing target topology to reference...</p>
 
                             {/* Fake Progress */}
                             <div className="w-64 h-1 bg-black rounded-full overflow-hidden border border-white/10 mt-8">
                                 <motion.div
-                                    className="h-full bg-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.8)]"
+                                    className="h-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]"
                                     initial={{ width: 0 }}
                                     animate={{ width: '100%' }}
                                     transition={{ duration: 3, ease: 'linear' }}
@@ -557,7 +557,7 @@ export default function StudioCore() {
                             <div className="flex items-center gap-4 bg-black/60 p-2 pr-6 rounded-full border border-white/10">
                                 <button
                                     onClick={() => setIsSovereignMaster(!isSovereignMaster)}
-                                    className={`w-12 h-6 rounded-full p-1 transition-colors ${isSovereignMaster ? 'bg-cyan-500 shadow-[0_0_15px_rgba(0,240,255,0.5)]' : 'bg-gray-700'}`}
+                                    className={`w-12 h-6 rounded-full p-1 transition-colors ${isSovereignMaster ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-gray-700'}`}
                                 >
                                     <motion.div
                                         className="bg-white w-4 h-4 rounded-full"
@@ -566,7 +566,7 @@ export default function StudioCore() {
                                 </button>
                                 <div className="flex flex-col">
                                     <span className="font-cinzel text-xs text-white font-bold -mb-1">SOVEREIGN MODE</span>
-                                    <span className="font-mono text-[9px] text-cyan-400 tracking-widest uppercase">A/B Testing Active</span>
+                                    <span className="font-mono text-[9px] text-emerald-400 tracking-widest uppercase">A/B Testing Active</span>
                                 </div>
                             </div>
                         </div>
@@ -574,7 +574,7 @@ export default function StudioCore() {
                         {/* Fine-Tuning Console */}
                         <div className="glass-card p-8 rounded-2xl relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-8 opacity-5">
-                                <Settings2 size={200} className="text-cyan-400 mix-blend-screen" />
+                                <Settings2 size={200} className="text-emerald-400 mix-blend-screen" />
                             </div>
 
                             <h3 className="font-cinzel text-xl text-white tracking-widest mb-8 border-b border-white/10 pb-4 inline-block pr-12">
@@ -599,7 +599,7 @@ export default function StudioCore() {
                                 )}
                                 <button
                                     onClick={() => setShowAnalytics(true)}
-                                    className="font-mono text-xs text-cyan-400 hover:text-white border-b border-cyan-600 pb-1 tracking-widest uppercase transition-colors flex items-center gap-2"
+                                    className="font-mono text-xs text-emerald-400 hover:text-white border-b border-emerald-600 pb-1 tracking-widest uppercase transition-colors flex items-center gap-2"
                                 >
                                     <Waves size={14} /> [WAVEFORM ANALYTICS]
                                 </button>
@@ -639,11 +639,11 @@ export default function StudioCore() {
                             initial={{ scale: 0.95, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.95, y: 20 }}
-                            className="bg-gray-900 w-full max-w-4xl border border-cyan-500/30 shadow-[0_0_50px_rgba(0,240,255,0.15)] rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                            className="bg-gray-900 w-full max-w-4xl border border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.15)] rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
                         >
                             <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/40">
                                 <h2 className="font-cinzel text-xl font-bold text-white tracking-widest flex items-center gap-3">
-                                    <Waves className="text-cyan-400" />
+                                    <Waves className="text-emerald-400" />
                                     TOPOLOGY COMPARISON MATRIX
                                 </h2>
                                 <button onClick={() => setShowAnalytics(false)} className="text-gray-400 hover:text-white transition-colors">
@@ -658,7 +658,7 @@ export default function StudioCore() {
                                         <WaveformViewer url={refUrl} title="Acoustic Reference Goal" color="#10b981" />
                                     </div>
                                     <div className="flex flex-col h-full bg-black/40 border border-white/5 rounded p-6">
-                                        <h3 className="font-mono text-xs text-cyan-400 tracking-widest uppercase mb-4 flex items-center gap-2">
+                                        <h3 className="font-mono text-xs text-emerald-400 tracking-widest uppercase mb-4 flex items-center gap-2">
                                             <Activity size={14} /> Neural DSP Decision Log
                                         </h3>
                                         <div className="text-xs font-mono text-gray-300 space-y-3 flex-1">
@@ -666,8 +666,8 @@ export default function StudioCore() {
                                                 <span className="text-emerald-400 font-bold block mb-1">Phase 1: LUFS & RMS Alignment</span>
                                                 Matchering Engine successfully aligned target crest factor with the reference goal track. Global dynamic range reduction: -3.2dB.
                                             </p>
-                                            <p className="border-l-2 border-cyan-500 pl-2">
-                                                <span className="text-cyan-400 font-bold block mb-1">Phase 2: Sovereign Clarity Polish</span>
+                                            <p className="border-l-2 border-emerald-500 pl-2">
+                                                <span className="text-emerald-400 font-bold block mb-1">Phase 2: Sovereign Clarity Polish</span>
                                                 Gemini Oracle detected excessive low-mid mud. Applied High-Shelf Air injection at 10kHz (+{(knobs.air - 50) / 10}dB) to prevent algorithm muffling.
                                             </p>
                                             <p className="border-l-2 border-red-500 pl-2">
@@ -677,8 +677,8 @@ export default function StudioCore() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-4 border border-cyan-500/50 rounded-lg p-1 bg-cyan-900/10">
-                                    <WaveformViewer url={masterAudioUrl} title="FINAL SOVEREIGN MASTER" color="#00f0ff" />
+                                <div className="mt-4 border border-emerald-500/50 rounded-lg p-1 bg-emerald-900/10">
+                                    <WaveformViewer url={masterAudioUrl} title="FINAL SOVEREIGN MASTER" color="#10b981" />
                                 </div>
                             </div>
                         </motion.div>

@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard';
 import GigRadar from './components/GigRadar';
 import StudioCore from './components/StudioCore';
 import LegalCore from './components/LegalCore';
+import ArtistProfile from './components/ArtistProfile';
 
 export default function App() {
     const [activeView, setActiveView] = useState('dashboard');
@@ -26,6 +27,7 @@ export default function App() {
         { id: 'radar', label: 'Gig Radar', icon: Radio },
         { id: 'legal', label: 'Legal War Room', icon: Scale },
         { id: 'studio', label: 'Audio Core', icon: Mic2 },
+        { id: 'profile', label: 'Profile', icon: ShieldCheck },
     ];
 
     const renderActiveView = () => {
@@ -34,6 +36,7 @@ export default function App() {
             case 'radar': return <GigRadar agentName={agentName} artistAlias={artistAlias} />;
             case 'legal': return <LegalCore />;
             case 'studio': return <StudioCore />;
+            case 'profile': return <ArtistProfile />;
             default: return <Dashboard />;
         }
     };
@@ -189,12 +192,12 @@ export default function App() {
                             className="max-w-7xl mx-auto w-full"
                         >
                             {/* Desktop View */}
-                            <div className={`${['legal', 'studio', 'radar'].includes(activeView) ? 'hidden md:block' : 'block'}`}>
+                            <div className={`${['studio'].includes(activeView) ? 'hidden md:block' : 'block'}`}>
                                 {renderActiveView()}
                             </div>
 
                             {/* Mobile Lockdown Overlay */}
-                            {['legal', 'studio', 'radar'].includes(activeView) && (
+                            {['studio'].includes(activeView) && (
                                 <div className="md:hidden flex flex-col items-center justify-center min-h-[50vh] text-center px-4 mt-12">
                                     <div className="glass-card p-8 rounded-2xl border border-red-500/30 flex flex-col items-center bg-black/60 shadow-[0_0_50px_rgba(239,68,68,0.1)] relative overflow-hidden w-full">
                                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-transparent" />

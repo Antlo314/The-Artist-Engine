@@ -4,9 +4,9 @@ import { Activity, Zap, TrendingUp, Music, BarChart, ShieldAlert } from 'lucide-
 export default function Dashboard() {
     const stats = [
         { label: 'ACTIVE STREAMS', value: '1.24M', icon: Music, color: 'text-cyan-400' },
-        { label: 'SOVEREIGN REVENUE', value: '$42,050', icon: TrendingUp, color: 'text-green-400' },
-        { label: 'THREATS NEUTRALIZED', value: '14', icon: ShieldAlert, color: 'text-orange-500' },
-        { label: 'GLOBAL REACH', value: '88.4K', icon: Zap, color: 'text-yellow-400' }
+        { label: 'SOVEREIGN REVENUE', value: '$42,050', icon: TrendingUp, color: 'text-cyan-400' },
+        { label: 'THREATS NEUTRALIZED', value: '14', icon: ShieldAlert, color: 'text-cyan-500' },
+        { label: 'GLOBAL REACH', value: '88.4K', icon: Zap, color: 'text-cyan-300' }
     ];
 
     return (
