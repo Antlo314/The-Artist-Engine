@@ -1,0 +1,10 @@
+google-generativeai
+fastapi
+uvicorn
+python-dotenv
+matchering
+pedalboard
+pydub
+python-multipart
+python-multipart
+google-generativeai

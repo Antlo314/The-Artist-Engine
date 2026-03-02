@@ -1,0 +1,1 @@
+{"status":"error","error":"","log":"[STUDIO CORE] Target ingest: LANDR-I DO-target.wav\n[STUDIO CORE] Reference ingest: reference.mp3\n[STUDIO CORE] Assets secured. Initializing separate Python process to protect event loop...\n[STUDIO CORE] Error: "}
