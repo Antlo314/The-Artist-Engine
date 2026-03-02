@@ -4,9 +4,9 @@ import { Activity, Zap, TrendingUp, Music, BarChart, ShieldAlert } from 'lucide-
 export default function Dashboard() {
     const stats = [
         { label: 'ACTIVE STREAMS', value: '1.24M', icon: Music, color: 'text-cyan-400' },
-        { label: 'SOVEREIGN REVENUE', value: '$42,050', icon: TrendingUp, color: 'text-emerald-400' },
-        { label: 'THREATS NEUTRALIZED', value: '14', icon: ShieldAlert, color: 'text-red-400' },
-        { label: 'GLOBAL REACH', value: '88.4K', icon: Zap, color: 'text-purple-400' }
+        { label: 'SOVEREIGN REVENUE', value: '$42,050', icon: TrendingUp, color: 'text-green-400' },
+        { label: 'THREATS NEUTRALIZED', value: '14', icon: ShieldAlert, color: 'text-orange-500' },
+        { label: 'GLOBAL REACH', value: '88.4K', icon: Zap, color: 'text-yellow-400' }
     ];
 
     return (
@@ -20,10 +20,10 @@ export default function Dashboard() {
                 </div>
                 <div className="hidden md:flex items-center gap-2">
                     <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                     </span>
-                    <span className="font-mono text-[10px] tracking-widest text-emerald-500 bg-emerald-950/40 px-2 py-1 border border-emerald-900/50 rounded">
+                    <span className="font-mono text-[10px] tracking-widest text-green-400 bg-green-900/30 px-2 py-1 border border-green-500/50 rounded drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]">
                         LIVE TELEMETRY
                     </span>
                 </div>
@@ -65,14 +65,12 @@ export default function Dashboard() {
             </div>
 
             {/* Main Graph Area */}
-            <div className="glass-card p-8 rounded-xl min-h-[400px] border-glow flex flex-col relative overflow-hidden group">
-                {/* Background Art */}
+            <div className="glass-card p-8 rounded-xl min-h-[400px] border-glow flex flex-col relative overflow-hidden group border-cyan-500/30 shadow-[0_0_40px_rgba(0,240,255,0.05)]">
+                {/* Background Art - Cleaned Up */}
                 <div
-                    className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity z-0 group-hover:opacity-40 transition-opacity duration-700"
+                    className="absolute inset-0 bg-cover bg-center opacity-40 z-0 group-hover:opacity-50 transition-opacity duration-700 pointer-events-none"
                     style={{ backgroundImage: "url('/cmd_center.png')" }}
                 />
-                {/* Gradient fade to integrate into layout */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-[#0a0a0a]/80 to-transparent z-0" />
 
                 <div className="absolute top-0 right-0 p-4 z-10">
                     <div className="h-4 w-4 rounded-sm border border-cyan-500/20 bg-cyan-900/10 flex items-center justify-center">
@@ -83,11 +81,12 @@ export default function Dashboard() {
                 <h3 className="font-cinzel text-xl text-white tracking-widest mb-1">REVENUE VELOCITY</h3>
                 <p className="font-mono text-[10px] text-gray-500 tracking-widest uppercase">7-Day Trajectory Overview</p>
 
-                <div className="flex-1 flex items-center justify-center mt-8 border border-white/5 bg-black/40 rounded-lg relative">
-                    {/* Fake Graph Lines */}
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#050505_1px,transparent_1px),linear-gradient(to_bottom,#050505_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
-                    <div className="text-gray-600 font-mono text-sm tracking-widest flex items-center gap-2">
-                        <Activity size={16} className="text-cyan-900/50" />
+                <div className="flex-1 flex items-center justify-center mt-8 border border-white/10 bg-black/40 rounded-lg relative overflow-hidden">
+                    {/* Fake Graph Lines - Tron style */}
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,240,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,240,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,240,255,0.1),transparent_70%)]" />
+                    <div className="text-cyan-400 font-mono text-sm tracking-widest flex items-center gap-2 relative z-10 shadow-[0_0_15px_rgba(0,240,255,0.5)] bg-black/80 px-4 py-2 border border-cyan-500/30 rounded">
+                        <Activity size={16} className="text-cyan-400 animate-pulse" />
                         AWAITING DATA SYNC...
                     </div>
                 </div>

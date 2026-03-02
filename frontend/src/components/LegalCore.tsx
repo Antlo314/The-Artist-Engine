@@ -11,7 +11,7 @@ export default function LegalCore() {
     const [activeTab, setActiveTab] = useState('zion');
 
     const tabs = [
-        { id: 'zion', label: 'ZION SENTINEL', icon: Shield, color: 'text-emerald-500' },
+        { id: 'zion', label: 'ZION SENTINEL', icon: Shield, color: 'text-green-400' },
         { id: 'shark', label: 'SHARK PROTOCOL', icon: Sword, color: 'text-red-500' },
         { id: 'codex', label: 'THE CODEX', icon: BookOpen, color: 'text-amber-500' },
         { id: 'recoupment', label: 'RECOUPMENT SANDBOX', icon: Calculator, color: 'text-blue-500' },
@@ -25,8 +25,7 @@ export default function LegalCore() {
                 className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-luminosity z-0 group-hover:opacity-30 transition-opacity duration-1000"
                 style={{ backgroundImage: "url('/legal_protocol_vault.png')" }}
             />
-            {/* Global Background Noise overlay */}
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-20 mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+
 
             <div className="z-10 relative flex flex-col h-full space-y-8">
                 {/* Header */}

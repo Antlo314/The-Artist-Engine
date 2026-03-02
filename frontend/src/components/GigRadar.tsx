@@ -119,18 +119,17 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
         <div className="space-y-8 relative">
 
             {/* Target Logic Header */}
-            <div className="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden border-glow group">
-                {/* Background Video Layer */}
+            <div className="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden border-glow group border-cyan-500/30 shadow-[0_0_40px_rgba(0,240,255,0.05)]">
+                {/* Background Video Layer - Cleaned Up */}
                 <video
                     autoPlay
                     loop
                     muted
                     playsInline
-                    className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-screen pointer-events-none z-0 group-hover:opacity-30 transition-opacity duration-700"
+                    className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none z-0 group-hover:opacity-50 transition-opacity duration-700"
                 >
                     <source src="/global_sync.mp4" type="video/mp4" />
                 </video>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-80 z-0" />
 
                 <div className="absolute right-0 top-0 opacity-20 pointer-events-none z-10 mix-blend-overlay">
                     <Radar size={200} className="text-cyan-400 rotate-45" />
@@ -330,7 +329,7 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                                                 </span>
                                             )}
                                             {gig.active_search_signal && !isAlpha && (
-                                                <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-lg bg-emerald-900/30 text-emerald-400 border border-emerald-500/30 animate-pulse">
+                                                <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-lg bg-green-900/30 text-green-400 border border-green-500/30 animate-pulse">
                                                     [ACTIVE SEARCH]
                                                 </span>
                                             )}
@@ -379,21 +378,21 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                                             <span className="font-cinzel text-lg font-bold text-gray-300">{gig.avg_ticket_price_usd ? `$${gig.avg_ticket_price_usd}` : 'N/A'}</span>
                                         </div>
                                         <div className="flex flex-col text-center w-1/3 px-2">
-                                            <span className="font-mono text-[9px] text-emerald-500/80 uppercase tracking-widest mb-1">Gross Potential</span>
-                                            <span className="font-cinzel text-xl font-bold text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : 'N/A'}</span>
+                                            <span className="font-mono text-[9px] text-green-400/80 uppercase tracking-widest mb-1">Gross Potential</span>
+                                            <span className="font-cinzel text-xl font-bold text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : 'N/A'}</span>
                                         </div>
                                     </div>
 
                                     <div className="border-t border-white/10 pt-4 pb-16 relative z-10">
                                         {gig.leverage_point && (
-                                            <div className="mb-4 bg-amber-900/10 border border-amber-500/20 rounded p-3">
-                                                <div className="flex items-center gap-2 font-mono text-[10px] text-amber-500/80 mb-1 uppercase tracking-widest">
+                                            <div className="mb-4 bg-orange-900/10 border border-orange-500/20 rounded p-3">
+                                                <div className="flex items-center gap-2 font-mono text-[10px] text-orange-500/80 mb-1 uppercase tracking-widest">
                                                     <AlertTriangle size={12} /> Tactical Leverage Point
                                                 </div>
-                                                <p className="text-xs text-amber-100/90 font-inter italic leading-snug">"{gig.leverage_point}"</p>
+                                                <p className="text-xs text-orange-100/90 font-inter italic leading-snug">"{gig.leverage_point}"</p>
                                             </div>
                                         )}
-                                        <div className="flex items-center gap-2 font-mono text-xs text-emerald-500/80 mb-2 uppercase tracking-widest drop-shadow-md">
+                                        <div className="flex items-center gap-2 font-mono text-xs text-green-400/80 mb-2 uppercase tracking-widest drop-shadow-md">
                                             <BrainCircuit size={12} /> Shark Negotiation Strategy
                                         </div>
                                         <p className="text-sm text-gray-300 font-inter leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
@@ -405,7 +404,7 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                                         <button
                                             onClick={() => handleEngageShark(gig)}
                                             disabled={gig.pipeline_status === 'PITCHED'}
-                                            className="w-full bg-emerald-900/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500 hover:text-black font-bold font-mono text-xs tracking-widest px-4 py-3 rounded flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+                                            className="w-full bg-green-900/20 text-green-400 border border-green-500/50 hover:bg-green-500 hover:text-black font-bold font-mono text-xs tracking-widest px-4 py-3 rounded flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase shadow-[0_0_15px_rgba(74,222,128,0.1)] hover:shadow-[0_0_20px_rgba(74,222,128,0.4)]"
                                         >
                                             {gig.pipeline_status === 'PITCHED' ? 'PITCH DEPLOYED' : <><Send size={14} /> ONE-CLICK ENGAGE</>}
                                         </button>

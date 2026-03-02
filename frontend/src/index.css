@@ -28,16 +28,7 @@
         color: var(--color-studio-neon);
     }
 
-    /* Global SVG Noise Overlay */
-    body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 9999;
-        opacity: 0.04;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    }
+    /* Global SVG Noise Overlay Removed for Clarity */
 
     h1,
     h2,
@@ -54,20 +45,20 @@
 
 @layer utilities {
     .glass-panel {
-        background-color: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(40px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        background-color: rgba(5, 5, 5, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 240, 255, 0.15);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 240, 255, 0.05);
     }
 
     .glass-card {
-        background-color: rgba(6, 6, 6, 0.75);
-        backdrop-filter: blur(28px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-        transition-property: color, background-color, border-color, shadow, transform;
+        background-color: rgba(2, 2, 2, 0.65);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 240, 255, 0.15);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(0, 240, 255, 0.03);
+        transition-property: color, background-color, border-color, shadow, transform, box-shadow;
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 500ms;
+        transition-duration: 300ms;
     }
 
     .glass-card:hover {

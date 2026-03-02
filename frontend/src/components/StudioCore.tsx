@@ -480,11 +480,10 @@ export default function StudioCore() {
                             loop
                             muted
                             playsInline
-                            className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-screen pointer-events-none z-0"
+                            className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none z-0"
                         >
                             <source src="/the_sine_wave.mp4" type="video/mp4" />
                         </video>
-                        <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none" />
 
                         <div className="relative z-10 flex flex-col items-center">
                             <div className="relative flex items-center justify-center p-10">

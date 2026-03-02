@@ -54,7 +54,7 @@ export default function App() {
 
             {/* Background Ambient Glows */}
             <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-cyan-900/20 rounded-full blur-[120px] pointer-events-none z-0" />
-            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-emerald-900/10 rounded-full blur-[150px] pointer-events-none z-0" />
+            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-green-900/10 rounded-full blur-[150px] pointer-events-none z-0" />
 
             {/* Mobile Header (Tactical Density) */}
             <div className="md:hidden fixed top-0 w-full glass-panel z-50 flex items-center justify-between p-4 border-b border-cyan-900/40 bg-[#020202]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
@@ -67,8 +67,8 @@ export default function App() {
                         <span className="font-mono text-[8px] text-cyan-500 tracking-[0.3em] uppercase leading-none">ENGINE.OS</span>
                     </div>
                 </div>
-                <div className="font-mono text-[9px] tracking-widest text-emerald-500 flex items-center gap-1.5 bg-emerald-950/40 px-2 py-1 border border-emerald-900/50 rounded">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> SYNCED
+                <div className="font-mono text-[9px] tracking-widest text-green-400 flex items-center gap-1.5 bg-green-900/30 px-2 py-1 border border-green-500/50 rounded drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> SYNCED
                 </div>
             </div>
 
@@ -110,7 +110,7 @@ export default function App() {
                     <div className="mt-4 flex items-center justify-between text-[10px] font-mono tracking-widest text-gray-500">
                         <span>SYSTEM ALIGNMENT</span>
                         {systemStatus ? (
-                            <span className="text-emerald-400 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> OMEGA TIER</span>
+                            <span className="text-green-400 flex items-center gap-1 drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> OMEGA TIER</span>
                         ) : (
                             <span className="text-red-400 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400" /> OFFLINE</span>
                         )}
@@ -166,7 +166,7 @@ export default function App() {
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] font-mono text-gray-500 tracking-widest uppercase mb-0.5">TREASURY BALANCE</span>
                             <div className="flex items-center gap-2 text-sm text-white font-mono font-bold">
-                                <DollarSign size={14} className="text-emerald-400" />
+                                <DollarSign size={14} className="text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]" />
                                 42,050.<span className="text-gray-500 text-xs">00</span> USD
                             </div>
                         </div>
