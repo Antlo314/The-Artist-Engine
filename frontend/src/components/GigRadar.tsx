@@ -5,11 +5,10 @@ import { Radar, Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Musi
 import LoadingProgressBar from './LoadingProgressBar';
 
 interface GigRadarProps {
-    agentName?: string;
-    artistAlias?: string;
+    profile: any;
 }
 
-export default function GigRadar({ agentName = "The Manager", artistAlias = "The Artist" }: GigRadarProps) {
+export default function GigRadar({ profile }: GigRadarProps) {
     // Search State
     const [city, setCity] = useState('Chicago');
     const [genre, setGenre] = useState('Deep House');
@@ -85,8 +84,11 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                     genre: genre,
                     contact_persona: targetGig.contact_persona || 'Booking Team',
                     payout_model: targetGig.payout_model || 'Standard',
-                    artist_name: artistAlias,
-                    agent_name: agentName,
+                    artist_name: profile.artistAlias || 'The Artist',
+                    agent_name: profile.agentName || 'The Manager',
+                    agent_email: profile.agentEmail || null,
+                    agent_phone: profile.agentPhone || null,
+                    agent_social: profile.agentSocial || null,
                     outreach_type: type
                 })
             });
@@ -282,32 +284,45 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                         })()}
 
                         {/* Scanning Phase replaced with LoadingProgressBar */}
-                        <div className="w-full max-w-lg mt-8 mb-8 px-4 z-20">
-                            <LoadingProgressBar
-                                active={isScouting}
-                                message="EXECUTING RADAR SWEEP"
-                                subMessage="Intercepting booking calendars & cross-referencing payout models. Please allow 30-60s for the Engine to start on the free tier."
-                                colorClass="violet"
-                                estimatedDurationMs={40000}
-                            />
-                        </div>
+                        {isScouting && (
+                            <div className="col-span-full w-full max-w-lg mx-auto py-20 px-4 z-20">
+                                <LoadingProgressBar
+                                    active={isScouting}
+                                    message="EXECUTING RADAR SWEEP"
+                                    subMessage="Intercepting booking calendars & cross-referencing payout models. Please allow 30-60s for the Engine to start on the free tier."
+                                    colorClass="violet"
+                                    estimatedDurationMs={40000}
+                                />
+                            </div>
+                        )}
                         {(() => {
-                            let alphaGigId = -1;
-                            if (!isScouting && gigs.length > 0) {
-                                let maxScore = -1;
-                                gigs.forEach((g, i) => {
-                                    const rep = parseInt(g.reputation_score) || 0;
-                                    const activeBonus = g.active_search_signal ? 20 : 0;
-                                    const total = rep + activeBonus;
-                                    if (total > maxScore) {
-                                        maxScore = total;
-                                        alphaGigId = i;
-                                    }
-                                });
-                            }
+                            if (isScouting || gigs.length === 0) return null;
 
-                            return !isScouting && gigs.map((gig, idx) => {
-                                const isAlpha = idx === alphaGigId;
+                            // Sort targets: Alpha Target first, then by reputation score
+                            const sortedGigs = [...gigs].map((gig, originalIndex) => {
+                                const rep = parseInt(gig.reputation_score) || 0;
+                                const activeBonus = gig.active_search_signal ? 20 : 0;
+                                return { gig, originalIndex, totalScore: rep + activeBonus, repScore: rep };
+                            });
+
+                            // Find the alpha target
+                            let maxScore = -1;
+                            let alphaIndex = -1;
+                            sortedGigs.forEach((g) => {
+                                if (g.totalScore > maxScore) {
+                                    maxScore = g.totalScore;
+                                    alphaIndex = g.originalIndex;
+                                }
+                            });
+
+                            sortedGigs.sort((a, b) => {
+                                if (a.originalIndex === alphaIndex) return -1;
+                                if (b.originalIndex === alphaIndex) return 1;
+                                return b.repScore - a.repScore;
+                            });
+
+                            return sortedGigs.map(({ gig, originalIndex }, idx) => {
+                                const isAlpha = originalIndex === alphaIndex;
 
                                 return (
                                     <motion.div
@@ -345,13 +360,20 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                                             </button>
                                         </div>
 
-                                        <div className="flex items-center gap-2 mb-1">
+                                        <div className="flex items-center gap-3 mb-1">
                                             <h3 className="font-cinzel font-bold text-2xl text-white leading-tight relative z-10">{gig.name}</h3>
-                                            {gig.social_media_url && (
-                                                <a href={gig.social_media_url} target="_blank" rel="noopener noreferrer" className="relative z-10 text-violet-400 opacity-60 hover:opacity-100 hover:text-violet-300 transition-opacity">
-                                                    {getSocialIcon(gig.social_media_url)}
-                                                </a>
-                                            )}
+                                            <div className="flex gap-2 relative z-10">
+                                                {gig.social_media_url && (
+                                                    <a href={gig.social_media_url} target="_blank" rel="noopener noreferrer" className="text-violet-400 opacity-60 hover:opacity-100 hover:text-violet-300 transition-opacity">
+                                                        {getSocialIcon(gig.social_media_url)}
+                                                    </a>
+                                                )}
+                                                {gig.website_url && (
+                                                    <a href={gig.website_url} target="_blank" rel="noopener noreferrer" className="text-violet-400 opacity-60 hover:opacity-100 hover:text-violet-300 transition-opacity">
+                                                        <Globe size={14} />
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
                                         <p className="font-mono text-xs text-gray-500 mb-4">{gig.tier || tier}</p>
 

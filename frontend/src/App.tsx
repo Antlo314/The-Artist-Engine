@@ -13,9 +13,23 @@ export default function App() {
     const [activeView, setActiveView] = useState('dashboard');
     const [systemStatus, setSystemStatus] = useState<any>(null);
 
-    // Sovereign User Context
-    const [agentName, setAgentName] = useState('Alex Chen');
-    const [artistAlias, setArtistAlias] = useState('ECHOVELOCITY');
+    // Sovereign User Context (Persistent Global Profile)
+    const [profile, setProfile] = useState(() => {
+        const saved = localStorage.getItem('sovereign_identity');
+        if (saved) return JSON.parse(saved);
+        return {
+            artistAlias: 'ECHOVELOCITY',
+            agentName: 'Alex Chen',
+            agentEmail: '',
+            agentPhone: '',
+            agentSocial: ''
+        };
+    });
+
+    // Save changes automatically
+    useEffect(() => {
+        localStorage.setItem('sovereign_identity', JSON.stringify(profile));
+    }, [profile]);
 
     useEffect(() => {
         // Simulate Backend Online Status for static deployment
@@ -33,10 +47,10 @@ export default function App() {
     const renderActiveView = () => {
         switch (activeView) {
             case 'dashboard': return <Dashboard />;
-            case 'radar': return <GigRadar agentName={agentName} artistAlias={artistAlias} />;
+            case 'radar': return <GigRadar profile={profile} />;
             case 'legal': return <LegalCore />;
             case 'studio': return <StudioCore />;
-            case 'profile': return <ArtistProfile />;
+            case 'profile': return <ArtistProfile profile={profile} setProfile={setProfile} />;
             default: return <Dashboard />;
         }
     };
@@ -146,13 +160,19 @@ export default function App() {
                 <div className="p-4 border-t border-white/5 bg-black/20">
                     <div className="flex items-center justify-between">
                         <div>
-                            <div className="text-xs font-bold text-white tracking-wider">SOVEREIGN ARTIST</div>
-                            <div className="text-[10px] font-mono text-gray-500 flex items-center gap-1 mt-1">
-                                <Activity size={10} className="text-cyan-500" /> ID: AE-9402
+                            <div className="text-xs font-bold text-white tracking-wider uppercase">{profile.artistAlias}</div>
+                            <div className="text-[10px] font-mono text-gray-500 flex items-center gap-1 mt-1 uppercase">
+                                <Activity size={10} className="text-cyan-500" /> SYSTEM ID: {profile.agentName}
                             </div>
                         </div>
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-800 to-black border border-gray-700 flex items-center justify-center">
-                            <span className="font-cinzel text-xs text-white">SA</span>
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-800 to-black border border-gray-700 flex items-center justify-center overflow-hidden">
+                            {localStorage.getItem('sovereign_avatar') ? (
+                                <img src={localStorage.getItem('sovereign_avatar')!} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="font-cinzel text-xs text-white">
+                                    {profile.artistAlias.substring(0, 2).toUpperCase()}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>

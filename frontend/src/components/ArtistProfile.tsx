@@ -1,18 +1,33 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Star, TrendingUp, ShieldAlert, Award, ChevronRight, Fingerprint, Lock, Zap } from 'lucide-react';
+import { Upload, Star, TrendingUp, ShieldAlert, Award, ChevronRight, Fingerprint, Lock, Zap, Save, CheckCircle } from 'lucide-react';
 
-export default function ArtistProfile() {
-    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-    const [alias, setAlias] = useState('');
+interface ArtistProfileProps {
+    profile: any;
+    setProfile: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export default function ArtistProfile({ profile, setProfile }: ArtistProfileProps) {
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(localStorage.getItem('sovereign_avatar'));
+    const [isSaved, setIsSaved] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const url = URL.createObjectURL(file);
-            setAvatarPreview(url);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                localStorage.setItem('sovereign_avatar', base64String);
+                setAvatarPreview(base64String);
+            };
+            reader.readAsDataURL(file);
         }
+    };
+
+    const handleSave = () => {
+        setIsSaved(true);
+        setTimeout(() => setIsSaved(false), 3000);
     };
 
     return (
@@ -78,14 +93,66 @@ export default function ArtistProfile() {
                             </div>
 
                             {/* Alias Input */}
-                            <div className="w-full relative z-10">
-                                <input
-                                    type="text"
-                                    value={alias}
-                                    onChange={(e) => setAlias(e.target.value)}
-                                    placeholder="ENTER ARTIST ALIAS"
-                                    className="w-full bg-black/50 border-b-2 border-yellow-500/30 text-white font-cinzel text-xl text-center py-2 px-4 focus:outline-none focus:border-yellow-400 focus:bg-yellow-900/10 transition-all placeholder:text-gray-600 tracking-widest"
-                                />
+                            <div className="w-full relative z-10 space-y-4 text-left">
+                                <div>
+                                    <label className="font-mono text-[9px] text-yellow-500/70 uppercase tracking-widest pl-2 mb-1 block">Artist / Project Alias</label>
+                                    <input
+                                        type="text"
+                                        value={profile.artistAlias}
+                                        onChange={(e) => setProfile({ ...profile, artistAlias: e.target.value })}
+                                        placeholder="ECHOVELOCITY"
+                                        className="w-full bg-black/50 border-b border-yellow-500/30 text-white font-cinzel text-xl text-center py-2 px-4 focus:outline-none focus:border-yellow-400 focus:bg-yellow-900/10 transition-all placeholder:text-gray-600 tracking-widest"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="font-mono text-[9px] text-yellow-500/70 uppercase tracking-widest pl-2 mb-1 block">Manager Name</label>
+                                        <input
+                                            type="text"
+                                            value={profile.agentName}
+                                            onChange={(e) => setProfile({ ...profile, agentName: e.target.value })}
+                                            placeholder="Alex Chen"
+                                            className="w-full bg-black/50 border border-yellow-500/20 text-white font-inter text-sm py-2 px-3 rounded focus:outline-none focus:border-yellow-400 focus:bg-yellow-900/10 transition-all placeholder:text-gray-600"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="font-mono text-[9px] text-yellow-500/70 uppercase tracking-widest pl-2 mb-1 block">Primary Phone</label>
+                                        <input
+                                            type="text"
+                                            value={profile.agentPhone}
+                                            onChange={(e) => setProfile({ ...profile, agentPhone: e.target.value })}
+                                            placeholder="+1 (555) 000-0000"
+                                            className="w-full bg-black/50 border border-yellow-500/20 text-white font-inter text-sm py-2 px-3 rounded focus:outline-none focus:border-yellow-400 focus:bg-yellow-900/10 transition-all placeholder:text-gray-600"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="font-mono text-[9px] text-yellow-500/70 uppercase tracking-widest pl-2 mb-1 block">Routing Email</label>
+                                    <input
+                                        type="email"
+                                        value={profile.agentEmail}
+                                        onChange={(e) => setProfile({ ...profile, agentEmail: e.target.value })}
+                                        placeholder="mgmt@echovelocity.com"
+                                        className="w-full bg-black/50 border border-yellow-500/20 text-white font-inter text-sm py-2 px-3 rounded focus:outline-none focus:border-yellow-400 focus:bg-yellow-900/10 transition-all placeholder:text-gray-600"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="font-mono text-[9px] text-yellow-500/70 uppercase tracking-widest pl-2 mb-1 block">Primary Web/Social Link</label>
+                                    <input
+                                        type="text"
+                                        value={profile.agentSocial}
+                                        onChange={(e) => setProfile({ ...profile, agentSocial: e.target.value })}
+                                        placeholder="https://instagram.com/artist"
+                                        className="w-full bg-black/50 border border-yellow-500/20 text-white font-inter text-sm py-2 px-3 rounded focus:outline-none focus:border-yellow-400 focus:bg-yellow-900/10 transition-all placeholder:text-gray-600"
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={handleSave}
+                                    className="w-full mt-4 bg-yellow-900/30 hover:bg-yellow-500 hover:text-black border border-yellow-500/50 text-yellow-500 transition-all py-3 rounded uppercase font-mono text-xs tracking-widest font-bold flex items-center justify-center gap-2"
+                                >
+                                    {isSaved ? <><CheckCircle size={14} /> IDENTITY SAVED</> : <><Save size={14} /> SAVE IDENTITY</>}
+                                </button>
                             </div>
 
                             {/* Status Pill */}

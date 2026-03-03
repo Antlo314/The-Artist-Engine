@@ -96,17 +96,18 @@ class ScoutRequest(BaseModel):
 class NegotiateRequest(BaseModel):
     venue_offer: str
 
-class PitchRequest(BaseModel):
+class DraftPitchRequest(BaseModel):
     venue_name: str
     venue_tier: str
     genre: str
     contact_persona: str
     payout_model: str
-    artist_name: str = "The Artist"
-    agent_name: str = "The Manager"
+    artist_name: str
+    agent_name: str
+    agent_email: Optional[str] = None
+    agent_phone: Optional[str] = None
+    agent_social: Optional[str] = None
     outreach_type: str = "email" # email, call_script, dm
-    artist_name: str = "The Artist"
-    agent_name: str = "The Manager"
 
 # ---------------------------------------------------------------------------
 # SYSTEM ROUTES
@@ -163,6 +164,7 @@ async def scout_gigs(request: ScoutRequest):
                 "contact": "string",
                 "contact_persona": "Name or Title of the specific human buyer/owner",
                 "contact_source": "Where the contact was found (e.g., Instagram, Official Website)",
+                "website_url": "CRITICAL: The full link to their official website if found, otherwise null",
                 "social_media_url": "CRITICAL: The FULL Link to their primary social media (e.g. https://instagram.com/venue) if found, otherwise null",
                 "similar_acts": ["Act 1", "Act 2"],
                 "payout_model": "CRITICAL: Describe the exact payout structure (Door Deal, Guarantee, Split, Unknown etc). MUST provide a best guess based on venue tier if unknown.",
@@ -219,7 +221,7 @@ async def scout_gigs(request: ScoutRequest):
             fallback_prompt = f'''
             Suggest 10 legacy or famous "{request.tier}" music venues in {request.city} (within {request.radius}) for {request.genre} artists.
             Timeframe target: {request.timeframe}.
-            Use internal world knowledge. Respond in strict JSON only, same schema as before (including contact_persona, contact_source, social_media_url, payout_model, lead_time, similar_acts, reputation_score, reputation_explanation, capacity, avg_ticket_price_usd, gross_potential_usd, leverage_point, and active_search_signal). Ensure NO missing fields.
+            Use internal world knowledge. Respond in strict JSON only, same schema as before (including contact_persona, contact_source, website_url, social_media_url, payout_model, lead_time, similar_acts, reputation_score, reputation_explanation, capacity, avg_ticket_price_usd, gross_potential_usd, leverage_point, and active_search_signal). Ensure NO missing fields.
             '''
             fb_resp = client.models.generate_content(
                 model='gemini-2.5-flash',
@@ -241,26 +243,37 @@ async def scout_gigs(request: ScoutRequest):
 # ---------------------------------------------------------------------------
 
 @app.post("/api/draft-pitch")
-async def draft_pitch(request: PitchRequest):
+async def draft_pitch(request: DraftPitchRequest):
     logs = ["[GIG RADAR] Generating Auto-Pitch..."]
     client = get_genai_client()
     
+    sign_off = f"Best,\\n{request.agent_name}\\nManager for {request.artist_name}"
+    if request.agent_email or request.agent_phone or request.agent_social:
+        sign_off += "\\n"
+        if request.agent_email:
+            sign_off += f"Email: {request.agent_email}\\n"
+        if request.agent_phone:
+            sign_off += f"Phone: {request.agent_phone}\\n"
+        if request.agent_social:
+            sign_off += f"Web: {request.agent_social}\\n"
+
+    format_instructions = ""
+    if request.outreach_type == "email":
+        format_instructions = f"Draft a professional but edgy email. Sign off exactly with:\\n{sign_off}"
+    elif request.outreach_type == "call_script":
+        format_instructions = "Draft a conversational, high-energy phone script for leaving a voicemail or speaking to a gatekeeper. Include cues like [Pause] or [Enthusiastic]. End with the agent noting they will follow up via email."
+    elif request.outreach_type == "dm":
+        format_instructions = f"Draft a concise, punchy direct message for Instagram/Twitter. Needs to be very short, impactful, and easy to read on mobile. Sign off briefly with: {request.agent_name} / {request.artist_name}."
+
     prompt = f'''
-    You are an elite, highly persuasive music manager representing {request.artist_name}, a {request.genre} artist.
-    Your name is {request.agent_name}. 
-    Draft an outreach of type "{request.outreach_type}" (email, call_script, or dm) to {request.contact_persona} at {request.venue_name}.
-    Context:
-    - Venue Tier: {request.venue_tier}
-    - Payout Model: {request.payout_model}
+    You are '{request.agent_name}', a shark music manager representing the emerging {request.genre} artist "{request.artist_name}".
+    Write a pitch targeting the booking buyer: "{request.contact_persona}" at the venue: "{request.venue_name}".
     
-    The outreach must be strictly tailored to the tier:
-    - Mom & Pop: Humble, community-focused, willing to prove value.
-    - Mid-Size: Professional, highlighting recent growth.
-    - Top-Tier Theater: Strictly business, data-driven, highlighting guarantees and ROI.
+    CONTEXT:
+    Venue Tier: {request.venue_tier}
+    Expected Payout Model: {request.payout_model}
     
-    If the type is "email" or "dm", return ONLY the raw text. For email, include a Subject line. 
-    If the type is "call_script", provide a line-by-line script for a phone call, including what to say to the gatekeeper if necessary.
-    No conversational filler, no markdown blocks.
+    {format_instructions}
     '''
     try:
         response = client.models.generate_content(
@@ -269,10 +282,10 @@ async def draft_pitch(request: PitchRequest):
             config={'temperature': 0.7}
         )
         logs.append("[GIG RADAR] Auto-Pitch crafted to OMEGA standards.")
-        return {"status": "success", "pitch": response.text.strip(), "log": "\n".join(logs)}
+        return {"status": "success", "pitch": response.text.strip(), "log": "\\n".join(logs)}
     except Exception as e:
         logs.append(f"[GIG RADAR] Pitch Generation Error: {str(e)}")
-        return {"status": "error", "error": str(e), "log": "\n".join(logs)}
+        return {"status": "error", "error": str(e), "log": "\\n".join(logs)}
 
 # ---------------------------------------------------------------------------
 # PILLAR 3: SHARK (Negotiation Protocol)
