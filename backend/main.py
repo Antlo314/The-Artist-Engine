@@ -6,7 +6,9 @@ import uuid
 import json
 import time
 import sys
-import time
+import io
+import PyPDF2
+from docx import Document
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, BackgroundTasks
 from fastapi.responses import FileResponse
 from pydub import AudioSegment
@@ -288,90 +290,83 @@ async def draft_pitch(request: DraftPitchRequest):
         return {"status": "error", "error": str(e), "log": "\\n".join(logs)}
 
 # ---------------------------------------------------------------------------
-# PILLAR 3: SHARK (Negotiation Protocol)
-# ---------------------------------------------------------------------------
-
-@app.post("/api/negotiate")
-async def negotiate(request: NegotiateRequest):
-    logs = ["[SHARK PROTOCOL] Activating Negotiation Persona..."]
-    client = get_genai_client()
-    
-    system_instruction = """
-    You are the Lead Music Manager 'Shark' for 'The Artist Engine'.
-    Your duty is to maximize artist revenue and respect.
-    Analyze venue offers aggressively but professionally.
-    Identify red flags (low pay, bad slots). Output strict JSON.
-    """
-    
-    prompt = f'''
-    Analyze this promoter offer:
-    "{request.venue_offer}"
-    
-    Return a JSON object exactly like this:
-    {{
-        "reasoning": "Your internal shark logic identifying the weaknesses in their offer",
-        "counter_offer": "The exact professional, firm email you will send back to them."
-    }}
-    '''
-    
-    try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-            config={
-                'system_instruction': system_instruction,
-                'temperature': 0.4,
-                'response_mime_type': 'application/json'
-            }
-        )
-        data = json.loads(response.text)
-        logs.append("[SHARK PROTOCOL] Counter-offensive formulated successfully.")
-        return {"status": "success", "agent_response": json.dumps(data, indent=2), "log": "\n".join(logs)}
-    except Exception as e:
-         logs.append(f"[SHARK PROTOCOL] Error: {str(e)}")
-         return {"status": "error", "error": str(e), "log": "\n".join(logs)}
-
-# ---------------------------------------------------------------------------
-# PILLAR 4: ZION (Legal Sentinel)
+# PILLAR 3 & 4: ZION SHARK PROTOCOL (Merged)
 # ---------------------------------------------------------------------------
 
 @app.post("/api/analyze-contract")
-async def analyze_contract(file: Optional[UploadFile] = File(None), text: Optional[str] = Form(None)):
-    logs = ["[ZION SENTINEL] Legal Scan Initiated..."]
+async def analyze_contract(
+    text: str = Form(None),
+    file: UploadFile = File(None),
+    scan_type: str = Form("contract")
+):
+    logs = [f"[ZION SHARK PROTOCOL] Initiating {scan_type.upper()} Scan..."]
     client = get_genai_client()
     
     contents = []
+    extracted_text = ""
     try:
         if file:
-            logs.append(f"[ZION SENTINEL] Ingesting Document Vault: {file.filename}")
+            logs.append(f"[ZION SHARK PROTOCOL] Ingesting Vault: {file.filename}")
             file_bytes = await file.read()
-            contents.append(types.Part.from_bytes(data=file_bytes, mime_type=file.content_type))
+            
+            # Determine File Type
+            if file.filename.endswith('.pdf'):
+                logs.append("[ZION SHARK PROTOCOL] Engaging PDF OCR...")
+                reader = PyPDF2.PdfReader(io.BytesIO(file_bytes))
+                for page in reader.pages:
+                    extracted_text += page.extract_text() + "\n"
+            elif file.filename.endswith('.docx'):
+                logs.append("[ZION SHARK PROTOCOL] Engaging DOCX Extraction...")
+                doc = Document(io.BytesIO(file_bytes))
+                for para in doc.paragraphs:
+                    extracted_text += para.text + "\n"
+            else:
+                # Fallback purely as raw text
+                extracted_text = file_bytes.decode('utf-8', errors='ignore')
+
+            contents.append(extracted_text)
         elif text:
-            logs.append("[ZION SENTINEL] Ingesting Raw Legal Text Block...")
+            logs.append("[ZION SHARK PROTOCOL] Ingesting Raw Text Block...")
             contents.append(text)
         else:
             raise HTTPException(status_code=400, detail="Data feed empty.")
-            
-        system_instruction = "You are the Zion Legal Sentinel. Protect the artist mathematically. Identify predatory clauses."
-        
-        prompt = '''
-        Analyze this contract for an artist. Protect them.
-        Return strictly in this JSON format:
-        {
-            "parties": "Who is involved",
-            "obligations": "What the artist owes",
-            "red_flags": [
-                { "clause": "Quote", "risk": "Why it's bad", "fix": "Solution" }
-            ],
-            "summary": "Final legal verdict",
-            "integrity_score": 50,
-            "shark_rebuttal": "Firm response to the lawyer"
-        }
-        ''' # integrity_score is 0-100 integer
-        
+
+        if scan_type == 'offer':
+            system_instruction = "You are 'Shark', the Lead Music Manager. Brutally dissect standard venue offers and negotiate fiercely for the artist."
+            prompt = '''
+            Analyze this venue booking offer. Identify lowballs or hidden fees.
+            Return strictly in this JSON format:
+            {
+                "parties": "Venue vs Artist",
+                "obligations": "What the offer details",
+                "red_flags": [
+                    { "clause": "Low guarantee or terrible split", "risk": "Why it's a bad deal", "fix": "Counter-offer calculation" }
+                ],
+                "summary": "Final negotiation stance",
+                "integrity_score": 50,
+                "shark_rebuttal": "Aggressive, professional counter-offer email to the promoter"
+            }
+            '''
+        else:
+            system_instruction = "You are the Zion Legal Sentinel. Protect the artist mathematically. Identify predatory clauses."
+            prompt = '''
+            Analyze this contract for an artist. Protect them.
+            Return strictly in this JSON format:
+            {
+                "parties": "Who is involved",
+                "obligations": "What the artist owes",
+                "red_flags": [
+                    { "clause": "Quote", "risk": "Why it's bad", "fix": "Solution" }
+                ],
+                "summary": "Final legal verdict",
+                "integrity_score": 50,
+                "shark_rebuttal": "Firm response to the lawyer"
+            }
+            '''
+
         contents.append(prompt)
         
-        logs.append("[ZION SENTINEL] Executing Multi-Modal Flash Extraction...")
+        logs.append("[ZION SHARK PROTOCOL] Executing Multi-Modal Flash Extraction...")
         
         response = client.models.generate_content(
             model='gemini-2.5-flash',
@@ -384,12 +379,12 @@ async def analyze_contract(file: Optional[UploadFile] = File(None), text: Option
         )
         
         data = json.loads(response.text)
-        logs.append("[ZION SENTINEL] Forensic Analysis Complete. Integrity Scored.")
+        logs.append(f"[ZION SHARK PROTOCOL] {scan_type.capitalize()} Analysis Complete. Engine Scored.")
         
         return {"status": "success", "analysis": data, "log": "\n".join(logs)}
         
     except Exception as e:
-        logs.append(f"[ZION SENTINEL] System Failure: {str(e)}")
+        logs.append(f"[ZION SHARK PROTOCOL] System Failure: {str(e)}")
         return {"status": "error", "error": str(e), "log": "\n".join(logs)}
 
 # ---------------------------------------------------------------------------

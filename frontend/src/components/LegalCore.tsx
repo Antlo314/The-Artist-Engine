@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, BookOpen, Calculator, FileSignature, Sword } from 'lucide-react';
 import ZionSentinel from './ZionSentinel';
-import SharkProtocol from './SharkProtocol';
 import TheCodex from './TheCodex';
 import RecoupmentSandbox from './RecoupmentSandbox';
 import SplitSheetGenerator from './SplitSheetGenerator';
@@ -11,8 +10,7 @@ export default function LegalCore() {
     const [activeTab, setActiveTab] = useState('zion');
 
     const tabs = [
-        { id: 'zion', label: 'ZION SENTINEL', icon: Shield, color: 'text-purple-400' },
-        { id: 'shark', label: 'SHARK PROTOCOL', icon: Sword, color: 'text-purple-400' },
+        { id: 'zion', label: 'ZION SHARK PROTOCOL', icon: Shield, color: 'text-purple-400' },
         { id: 'codex', label: 'THE CODEX', icon: BookOpen, color: 'text-purple-400' },
         { id: 'recoupment', label: 'RECOUPMENT SANDBOX', icon: Calculator, color: 'text-purple-400' },
         { id: 'splits', label: 'SPLIT SHEETS', icon: FileSignature, color: 'text-purple-400' },
@@ -78,7 +76,6 @@ export default function LegalCore() {
                                 className="h-full"
                             >
                                 {activeTab === 'zion' && <ZionSentinel />}
-                                {activeTab === 'shark' && <SharkProtocol />}
                                 {activeTab === 'codex' && <TheCodex />}
                                 {activeTab === 'recoupment' && <RecoupmentSandbox />}
                                 {activeTab === 'splits' && <SplitSheetGenerator />}
