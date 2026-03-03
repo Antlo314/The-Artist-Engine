@@ -296,7 +296,7 @@ export default function StudioCore() {
                                 loop
                                 muted
                                 playsInline
-                                className="absolute inset-0 w-full h-full object-cover opacity-[0.15] mix-blend-screen z-0 group-hover:opacity-25 transition-opacity duration-1000"
+                                className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-screen z-0 group-hover:opacity-75 transition-opacity duration-1000"
                             >
                                 <source src="/audio-core.mp4" type="video/mp4" />
                             </video>
@@ -498,7 +498,7 @@ export default function StudioCore() {
                             loop
                             muted
                             playsInline
-                            className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none z-0 mix-blend-screen hue-rotate-[110deg]"
+                            className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none z-0 mix-blend-screen hue-rotate-[110deg]"
                         >
                             <source src="/the_sine_wave.mp4" type="video/mp4" />
                         </video>
