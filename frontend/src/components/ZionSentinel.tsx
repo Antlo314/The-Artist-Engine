@@ -326,7 +326,21 @@ export default function ZionSentinel() {
                             <div className="glass-card p-6 rounded-2xl border border-purple-900/30 mt-4 relative">
                                 <h4 className="font-cinzel text-lg text-white tracking-widest border-b border-purple-900/50 pb-2 mb-4 flex items-center justify-between">
                                     SOVEREIGN REBUTTAL
-                                    <button className="font-mono text-[10px] bg-white/5 border border-white/10 px-3 py-1 rounded text-gray-400 hover:text-white transition-colors">COPY</button>
+                                    <button
+                                        onClick={(e) => {
+                                            navigator.clipboard.writeText(analysis.shark_rebuttal);
+                                            const btn = e.currentTarget;
+                                            btn.innerText = 'COPIED!';
+                                            btn.classList.add('text-emerald-400', 'border-emerald-500/50');
+                                            setTimeout(() => {
+                                                btn.innerText = 'COPY';
+                                                btn.classList.remove('text-emerald-400', 'border-emerald-500/50');
+                                            }, 2000);
+                                        }}
+                                        className="font-mono text-[10px] bg-white/5 border border-white/10 px-3 py-1 rounded text-gray-400 hover:text-white transition-colors"
+                                    >
+                                        COPY
+                                    </button>
                                 </h4>
                                 <div className="text-sm font-inter text-gray-300 leading-relaxed whitespace-pre-wrap bg-black/40 p-4 rounded border border-white/5">
                                     {analysis.shark_rebuttal}
