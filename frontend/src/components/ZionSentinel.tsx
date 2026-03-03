@@ -111,15 +111,20 @@ export default function ZionSentinel() {
                     if (i % 2 === 0) {
                         newElements.push(subPart);
                     } else {
+                        // Use a details/summary approach for pure CSS collapse without needing complex React state mapping for every word
                         newElements.push(
-                            <span key={`${entry.term}-${partIdx}-${i}`} className="relative inline-block group cursor-help border-b border-dashed border-red-500 text-red-400 font-bold bg-red-900/20 px-1 rounded mx-0.5">
-                                {subPart}
-                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-black border border-red-500/50 rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 flex flex-col gap-1">
-                                    <span className="font-mono text-[10px] text-red-500 tracking-widest uppercase border-b border-red-900/50 pb-1 mb-1">{entry.term}</span>
+                            <details key={`${entry.term}-${partIdx}-${i}`} className="inline-block group cursor-pointer border-b border-dashed border-red-500 text-red-400 font-bold bg-red-900/20 px-1 rounded mx-0.5 relative align-bottom">
+                                <summary className="list-none hover:text-red-300 transition-colors focus:outline-none flex items-center gap-1 inline-flex">
+                                    {subPart} <span className="text-[8px] opacity-50">▼</span>
+                                </summary>
+                                <div className="absolute top-full left-0 mt-2 w-64 p-3 bg-black border border-red-500/50 rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 flex flex-col gap-1 text-left font-normal cursor-default">
+                                    <span className="font-mono text-[10px] text-red-500 tracking-widest uppercase border-b border-red-900/50 pb-1 mb-1 flex justify-between items-center">
+                                        {entry.term}
+                                    </span>
                                     <span className="font-inter text-xs text-gray-200 leading-tight">"{entry.translation}"</span>
                                     <span className="font-mono text-[9px] text-gray-400 leading-tight mt-1 bg-white/5 p-1 rounded border border-white/5">{entry.meaning}</span>
                                 </div>
-                            </span>
+                            </details>
                         );
                     }
                 });
