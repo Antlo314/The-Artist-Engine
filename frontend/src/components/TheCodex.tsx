@@ -28,6 +28,18 @@ export const codexEntries = [
         meaning: "By signing a 'work for hire' clause, you legally declare that you never owned the copyright to begin with. The label or producer is considered the 'author' of the work from inception. Highly predatory for featured artists."
     },
     {
+        term: "Recoupment",
+        translation: "Paying back the loan before you make a profit.",
+        dangerLevel: "CRITICAL",
+        meaning: "An advance is not a gift; it is a loan. Recoupment is the process of the label keeping your royalties until that loan (and all recording/marketing expenses) is paid off. Standard, but watch out for 'All-In' recoupment where they take from live shows too."
+    },
+    {
+        term: "Leaving Member Clause",
+        translation: "Trap doors for band breakups.",
+        dangerLevel: "CRITICAL",
+        meaning: "If a band breaks up, this clause gives the label the right to keep the remaining members, drop the ones who left, or even force the leaving member into a solo deal under the same terrible terms. It prevents artists from escaping bad deals by disbanding."
+    },
+    {
         term: "Controlled Composition",
         translation: "A forced discount on your own mechanical royalties.",
         dangerLevel: "HIGH",
@@ -38,6 +50,24 @@ export const codexEntries = [
         translation: "Hollywood Accounting.",
         dangerLevel: "HIGH",
         meaning: "Never agree to a percentage of 'Net Profits'. The label will deduct 'marketing', 'breakage', 'packaging', and 'distribution' costs until the 'Net Profit' magically equals zero. Always fight for a percentage of 'Gross Revenue'."
+    },
+    {
+        term: "Black Box Royalties",
+        translation: "Unclaimed money the industry keeps.",
+        dangerLevel: "HIGH",
+        meaning: "Royalties that remain unclaimed (usually mechanicals) because the publisher or writer couldn't be located. After a certain time, societies distribute this money based on market share, meaning the biggest labels/publishers get your unclaimed cash."
+    },
+    {
+        term: "Exploitation",
+        translation: "The right to use your music however they want.",
+        dangerLevel: "HIGH",
+        meaning: "In legal terms, 'exploit' just means 'to make money from'. But broad exploitation clauses allow labels to use your music in ways you might hate (e.g., political campaigns, embarrassing commercials) unless you have Mutual Consent."
+    },
+    {
+        term: "Moral Rights",
+        translation: "The right to protect your artistic integrity.",
+        dangerLevel: "HIGH",
+        meaning: "The right to not have your work mutated, distorted, or used in a derogatory way. Many standard US contracts force you to waive your moral rights, allowing them to drastically alter your music without your permission."
     },
     {
         term: "Option Periods",
@@ -56,6 +86,48 @@ export const codexEntries = [
         translation: "A fake fee from the CD era.",
         dangerLevel: "WARNING",
         meaning: "A legacy clause where labels deduct 20%-25% of your royalties for the 'cost of packaging' the CD/Vinyl. But they apply this deduction to digital streams and downloads too, where there is zero packaging cost. It's pure theft."
+    },
+    {
+        term: "Minimum Delivery Commitment",
+        translation: "The bare minimum you must provide.",
+        dangerLevel: "WARNING",
+        meaning: "The exact number of masters you must deliver to satisfy the term or option. Be careful: labels often stipulate that albums must be 'commercially satisfactory,' meaning they can reject your album and claim you haven't fulfilled your commitment."
+    },
+    {
+        term: "Indemnification",
+        translation: "If we get sued, YOU pay for it.",
+        dangerLevel: "WARNING",
+        meaning: "You agree to protect the label against any legal claims regarding your music (e.g., uncleared samples). If they get sued, this clause forces you to pay their legal fees out of your own pocket or royalties."
+    },
+    {
+        term: "Force Majeure",
+        translation: "Acts of God.",
+        dangerLevel: "WARNING",
+        meaning: "Suspends the contract during extraordinary events (war, pandemics, strikes). Labels use this to indefinitely pause their obligations to you. Ensure there is a hard time limit (e.g., 6 months) after which you can terminate if they still aren't functioning."
+    },
+    {
+        term: "Territory",
+        translation: "Where they control your rights.",
+        dangerLevel: "WARNING",
+        meaning: "Usually defined as 'The Universe'. If you have a strong following in Japan, but you are signing to a US indie label, restrict the territory to the US so you can license your music separately in Japan for a massive secondary advance."
+    },
+    {
+        term: "Administration Deal",
+        translation: "They handle the paperwork, you keep the copyright.",
+        dangerLevel: "SAFE",
+        meaning: "A publishing deal where you retain 100% of your copyright. The administrator simply registers your songs and collects the money worldwide for a small percentage (usually 10-20%) for a limited amount of time (3-5 years)."
+    },
+    {
+        term: "Co-Publishing Deal",
+        translation: "Splitting the pie.",
+        dangerLevel: "SAFE",
+        meaning: "The most common publishing deal for successful writers. You give up 50% of the publisher's share (so 25% of the total revenue), but you get an advance and keep the other 75%. Better than a full publishing deal, but worse than Admin."
+    },
+    {
+        term: "Sync Licensing",
+        translation: "Getting placed in TV, Movies, and Video Games.",
+        dangerLevel: "SAFE",
+        meaning: "Synchronization. When your music is synchronized to a visual medium. This pays a massive upfront fee AND generates ongoing performance royalties every time the show/movie airs. The holy grail of alternative income."
     },
     {
         term: "Key Man Clause",
@@ -92,6 +164,36 @@ export const codexEntries = [
         translation: "They pay you even if they shelf you.",
         dangerLevel: "SAFE",
         meaning: "If the label decides not to record or release your album, this clause forces them to pay you a union-scale settlement or a pre-agreed sum, and immediately releases you from the contract so you can sign elsewhere."
+    },
+    {
+        term: "Release Commitment",
+        translation: "They actually have to put the music out.",
+        dangerLevel: "SAFE",
+        meaning: "A clause forcing the label to commercially release your album within a specific timeframe (e.g., 120 days of delivery). If they fail to release it, you can demand to be released from the contract. Prevents getting 'shelved'."
+    },
+    {
+        term: "Escalations",
+        translation: "Your royalty rate goes up as you sell more.",
+        dangerLevel: "SAFE",
+        meaning: "A clause where your royalty percentage automatically increases based on sales thresholds. For example, your base rate is 15%, but escalates to 16% after 500k sales, and 17% after 1M sales. Always ask for escalations."
+    },
+    {
+        term: "Favored Nations",
+        translation: "Nobody gets a better deal than you.",
+        dangerLevel: "SAFE",
+        meaning: "A clause stating that if any other party on the project (like a featured artist or co-writer) negotiates a higher royalty rate or better terms, your contract automatically upgrades to match theirs. Ultimate equalization."
+    },
+    {
+        term: "Sunset Clause",
+        translation: "Phasing out your old manager's commission.",
+        dangerLevel: "SAFE",
+        meaning: "When you fire a manager, they are usually entitled to commissions on deals they brought you. A Sunset Clause phases this out over time (e.g., 20% year 1, 10% year 2, 0% year 3) so you aren't paying two managers forever."
+    },
+    {
+        term: "Cure Period",
+        translation: "A second chance to fix a mistake.",
+        dangerLevel: "SAFE",
+        meaning: "If you breach the contract (e.g., deliver an album late), a 'cure period' requires the label to send you a formal warning and give you a specific amount of time (e.g., 30 days) to fix the mistake before they can sue or terminate."
     }
 ];
 
@@ -121,7 +223,7 @@ export default function TheCodex() {
                 <Search className="text-amber-500" size={20} />
                 <input
                     type="text"
-                    placeholder="Search predatory jargon... (e.g., 'Recoupment', 'Gross')"
+                    placeholder="Search predatory jargon... (e.g., 'Recoupment', 'Gross Revenue')"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="flex-1 bg-transparent text-white font-mono text-sm focus:outline-none placeholder-gray-600"

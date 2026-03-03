@@ -368,9 +368,9 @@ async def analyze_contract(
         IMPORTANT - CODEX VOCABULARY INJECTION:
         You must actively attempt to use the following specific legal terms in your analysis 'risk', 'fix', and 'summary' fields whenever they are applicable to the document. Do not force them if they don't apply, but if they do, use these EXACT words so the UI can highlight them for the user:
 
-        PREDATORY TERMS TO IDENTIFY: In Perpetuity, Cross-Collateralization, 360 Deal, Work For Hire, Controlled Composition, Net Profits, Option Periods, Right of First Refusal, Packaging Deduction.
+        PREDATORY TERMS TO IDENTIFY: In Perpetuity, Cross-Collateralization, 360 Deal, Work For Hire, Recoupment, Leaving Member Clause, Controlled Composition, Net Profits, Black Box Royalties, Exploitation, Moral Rights, Option Periods, Right of First Refusal, Packaging Deduction, Minimum Delivery Commitment, Indemnification, Force Majeure, Territory.
 
-        BENEFICIAL TERMS TO DEMAND/SUGGEST: Key Man Clause, Reversion Clause, Mutual Consent, Audit Rights, Gross Revenue, Pay or Play.
+        BENEFICIAL TERMS TO DEMAND/SUGGEST: Administration Deal, Co-Publishing Deal, Sync Licensing, Key Man Clause, Reversion Clause, Mutual Consent, Audit Rights, Gross Revenue, Pay or Play, Release Commitment, Escalations, Favored Nations, Sunset Clause, Cure Period.
         """
 
         contents.append(prompt + "\n" + codex_injection)
