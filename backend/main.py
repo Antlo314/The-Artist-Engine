@@ -104,6 +104,9 @@ class PitchRequest(BaseModel):
     payout_model: str
     artist_name: str = "The Artist"
     agent_name: str = "The Manager"
+    outreach_type: str = "email" # email, call_script, dm
+    artist_name: str = "The Artist"
+    agent_name: str = "The Manager"
 
 # ---------------------------------------------------------------------------
 # SYSTEM ROUTES
@@ -159,7 +162,10 @@ async def scout_gigs(request: ScoutRequest):
                 "contact": "string",
                 "contact_persona": "Name or Title of the specific human buyer/owner",
                 "contact_source": "Where the contact was found (e.g., Instagram, Official Website)",
+                "social_media_url": "Link to their primary social media (e.g. Instagram/Twitter profile) if found, otherwise null",
                 "similar_acts": ["Act 1", "Act 2"],
+                "payout_model": "Describe the payout structure (e.g., Door Deal, Guarantee, Split, Unknown)",
+                "lead_time": "Estimated lead time for booking (e.g., 2 months, 6 months OUT)",
                 "reputation_score": "Integer 0-100 representing artist fairness",
                 "reputation_explanation": "A 1-2 sentence detailed reason WHY they received this specific score (e.g. Known for late payouts, amazing sound engineer, pay-to-play packages, etc.)",
                 "capacity": "Integer maximum room capacity",
@@ -212,7 +218,7 @@ async def scout_gigs(request: ScoutRequest):
             fallback_prompt = f'''
             Suggest 5 legacy or famous "{request.tier}" music venues in {request.city} (within {request.radius}) for {request.genre} artists.
             Timeframe target: {request.timeframe}.
-            Use internal world knowledge. Respond in strict JSON only, same schema as before (including contact_persona, contact_source, payout_model, lead_time, similar_acts, reputation_score, reputation_explanation, capacity, avg_ticket_price_usd, gross_potential_usd, leverage_point, and active_search_signal).
+            Use internal world knowledge. Respond in strict JSON only, same schema as before (including contact_persona, contact_source, social_media_url, payout_model, lead_time, similar_acts, reputation_score, reputation_explanation, capacity, avg_ticket_price_usd, gross_potential_usd, leverage_point, and active_search_signal).
             '''
             fb_resp = client.models.generate_content(
                 model='gemini-2.5-flash',
@@ -241,17 +247,19 @@ async def draft_pitch(request: PitchRequest):
     prompt = f'''
     You are an elite, highly persuasive music manager representing {request.artist_name}, a {request.genre} artist.
     Your name is {request.agent_name}. 
-    Draft a cold booking outreach email to {request.contact_persona} at {request.venue_name}.
+    Draft an outreach of type "{request.outreach_type}" (email, call_script, or dm) to {request.contact_persona} at {request.venue_name}.
     Context:
     - Venue Tier: {request.venue_tier}
     - Payout Model: {request.payout_model}
     
-    The email must be strictly tailored to the tier:
+    The outreach must be strictly tailored to the tier:
     - Mom & Pop: Humble, community-focused, willing to prove value.
     - Mid-Size: Professional, highlighting recent growth.
     - Top-Tier Theater: Strictly business, data-driven, highlighting guarantees and ROI.
     
-    Return ONLY the raw email text (Subject line + Body). No conversational filler, no markdown blocks.
+    If the type is "email" or "dm", return ONLY the raw text. For email, include a Subject line. 
+    If the type is "call_script", provide a line-by-line script for a phone call, including what to say to the gatekeeper if necessary.
+    No conversational filler, no markdown blocks.
     '''
     try:
         response = client.models.generate_content(

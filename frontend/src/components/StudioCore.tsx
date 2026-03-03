@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic2, Activity, Play, Pause, Settings2, Shield, UploadCloud, Volume2, Waves, X } from 'lucide-react';
 import WaveSurfer from 'wavesurfer.js';
+import LoadingProgressBar from './LoadingProgressBar';
 
 export default function StudioCore() {
     const [phase, setPhase] = useState<'dropzone' | 'processing' | 'tuning'>('dropzone');
@@ -405,6 +406,18 @@ export default function StudioCore() {
                                 {isOracleScanning && <span className="animate-pulse bg-emerald-900/50 text-emerald-300 px-2 rounded">SCANNING OMEGA CORE...</span>}
                             </h3>
 
+                            {isOracleScanning && (
+                                <div className="mt-4">
+                                    <LoadingProgressBar
+                                        active={isOracleScanning}
+                                        message="SCANNING OMEGA CORE"
+                                        subMessage="Extracting acoustic topology signatures via AI. Engine requires up to 30s-40s."
+                                        colorClass="emerald"
+                                        estimatedDurationMs={25000}
+                                    />
+                                </div>
+                            )}
+
                             {targetFile && !oracleData && !isOracleScanning && (
                                 <button
                                     onClick={handleOracleScan}
@@ -491,16 +504,13 @@ export default function StudioCore() {
                                 <div className="absolute inset-4 border-r-2 border-emerald-200 rounded-full animate-spin [animation-duration:2s] [animation-direction:reverse]" />
                                 <Mic2 size={48} className="text-emerald-400 animate-pulse" />
                             </div>
-                            <h3 className="font-cinzel text-xl text-white tracking-widest mt-8 mb-2">FORGING SOVEREIGN MASTER</h3>
-                            <p className="font-mono text-emerald-500 text-xs tracking-widest uppercase mb-4 text-glow">Comparing target topology to reference...</p>
-
-                            {/* Fake Progress */}
-                            <div className="w-64 h-1 bg-black rounded-full overflow-hidden border border-white/10 mt-8">
-                                <motion.div
-                                    className="h-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]"
-                                    initial={{ width: 0 }}
-                                    animate={{ width: '100%' }}
-                                    transition={{ duration: 3, ease: 'linear' }}
+                            <div className="w-full max-w-sm mt-8">
+                                <LoadingProgressBar
+                                    active={phase === 'processing'}
+                                    message="FORGING SOVEREIGN MASTER"
+                                    subMessage="Running neural DSP Matchering algorithms. Comparing target topology to reference... Engine may take 30-60s to initiate."
+                                    colorClass="emerald"
+                                    estimatedDurationMs={45000}
                                 />
                             </div>
                         </div>

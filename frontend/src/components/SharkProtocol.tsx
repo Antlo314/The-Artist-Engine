@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, AlertTriangle, ShieldCheck, Sword, MessageSquare, Target } from 'lucide-react';
+import LoadingProgressBar from './LoadingProgressBar';
 
 export default function SharkProtocol() {
     const [offerText, setOfferText] = useState('');
@@ -137,15 +138,15 @@ export default function SharkProtocol() {
                     )}
 
                     {isAnalyzing && (
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                            className="flex-1 glass-card border-red-500/20 rounded-2xl flex flex-col items-center justify-center p-8 text-center relative overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,0,0.05)_1px,transparent_1px)] bg-[size:100%_4px] animate-pulse" />
-                            <Sword size={48} className="text-red-500 mb-6 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]" />
-                            <h3 className="font-cinzel text-xl text-white tracking-widest">DISSECTING LEVERAGE POINTS</h3>
-                            <p className="font-mono text-xs text-red-400 mt-2 tracking-widest">Applying psychological pressure structures...</p>
-                        </motion.div>
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            <LoadingProgressBar
+                                active={isAnalyzing}
+                                message="DISSECTING LEVERAGE POINTS"
+                                subMessage="Applying psychological pressure structures. Engine may take up to 30s to initiate."
+                                colorClass="red"
+                                estimatedDurationMs={20000}
+                            />
+                        </div>
                     )}
 
                     {result && (

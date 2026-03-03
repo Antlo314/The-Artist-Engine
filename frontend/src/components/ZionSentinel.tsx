@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Scale, FileText, Activity, AlertOctagon, TrendingUp, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { codexEntries } from './TheCodex';
+import LoadingProgressBar from './LoadingProgressBar';
 
 export default function ZionSentinel() {
     const [contractText, setContractText] = useState('');
@@ -70,31 +71,38 @@ export default function ZionSentinel() {
     const renderWithCodex = (text: string) => {
         if (!text) return text;
 
-        let elements: (string | React.ReactNode)[] = [text];
+        let elements: React.ReactNode[] = [text];
 
         codexEntries.forEach(entry => {
             const regex = new RegExp(`(${entry.term})`, 'gi');
 
-            elements = elements.flatMap((part, partIdx) => {
-                if (typeof part !== 'string') return [part];
+            const newElements: React.ReactNode[] = [];
+            elements.forEach((part, partIdx) => {
+                if (typeof part !== 'string') {
+                    newElements.push(part);
+                    return;
+                }
 
                 const splitParts = part.split(regex);
-                return splitParts.map((subPart, i) => {
+                splitParts.forEach((subPart, i) => {
                     // Even indices are non-matches, odd indices are matches
-                    if (i % 2 === 0) return subPart;
-
-                    return (
-                        <span key={`${entry.term}-${partIdx}-${i}`} className="relative inline-block group cursor-help border-b border-dashed border-red-500 text-red-400 font-bold bg-red-900/20 px-1 rounded mx-0.5">
-                            {subPart}
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-black border border-red-500/50 rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 flex flex-col gap-1">
-                                <span className="font-mono text-[10px] text-red-500 tracking-widest uppercase border-b border-red-900/50 pb-1 mb-1">{entry.term}</span>
-                                <span className="font-inter text-xs text-gray-200 leading-tight">"{entry.translation}"</span>
-                                <span className="font-mono text-[9px] text-gray-400 leading-tight mt-1 bg-white/5 p-1 rounded border border-white/5">{entry.meaning}</span>
-                            </div>
-                        </span>
-                    );
+                    if (i % 2 === 0) {
+                        newElements.push(subPart);
+                    } else {
+                        newElements.push(
+                            <span key={`${entry.term}-${partIdx}-${i}`} className="relative inline-block group cursor-help border-b border-dashed border-red-500 text-red-400 font-bold bg-red-900/20 px-1 rounded mx-0.5">
+                                {subPart}
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-black border border-red-500/50 rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 flex flex-col gap-1">
+                                    <span className="font-mono text-[10px] text-red-500 tracking-widest uppercase border-b border-red-900/50 pb-1 mb-1">{entry.term}</span>
+                                    <span className="font-inter text-xs text-gray-200 leading-tight">"{entry.translation}"</span>
+                                    <span className="font-mono text-[9px] text-gray-400 leading-tight mt-1 bg-white/5 p-1 rounded border border-white/5">{entry.meaning}</span>
+                                </div>
+                            </span>
+                        );
+                    }
                 });
             });
+            elements = newElements;
         });
 
         return <>{elements}</>;
@@ -162,26 +170,15 @@ export default function ZionSentinel() {
                     )}
 
                     {isScanning && (
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                            className="flex-1 glass-card border-emerald-500/20 rounded-2xl flex flex-col items-center justify-center p-8 text-center relative overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.05)_1px,transparent_1px)] bg-[size:100%_4px] animate-pulse" />
-                            <Scale size={48} className="text-emerald-500 mb-6 drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
-                            <h3 className="font-cinzel text-xl text-white tracking-widest">DEPLOYING ZION ENGINES</h3>
-                            <p className="font-mono text-xs text-emerald-400 mt-2 tracking-widest font-bold">Hunting Predatory Signatures...</p>
-
-                            <div className="mt-8 flex gap-2">
-                                {[0, 1, 2].map(i => (
-                                    <motion.div
-                                        key={i}
-                                        className="h-2 w-8 bg-emerald-500/50 rounded"
-                                        animate={{ opacity: [0.3, 1, 0.3] }}
-                                        transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-                                    />
-                                ))}
-                            </div>
-                        </motion.div>
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            <LoadingProgressBar
+                                active={isScanning}
+                                message="DEPLOYING ZION ENGINES"
+                                subMessage="Hunting Predatory Signatures. Engine may take 30-40s to respond."
+                                colorClass="emerald"
+                                estimatedDurationMs={25000}
+                            />
+                        </div>
                     )}
 
                     {analysis && (
