@@ -81,14 +81,14 @@ export default function TheCodex() {
                         >
                             <div className={`absolute top-0 left-0 w-1 h-full 
                                 ${entry.dangerLevel === 'CRITICAL' ? 'bg-red-500' :
-                                    entry.dangerLevel === 'HIGH' ? 'bg-orange-500' : 'bg-yellow-500'}`}
+                                    entry.dangerLevel === 'HIGH' ? 'bg-purple-500' : 'bg-yellow-500'}`}
                             />
 
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="font-cinzel text-xl text-white font-bold tracking-widest pl-3">{entry.term}</h3>
                                 <span className={`font-mono text-[10px] tracking-widest px-2 py-1 rounded bg-black/40 border
                                     ${entry.dangerLevel === 'CRITICAL' ? 'text-red-400 border-red-500/30' :
-                                        entry.dangerLevel === 'HIGH' ? 'text-orange-400 border-orange-500/30' : 'text-yellow-400 border-yellow-500/30'}`}>
+                                        entry.dangerLevel === 'HIGH' ? 'text-purple-400 border-purple-500/30' : 'text-yellow-400 border-yellow-500/30'}`}>
                                     {entry.dangerLevel} RISK
                                 </span>
                             </div>

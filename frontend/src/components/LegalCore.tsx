@@ -11,31 +11,36 @@ export default function LegalCore() {
     const [activeTab, setActiveTab] = useState('zion');
 
     const tabs = [
-        { id: 'zion', label: 'ZION SENTINEL', icon: Shield, color: 'text-orange-400' },
-        { id: 'shark', label: 'SHARK PROTOCOL', icon: Sword, color: 'text-orange-400' },
-        { id: 'codex', label: 'THE CODEX', icon: BookOpen, color: 'text-orange-400' },
-        { id: 'recoupment', label: 'RECOUPMENT SANDBOX', icon: Calculator, color: 'text-orange-400' },
-        { id: 'splits', label: 'SPLIT SHEETS', icon: FileSignature, color: 'text-orange-400' },
+        { id: 'zion', label: 'ZION SENTINEL', icon: Shield, color: 'text-purple-400' },
+        { id: 'shark', label: 'SHARK PROTOCOL', icon: Sword, color: 'text-purple-400' },
+        { id: 'codex', label: 'THE CODEX', icon: BookOpen, color: 'text-purple-400' },
+        { id: 'recoupment', label: 'RECOUPMENT SANDBOX', icon: Calculator, color: 'text-purple-400' },
+        { id: 'splits', label: 'SPLIT SHEETS', icon: FileSignature, color: 'text-purple-400' },
     ];
 
     return (
         <div className="h-full flex flex-col p-8 lg:p-12 overflow-hidden relative group">
-            {/* Legal Protocol Vault Background */}
-            <div
-                className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-luminosity z-0 group-hover:opacity-30 transition-opacity duration-1000"
-                style={{ backgroundImage: "url('/legal_protocol_vault.png')" }}
-            />
+            {/* Legal Protocol Vault Video Background */}
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-luminosity z-0 group-hover:opacity-30 transition-opacity duration-1000"
+            >
+                <source src="/legal-war.mp4" type="video/mp4" />
+            </video>
 
             <div className="z-10 relative flex flex-col h-full space-y-8">
                 {/* Header */}
                 <div className="flex flex-col border-b border-white/10 pb-6">
                     <h1 className="font-cinzel text-4xl lg:text-5xl font-bold text-white tracking-[0.2em] uppercase flex items-center gap-4">
-                        <Shield className="text-orange-500" size={36} />
+                        <Shield className="text-purple-500" size={36} />
                         LEGAL WAR ROOM
                     </h1>
                     <div className="mt-2 flex items-center gap-3">
-                        <div className="h-px w-12 bg-orange-500/50" />
-                        <p className="font-mono text-[10px] lg:text-xs text-orange-300/70 tracking-[0.3em] uppercase">
+                        <div className="h-px w-12 bg-purple-500/50" />
+                        <p className="font-mono text-[10px] lg:text-xs text-purple-300/70 tracking-[0.3em] uppercase">
                             Autonomous Legal Defense & Contract Nullification
                         </p>
                     </div>
@@ -52,9 +57,9 @@ export default function LegalCore() {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`relative px-4 lg:px-6 py-4 font-mono text-xs tracking-widest uppercase transition-all flex items-center gap-3 whitespace-nowrap lg:whitespace-normal text-left lg:rounded-l-lg lg:rounded-tr-none lg:border-r-2
-                                    ${isActive ? 'text-white bg-orange-900/30 border-orange-500 shadow-[inset_4px_0_15px_rgba(249,115,22,0.15)]' : 'text-gray-400 hover:text-white hover:bg-white/5 border-transparent rounded-lg lg:rounded-l-lg lg:rounded-r-none'}`}
+                                    ${isActive ? 'text-white bg-purple-900/30 border-purple-500 shadow-[inset_4px_0_15px_rgba(249,115,22,0.15)]' : 'text-gray-400 hover:text-white hover:bg-white/5 border-transparent rounded-lg lg:rounded-l-lg lg:rounded-r-none'}`}
                                 >
-                                    <Icon size={16} className={`${isActive ? 'text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]' : 'text-gray-500'}`} />
+                                    <Icon size={16} className={`${isActive ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]' : 'text-gray-500'}`} />
                                     {tab.label}
                                 </button>
                             );

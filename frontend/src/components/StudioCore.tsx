@@ -290,11 +290,16 @@ export default function StudioCore() {
                             className={`md:col-span-2 glass-card rounded-2xl p-10 flex flex-col items-center justify-center border-dashed border-2 hover:border-emerald-400/50 transition-all min-h-[400px] relative overflow-hidden group ${isDragging ? 'border-emerald-400 bg-emerald-900/20 shadow-[0_0_30px_rgba(16,185,129,0.2)]' : 'border-emerald-900/50 hover:bg-emerald-900/5 cursor-default'}`}
                         >
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity z-0" />
-                            {/* Background Soundwaves */}
-                            <div
-                                className="absolute inset-0 bg-cover bg-center opacity-10 mix-blend-luminosity z-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none"
-                                style={{ backgroundImage: "url('/audio_core_soundwaves.png')" }}
-                            />
+                            {/* Audio Core Ambient Soundwaves Video Background */}
+                            <video
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="absolute inset-0 w-full h-full object-cover opacity-[0.15] mix-blend-screen z-0 group-hover:opacity-25 transition-opacity duration-1000"
+                            >
+                                <source src="/audio-core.mp4" type="video/mp4" />
+                            </video>
 
                             <div className="w-20 h-20 rounded-full border-2 border-dashed border-emerald-500/50 flex items-center justify-center mb-6 group-hover:rotate-180 transition-transform duration-1000 ease-in-out">
                                 <UploadCloud size={32} className="text-emerald-400" />
