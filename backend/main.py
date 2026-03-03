@@ -416,7 +416,7 @@ def cleanup_audio_files(paths: list):
 async def master_audio(
     background_tasks: BackgroundTasks,
     target: UploadFile = File(...),
-    reference: UploadFile = File(...),
+    reference: UploadFile = File(None),
     sub: float = Form(50.0),
     air: float = Form(50.0),
     snap: float = Form(50.0),
@@ -430,25 +430,32 @@ async def master_audio(
     
     # Save uploaded files
     temp_target_ext = target.filename.split('.')[-1] if '.' in target.filename else 'wav'
-    temp_ref_ext = reference.filename.split('.')[-1] if '.' in reference.filename else 'wav'
-    
     raw_target_path = f"temp/raw_target_{job_id}.{temp_target_ext}"
-    raw_ref_path = f"temp/raw_ref_{job_id}.{temp_ref_ext}"
+    wav_target_path = f"temp/target_{job_id}.wav"
     
     with open(raw_target_path, "wb") as f:
         f.write(await target.read())
-    with open(raw_ref_path, "wb") as f:
-        f.write(await reference.read())
         
-    # Convert to WAV for Matchering/Pedalboard
-    wav_target_path = f"temp/target_{job_id}.wav"
-    wav_ref_path = f"temp/ref_{job_id}.wav"
-    
     try:
         AudioSegment.from_file(raw_target_path).export(wav_target_path, format="wav")
-        AudioSegment.from_file(raw_ref_path).export(wav_ref_path, format="wav")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Format normalization failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Target format normalization failed: {str(e)}")
+
+    wav_ref_path = "NONE"
+    
+    if reference:
+        temp_ref_ext = reference.filename.split('.')[-1] if '.' in reference.filename else 'wav'
+        raw_ref_path = f"temp/raw_ref_{job_id}.{temp_ref_ext}"
+        
+        with open(raw_ref_path, "wb") as f:
+            f.write(await reference.read())
+            
+        wav_ref_path = f"temp/ref_{job_id}.wav"
+        
+        try:
+            AudioSegment.from_file(raw_ref_path).export(wav_ref_path, format="wav")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Reference format normalization failed: {str(e)}")
     
     # Output path from worker
     mastered_wav_path = f"temp/mastered_{job_id}.wav"
@@ -514,9 +521,10 @@ async def oracle_analysis(
         '''
         
         prompt = '''
-        Listen to this unmastered track. Provide a 2-3 sentence ruthless, highly technical acoustic analysis of the mix balance (lows, mids, highs, transients, phase coherence, and dynamic range).
-        DO NOT USE GENERIC PHRASES like "overall good" or "standard mix". Identify specific frequency masking, harshness, muddiness, or transient issues.
-        Then, dictate the exact parameters needed for our DSP engine to correct these specific acoustic weaknesses.
+        Listen to this unmastered target track. This is NOT a reference track. Provide a 2-3 sentence ruthless, highly technical acoustic analysis of the mix balance (lows, mids, highs, transients, phase coherence, and dynamic range).
+        CRITICAL: If the mix already sounds excellent or professionally balanced, DO NOT hallucinate or invent flaws. Acknowledge its strengths.
+        Otherwise, do not use generic phrases like "overall good" or "standard mix". Identify specific frequency masking, harshness, muddiness, or transient issues.
+        Then, dictate the exact parameters needed for our DSP engine to correct these specific acoustic weaknesses, or enhance the existing strengths.
         Values must be integers from 0 to 100 (50 is neutral, 0 is max reduction, 100 is max addition).
         
         JSON Structure:

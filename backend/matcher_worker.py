@@ -13,26 +13,30 @@ def process_audio(target_path, reference_path, output_path, sub, air, snap, widt
         print(f"ERROR: Target file not found at {target_path}")
         sys.exit(1)
         
-    if not os.path.exists(reference_path):
-        print(f"ERROR: Reference file not found at {reference_path}")
-        sys.exit(1)
+    if reference_path == "NONE":
+        print("MATCHERING WORKER: Phase 1 - No reference provided. Skipping MatchRMS. Bypassing straight to DSP Engine.")
+        temp_matched_path = target_path
+    else:
+        if not os.path.exists(reference_path):
+            print(f"ERROR: Reference file not found at {reference_path}")
+            sys.exit(1)
 
-    print("MATCHERING WORKER: Phase 1 - Initializing AI Matchering Engine...")
-    temp_matched_path = target_path + "_matched.wav"
-    
-    try:
-        # MatchRMS & EQ Match
-        mg.process(
-            target=target_path,
-            reference=reference_path,
-            results=[
-                mg.pcm24(temp_matched_path)
-            ]
-        )
-        print("MATCHERING WORKER: Phase 1 complete. Base LUFS achieved.")
-    except Exception as e:
-        print(f"CRITICAL ERROR in Matchering Engine: {str(e)}")
-        sys.exit(1)
+        print("MATCHERING WORKER: Phase 1 - Initializing AI Matchering Engine...")
+        temp_matched_path = target_path + "_matched.wav"
+        
+        try:
+            # MatchRMS & EQ Match
+            mg.process(
+                target=target_path,
+                reference=reference_path,
+                results=[
+                    mg.pcm24(temp_matched_path)
+                ]
+            )
+            print("MATCHERING WORKER: Phase 1 complete. Base LUFS achieved.")
+        except Exception as e:
+            print(f"CRITICAL ERROR in Matchering Engine: {str(e)}")
+            sys.exit(1)
 
     print(f"MATCHERING WORKER: Phase 2 - Applying Sovereign DSP Engine (Sub:{sub} Air:{air} Snap:{snap} Width:{width}).")
     sub = float(sub)
@@ -74,7 +78,7 @@ def process_audio(target_path, reference_path, output_path, sub, air, snap, widt
         print(f"CRITICAL ERROR in DSP Engine: {str(e)}")
         sys.exit(1)
     finally:
-        if os.path.exists(temp_matched_path):
+        if temp_matched_path != target_path and os.path.exists(temp_matched_path):
             os.remove(temp_matched_path)
             
     sys.exit(0)

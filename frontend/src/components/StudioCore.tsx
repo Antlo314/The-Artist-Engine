@@ -202,13 +202,15 @@ export default function StudioCore() {
     };
 
     const handleMaster = async () => {
-        if (!targetFile || !refFile) return;
+        if (!targetFile) return;
         setPhase('processing');
 
         try {
             const formData = new FormData();
             formData.append('target', targetFile);
-            formData.append('reference', refFile);
+            if (refFile) {
+                formData.append('reference', refFile);
+            }
             formData.append('sub', knobs.sub.toString());
             formData.append('air', knobs.air.toString());
             formData.append('snap', knobs.snap.toString());
@@ -555,14 +557,14 @@ export default function StudioCore() {
                                 </div>
                             </div>
 
-                            {(targetFile && refFile) && (
+                            {targetFile && (
                                 <motion.button
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     onClick={handleMaster}
-                                    className="mt-8 px-12 py-3 bg-white text-black font-cinzel font-bold tracking-widest rounded shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform z-10"
+                                    className="mt-8 px-12 py-3 bg-white text-black font-cinzel font-bold tracking-widest rounded shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform z-10 w-full md:w-auto"
                                 >
-                                    GENERATE MASTER
+                                    GENERATE {refFile ? "MATCHED " : ""}MASTER
                                 </motion.button>
                             )}
                         </div>
@@ -724,7 +726,7 @@ export default function StudioCore() {
                                 <LoadingProgressBar
                                     active={phase === 'processing'}
                                     message="FORGING SOVEREIGN MASTER"
-                                    subMessage="Running neural DSP Matchering algorithms. Comparing target topology to reference... Engine may take 30-60s to initiate."
+                                    subMessage="Running neural DSP algorithms. Forging master topology... Engine may take 30-60s to initiate."
                                     colorClass="emerald"
                                     estimatedDurationMs={45000}
                                 />
@@ -898,7 +900,7 @@ export default function StudioCore() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="flex flex-col gap-4">
                                         <WaveformViewer url={targetUrl} title="Original Unmastered Source" color="#9ca3af" renderHeatmap={showHeatmap} />
-                                        <WaveformViewer url={refUrl} title="Acoustic Reference Goal" color="#10b981" renderHeatmap={showHeatmap} />
+                                        {refUrl && <WaveformViewer url={refUrl} title="Acoustic Reference Goal" color="#10b981" renderHeatmap={showHeatmap} />}
                                     </div>
                                     <div className="flex flex-col h-full bg-black/40 border border-white/5 rounded p-6">
                                         <h3 className="font-mono text-xs text-emerald-400 tracking-widest uppercase mb-4 flex items-center gap-2">
