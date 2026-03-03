@@ -364,9 +364,18 @@ async def analyze_contract(
             }
             '''
 
-        contents.append(prompt)
+        codex_injection = """
+        IMPORTANT - CODEX VOCABULARY INJECTION:
+        You must actively attempt to use the following specific legal terms in your analysis 'risk', 'fix', and 'summary' fields whenever they are applicable to the document. Do not force them if they don't apply, but if they do, use these EXACT words so the UI can highlight them for the user:
+
+        PREDATORY TERMS TO IDENTIFY: In Perpetuity, Cross-Collateralization, 360 Deal, Work For Hire, Controlled Composition, Net Profits, Option Periods, Right of First Refusal, Packaging Deduction.
+
+        BENEFICIAL TERMS TO DEMAND/SUGGEST: Key Man Clause, Reversion Clause, Mutual Consent, Audit Rights, Gross Revenue, Pay or Play.
+        """
+
+        contents.append(prompt + "\n" + codex_injection)
         
-        logs.append("[ZION SHARK PROTOCOL] Executing Multi-Modal Flash Extraction...")
+        logs.append("[ZION SHARK PROTOCOL] Executing Multi-Modal Flash Extraction with Codex Injection...")
         
         response = client.models.generate_content(
             model='gemini-2.5-flash',

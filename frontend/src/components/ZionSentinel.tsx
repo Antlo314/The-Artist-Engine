@@ -111,14 +111,25 @@ export default function ZionSentinel() {
                     if (i % 2 === 0) {
                         newElements.push(subPart);
                     } else {
+                        // Tailwind requires explicit class names for JIT compilation; cannot build dynamically with string templates
+                        const getColors = (level: string) => {
+                            switch (level) {
+                                case 'CRITICAL': return { text: 'text-red-400', border: 'border-red-500', bg: 'bg-red-900/20', hover: 'hover:text-red-300', panelBorder: 'border-red-500/50', panelHeader: 'text-red-500', borderBottom: 'border-red-900/50' };
+                                case 'HIGH': return { text: 'text-purple-400', border: 'border-purple-500', bg: 'bg-purple-900/20', hover: 'hover:text-purple-300', panelBorder: 'border-purple-500/50', panelHeader: 'text-purple-500', borderBottom: 'border-purple-900/50' };
+                                case 'WARNING': return { text: 'text-orange-400', border: 'border-orange-500', bg: 'bg-orange-900/20', hover: 'hover:text-orange-300', panelBorder: 'border-orange-500/50', panelHeader: 'text-orange-500', borderBottom: 'border-orange-900/50' };
+                                default: return { text: 'text-emerald-400', border: 'border-emerald-500', bg: 'bg-emerald-900/20', hover: 'hover:text-emerald-300', panelBorder: 'border-emerald-500/50', panelHeader: 'text-emerald-500', borderBottom: 'border-emerald-900/50' };
+                            }
+                        };
+                        const c = getColors(entry.dangerLevel || 'CRITICAL');
+
                         // Use a details/summary approach for pure CSS collapse without needing complex React state mapping for every word
                         newElements.push(
-                            <details key={`${entry.term}-${partIdx}-${i}`} className="inline-block group cursor-pointer border-b border-dashed border-red-500 text-red-400 font-bold bg-red-900/20 px-1 rounded mx-0.5 relative align-bottom">
-                                <summary className="list-none hover:text-red-300 transition-colors focus:outline-none flex items-center gap-1 inline-flex">
+                            <details key={`${entry.term}-${partIdx}-${i}`} className={`inline-block group cursor-pointer border-b border-dashed ${c.border} ${c.text} font-bold ${c.bg} px-1 rounded mx-0.5 relative align-bottom`}>
+                                <summary className={`list-none ${c.hover} transition-colors focus:outline-none flex items-center gap-1 inline-flex`}>
                                     {subPart} <span className="text-[8px] opacity-50">▼</span>
                                 </summary>
-                                <div className="absolute top-full left-0 mt-2 w-64 p-3 bg-black border border-red-500/50 rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 flex flex-col gap-1 text-left font-normal cursor-default">
-                                    <span className="font-mono text-[10px] text-red-500 tracking-widest uppercase border-b border-red-900/50 pb-1 mb-1 flex justify-between items-center">
+                                <div className={`absolute top-full left-0 mt-2 w-64 p-3 bg-black border ${c.panelBorder} rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 flex flex-col gap-1 text-left font-normal cursor-default`}>
+                                    <span className={`font-mono text-[10px] ${c.panelHeader} tracking-widest uppercase border-b ${c.borderBottom} pb-1 mb-1 flex justify-between items-center`}>
                                         {entry.term}
                                     </span>
                                     <span className="font-inter text-xs text-gray-200 leading-tight">"{entry.translation}"</span>
