@@ -128,7 +128,7 @@ export default function ZionSentinel() {
                                 <summary className={`list-none ${c.hover} transition-colors focus:outline-none flex items-center gap-1 inline-flex`}>
                                     {subPart} <span className="text-[8px] opacity-50">▼</span>
                                 </summary>
-                                <div className={`absolute top-full left-0 mt-2 w-64 p-3 bg-black border ${c.panelBorder} rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 flex flex-col gap-1 text-left font-normal cursor-default`}>
+                                <div className={`absolute top-full left-0 mt-2 w-64 p-3 bg-black border ${c.panelBorder} rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-[100] flex flex-col gap-1 text-left font-normal cursor-default`}>
                                     <span className={`font-mono text-[10px] ${c.panelHeader} tracking-widest uppercase border-b ${c.borderBottom} pb-1 mb-1 flex justify-between items-center`}>
                                         {entry.term}
                                     </span>
@@ -305,15 +305,15 @@ export default function ZionSentinel() {
                                     </div>
                                     <div className="p-4 space-y-4">
                                         {analysis.red_flags.map((flag: any, idx: number) => (
-                                            <div key={idx} className="bg-black/60 border border-red-500/20 rounded p-4 relative overflow-hidden group">
-                                                <div className="w-1 h-full bg-red-500 absolute left-0 top-0" />
+                                            <div key={idx} className="bg-black/60 border border-red-500/20 rounded p-4 relative group">
+                                                <div className="w-1 h-full bg-red-500 absolute left-0 top-0 overflow-hidden" />
                                                 <p className="text-xs font-mono text-gray-400 italic mb-2 border-l-2 border-red-500/30 pl-2">
                                                     "...{renderWithCodex(flag.clause)}..."
                                                 </p>
-                                                <p className="text-sm font-inter text-red-100 font-bold mb-1">
+                                                <p className="text-sm font-inter text-red-100 font-bold mb-1 relative z-10">
                                                     RISK: {renderWithCodex(flag.risk)}
                                                 </p>
-                                                <p className="text-sm font-inter text-purple-400 flex items-start gap-2 mt-3 bg-purple-950/20 p-2 rounded">
+                                                <p className="text-sm font-inter text-purple-400 flex items-start gap-2 mt-3 bg-purple-950/20 p-2 rounded relative z-10">
                                                     <CheckCircle2 size={16} className="mt-0.5 shrink-0" /> <span><span className="font-mono text-[10px] text-purple-600 tracking-widest uppercase block mb-1">Recommended Fix</span>{renderWithCodex(flag.fix)}</span>
                                                 </p>
                                             </div>
