@@ -22,7 +22,8 @@ export default function App() {
             agentName: 'Alex Chen',
             agentEmail: '',
             agentPhone: '',
-            agentSocial: ''
+            agentSocial: '',
+            treasuryBalance: '42500.00'
         };
     });
 
@@ -190,7 +191,11 @@ export default function App() {
                             <span className="text-[10px] font-mono text-gray-500 tracking-widest uppercase mb-0.5">TREASURY BALANCE</span>
                             <div className="flex items-center gap-2 text-sm text-white font-mono font-bold">
                                 <DollarSign size={14} className="text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]" />
-                                42,050.<span className="text-gray-500 text-xs">00</span> USD
+                                {(() => {
+                                    const bal = profile.treasuryBalance || '42500.00';
+                                    const parts = bal.split('.');
+                                    return <>{Number(parts[0]).toLocaleString()}<span className="text-gray-500 text-xs">.{parts[1] || '00'}</span></>;
+                                })()} USD
                             </div>
                         </div>
                         <div className="h-6 w-[1px] bg-white/10" />

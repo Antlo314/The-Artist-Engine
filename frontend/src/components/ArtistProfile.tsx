@@ -137,6 +137,16 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                     />
                                 </div>
                                 <div>
+                                    <label className="font-mono text-[9px] text-yellow-500/70 uppercase tracking-widest pl-2 mb-1 block">Treasury Balance (USD)</label>
+                                    <input
+                                        type="text"
+                                        value={profile.treasuryBalance || ''}
+                                        onChange={(e) => setProfile({ ...profile, treasuryBalance: e.target.value })}
+                                        placeholder="42500.00"
+                                        className="w-full bg-black/50 border border-yellow-500/20 text-white font-inter text-sm py-2 px-3 rounded focus:outline-none focus:border-yellow-400 focus:bg-yellow-900/10 transition-all placeholder:text-gray-600 mb-4"
+                                    />
+                                </div>
+                                <div>
                                     <label className="font-mono text-[9px] text-yellow-500/70 uppercase tracking-widest pl-2 mb-1 block">Primary Web/Social Link</label>
                                     <input
                                         type="text"

@@ -143,9 +143,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                         loop
                         muted
                         playsInline
-                        className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none z-0 mix-blend-screen"
+                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0 mix-blend-luminosity"
                     >
-                        <source src="/global_sync.mp4" type="video/mp4" />
+                        <source src="/gig-radar.mp4" type="video/mp4" />
                     </video>
 
                     <div className="absolute right-[-50px] top-[-50px] opacity-10 pointer-events-none z-10 mix-blend-overlay">
