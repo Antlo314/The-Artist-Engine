@@ -13,6 +13,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Bac
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydub import AudioSegment
+import traceback
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -416,7 +417,7 @@ def cleanup_audio_files(paths: list):
 async def master_audio(
     background_tasks: BackgroundTasks,
     target: UploadFile = File(...),
-    reference: UploadFile = File(None),
+    reference: UploadFile = File(...),
     sub: float = Form(50.0),
     air: float = Form(50.0),
     snap: float = Form(50.0),
@@ -428,34 +429,25 @@ async def master_audio(
     os.makedirs("temp", exist_ok=True)
     job_id = str(int(time.time()))
     
-    # Save uploaded files
-    temp_target_ext = target.filename.split('.')[-1] if '.' in target.filename else 'wav'
-    raw_target_path = f"temp/raw_target_{job_id}.{temp_target_ext}"
     wav_target_path = f"temp/target_{job_id}.wav"
+    wav_ref_path = f"temp/ref_{job_id}.wav"
     
-    with open(raw_target_path, "wb") as f:
-        f.write(await target.read())
-        
     try:
-        AudioSegment.from_file(raw_target_path).export(wav_target_path, format="wav")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Target format normalization failed: {str(e)}")
-
-    wav_ref_path = "NONE"
-    
-    if reference:
-        temp_ref_ext = reference.filename.split('.')[-1] if '.' in reference.filename else 'wav'
-        raw_ref_path = f"temp/raw_ref_{job_id}.{temp_ref_ext}"
+        # Pydub often fails trying to sniff headers from raw byte streams or mismatched extensions.
+        # We explicitly save the UploadFile stream physical data first.
+        content_target = await target.read()
+        content_ref = await reference.read()
         
-        with open(raw_ref_path, "wb") as f:
-            f.write(await reference.read())
+        with open(wav_target_path, "wb") as f:
+            f.write(content_target)
+        with open(wav_ref_path, "wb") as f:
+            f.write(content_ref)
             
-        wav_ref_path = f"temp/ref_{job_id}.wav"
-        
-        try:
-            AudioSegment.from_file(raw_ref_path).export(wav_ref_path, format="wav")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Reference format normalization failed: {str(e)}")
+        print("[DEBUG] Audio Streams pinned to disk.")
+    except Exception as e:
+        print("[CRITICAL] Stream Ingestion failed:")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"File Stream I/O failed: {str(e)}")
     
     # Output path from worker
     mastered_wav_path = f"temp/mastered_{job_id}.wav"
@@ -577,8 +569,8 @@ async def extract_stems(
     os.makedirs("temp", exist_ok=True)
     job_id = str(int(time.time()))
     
-    ext = target.filename.split('.')[-1] if '.' in target.filename else 'wav'
-    temp_path = f"temp/stem_source_{job_id}.{ext}"
+    # Force WAV extension for pydub stability
+    temp_path = f"temp/stem_source_{job_id}.wav"
     
     try:
         with open(temp_path, "wb") as f:
