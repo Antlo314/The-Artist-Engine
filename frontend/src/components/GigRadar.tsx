@@ -48,7 +48,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
         setError(null);
         setGigs([]);
         try {
-            const response = await fetch('https://the-artist-engine.onrender.com/api/scout', {
+            const response = await fetch('/api/scout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ city, genre, tier, radius, timeframe })
@@ -75,7 +75,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
         setGeneratedPitch('');
         setIsDrafting(true);
         try {
-            const response = await fetch('https://the-artist-engine.onrender.com/api/draft-pitch', {
+            const response = await fetch('/api/draft-pitch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

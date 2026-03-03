@@ -184,7 +184,7 @@ async def scout_gigs(request: ScoutRequest):
     '''
     
     try:
-        response = client.models.generate_content(
+        response = await client.aio.models.generate_content(
             model='gemini-2.5-flash',
             contents=prompt,
             config={
@@ -225,7 +225,7 @@ async def scout_gigs(request: ScoutRequest):
             Timeframe target: {request.timeframe}.
             Use internal world knowledge. Respond in strict JSON only, same schema as before (including contact_persona, contact_source, website_url, social_media_url, payout_model, lead_time, similar_acts, reputation_score, reputation_explanation, capacity, avg_ticket_price_usd, gross_potential_usd, leverage_point, and active_search_signal). Ensure NO missing fields.
             '''
-            fb_resp = client.models.generate_content(
+            fb_resp = await client.aio.models.generate_content(
                 model='gemini-2.5-flash',
                 contents=fallback_prompt,
                 config={
@@ -278,7 +278,7 @@ async def draft_pitch(request: DraftPitchRequest):
     {format_instructions}
     '''
     try:
-        response = client.models.generate_content(
+        response = await client.aio.models.generate_content(
             model='gemini-2.5-flash',
             contents=prompt,
             config={'temperature': 0.7}
@@ -377,7 +377,7 @@ async def analyze_contract(
         
         logs.append("[ZION SHARK PROTOCOL] Executing Multi-Modal Flash Extraction with Codex Injection...")
         
-        response = client.models.generate_content(
+        response = await client.aio.models.generate_content(
             model='gemini-2.5-flash',
             contents=contents,
             config={
@@ -527,7 +527,7 @@ async def oracle_analysis(
         }
         '''
         print("[ORACLE ENGINE] Extracting topology signatures via Gemini 2.5 Flash...")
-        response = client.models.generate_content(
+        response = await client.aio.models.generate_content(
             model='gemini-2.5-flash',
             contents=[uploaded_file, prompt],
             config={

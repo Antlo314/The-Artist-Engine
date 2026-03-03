@@ -4,6 +4,10 @@
     "framework": "vite",
     "rewrites": [
         {
+            "source": "/api/:path*",
+            "destination": "https://the-artist-engine.onrender.com/api/:path*"
+        },
+        {
             "source": "/(.*)",
             "destination": "/"
         }
