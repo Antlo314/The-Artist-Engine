@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Radar, Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Music2, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Phone, Mail, MessageCircle } from 'lucide-react';
+import { Radar, Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Music2, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Phone, Mail, MessageCircle, Instagram, Twitter, Facebook, Globe } from 'lucide-react';
 import LoadingProgressBar from './LoadingProgressBar';
 
 interface GigRadarProps {
@@ -12,7 +13,7 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
     // Search State
     const [city, setCity] = useState('Chicago');
     const [genre, setGenre] = useState('Deep House');
-    const [tier, setTier] = useState('Mid-Size Touring');
+    const [tier, setTier] = useState('Mid-Size Touring (250-1000 cap)');
     const [radius, setRadius] = useState('50 miles');
     const [timeframe, setTimeframe] = useState('Fall 2026');
 
@@ -119,6 +120,15 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
         return 'text-red-500';
     };
 
+    const getSocialIcon = (url: string | undefined | null) => {
+        if (!url) return <LinkIcon size={14} />;
+        const lurl = url.toLowerCase();
+        if (lurl.includes('instagram.com')) return <Instagram size={14} />;
+        if (lurl.includes('twitter.com') || lurl.includes('x.com')) return <Twitter size={14} />;
+        if (lurl.includes('facebook.com')) return <Facebook size={14} />;
+        return <Globe size={14} />;
+    };
+
     return (
         <div className="space-y-8 relative">
 
@@ -152,12 +162,12 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                         </div>
 
                         <div className="flex flex-col gap-4 bg-black/60 p-5 rounded-xl border border-violet-500/10 backdrop-blur-md">
-                            {/* City */}
+                            {/* City / Zip */}
                             <div className="relative flex flex-col text-gray-400 bg-black/50 rounded-lg px-3 py-2 border border-white/5 focus-within:border-violet-500/50 focus-within:text-violet-400 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-violet-500/80 mb-1">Target Point</span>
+                                <span className="text-[9px] uppercase tracking-widest text-violet-500/80 mb-1">Target Point (City / Zip)</span>
                                 <div className="flex items-center">
                                     <MapPin size={14} className="mr-2 opacity-70" />
-                                    <input placeholder="e.g., Brooklyn, NY" type="text" value={city} onChange={e => setCity(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white placeholder:text-gray-600" />
+                                    <input placeholder="e.g., Brooklyn, NY or 60601" type="text" value={city} onChange={e => setCity(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white placeholder:text-gray-600" />
                                 </div>
                             </div>
 
@@ -176,11 +186,23 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                             <div className="relative flex flex-col text-gray-400 bg-black/50 rounded-lg px-3 py-2 border border-white/5 focus-within:border-violet-500/50 focus-within:text-violet-400 transition-colors">
                                 <span className="text-[9px] uppercase tracking-widest text-violet-500/80 mb-1">Sonic Vector</span>
                                 <select value={genre} onChange={e => setGenre(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white appearance-none cursor-pointer">
+                                    <option className="bg-[#050505] border-none">House</option>
                                     <option className="bg-[#050505] border-none">Deep House</option>
                                     <option className="bg-[#050505] border-none">Techno</option>
-                                    <option className="bg-[#050505] border-none">Indie Electronic</option>
+                                    <option className="bg-[#050505] border-none">Trance</option>
+                                    <option className="bg-[#050505] border-none">Drum & Bass</option>
+                                    <option className="bg-[#050505] border-none">Dubstep</option>
+                                    <option className="bg-[#050505] border-none">Trap</option>
                                     <option className="bg-[#050505] border-none">Hip Hop</option>
-                                    <option className="bg-[#050505] border-none">Live Instrumentation</option>
+                                    <option className="bg-[#050505] border-none">R&B</option>
+                                    <option className="bg-[#050505] border-none">Pop</option>
+                                    <option className="bg-[#050505] border-none">Rock</option>
+                                    <option className="bg-[#050505] border-none">Metal</option>
+                                    <option className="bg-[#050505] border-none">Country</option>
+                                    <option className="bg-[#050505] border-none">Jazz</option>
+                                    <option className="bg-[#050505] border-none">Afrobeat</option>
+                                    <option className="bg-[#050505] border-none">Reggaeton</option>
+                                    <option className="bg-[#050505] border-none">Acoustic / Live Instrumentation</option>
                                 </select>
                             </div>
 
@@ -188,9 +210,10 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                             <div className="relative flex flex-col text-gray-400 bg-black/50 rounded-lg px-3 py-2 border border-white/5 focus-within:border-violet-500/50 focus-within:text-violet-400 transition-colors">
                                 <span className="text-[9px] uppercase tracking-widest text-violet-500/80 mb-1">Venue Tier</span>
                                 <select value={tier} onChange={e => setTier(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white appearance-none cursor-pointer">
-                                    <option className="bg-[#050505] border-none">Grassroots / Mom & Pop</option>
-                                    <option className="bg-[#050505] border-none">Mid-Size Touring</option>
-                                    <option className="bg-[#050505] border-none">Top-Tier Theater</option>
+                                    <option className="bg-[#050505] border-none">Grassroots / Mom & Pop (50-250 cap)</option>
+                                    <option className="bg-[#050505] border-none">Mid-Size Touring (250-1000 cap)</option>
+                                    <option className="bg-[#050505] border-none">Top-Tier Theater (1000-3000 cap)</option>
+                                    <option className="bg-[#050505] border-none">Arena / Stadium (3000+ cap)</option>
                                 </select>
                             </div>
 
@@ -326,7 +349,7 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                                             <h3 className="font-cinzel font-bold text-2xl text-white leading-tight relative z-10">{gig.name}</h3>
                                             {gig.social_media_url && (
                                                 <a href={gig.social_media_url} target="_blank" rel="noopener noreferrer" className="relative z-10 text-violet-400 opacity-60 hover:opacity-100 hover:text-violet-300 transition-opacity">
-                                                    <LinkIcon size={14} />
+                                                    {getSocialIcon(gig.social_media_url)}
                                                 </a>
                                             )}
                                         </div>
@@ -348,9 +371,9 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
                                                 </span>
                                                 <span className="font-inter text-sm text-gray-200 truncate">{gig.contact_persona || gig.contact || 'Generic Intel'}</span>
                                             </div>
-                                            <div className="bg-black/40 p-3 rounded border border-white/5 flex flex-col gap-1">
+                                            <div className="bg-black/40 p-3 rounded border border-white/5 flex flex-col gap-1 col-span-2 md:col-span-1">
                                                 <span className="font-mono text-[9px] text-violet-500/70 uppercase tracking-widest flex items-center gap-1"><Users size={10} /> Similar Acts</span>
-                                                <span className="font-inter text-sm text-gray-200 truncate truncate">{gig.similar_acts ? (Array.isArray(gig.similar_acts) ? gig.similar_acts.join(', ') : gig.similar_acts) : 'None extracted'}</span>
+                                                <span className="font-inter text-sm text-gray-200 line-clamp-1 group-hover:line-clamp-none transition-all">{gig.similar_acts ? (Array.isArray(gig.similar_acts) ? gig.similar_acts.join(', ') : gig.similar_acts) : 'None extracted'}</span>
                                             </div>
                                         </div>
 
@@ -405,167 +428,173 @@ export default function GigRadar({ agentName = "The Manager", artistAlias = "The
             </div>
 
             {/* Auto-Pitch Terminal Modal */}
-            <AnimatePresence>
-                {pitchModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
-                    >
+            {typeof window !== 'undefined' && createPortal(
+                <AnimatePresence>
+                    {pitchModal && (
                         <motion.div
-                            initial={{ scale: 0.95, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.95, y: 20 }}
-                            className="bg-[#050505] border border-violet-500/50 shadow-[0_0_50px_rgba(139,92,246,0.15)] rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
                         >
-                            {/* Modal Header */}
-                            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/50">
-                                <div>
-                                    <h3 className="font-cinzel text-xl font-bold text-white flex items-center gap-2">
-                                        <AlertTriangle size={20} className="text-violet-500" />
-                                        AUTO-PITCH TERMINAL
-                                    </h3>
-                                    <p className="font-mono text-[10px] text-violet-400 tracking-widest uppercase mt-1">
-                                        TARGET: {pitchModal.name} // PERSONA: {pitchModal.contact_persona || 'N/A'}
-                                    </p>
-                                </div>
-                                <button onClick={() => setPitchModal(null)} className="text-gray-500 hover:text-white transition-colors p-2">
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            {/* Modal Body */}
-                            <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
-                                {isDrafting ? (
-                                    <div className="py-20 w-full flex items-center justify-center">
-                                        <LoadingProgressBar
-                                            active={isDrafting}
-                                            message={`SYNTHESIZING ${outreachType.toUpperCase()} OUTREACH`}
-                                            subMessage="Correlating Venue Tier with Psychological Triggers. Engine requires up to 30-40s."
-                                            colorClass="violet"
-                                            estimatedDurationMs={20000}
-                                        />
+                            <motion.div
+                                initial={{ scale: 0.95, y: 20 }}
+                                animate={{ scale: 1, y: 0 }}
+                                exit={{ scale: 0.95, y: 20 }}
+                                className="bg-[#050505] border border-violet-500/50 shadow-[0_0_50px_rgba(139,92,246,0.15)] rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
+                            >
+                                {/* Modal Header */}
+                                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/50">
+                                    <div>
+                                        <h3 className="font-cinzel text-xl font-bold text-white flex items-center gap-2">
+                                            <AlertTriangle size={20} className="text-violet-500" />
+                                            AUTO-PITCH TERMINAL
+                                        </h3>
+                                        <p className="font-mono text-[10px] text-violet-400 tracking-widest uppercase mt-1">
+                                            TARGET: {pitchModal.name} // PERSONA: {pitchModal.contact_persona || 'N/A'}
+                                        </p>
                                     </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {/* Outreach Protocol Tabs */}
-                                        <div className="flex gap-2 border-b border-white/5 pb-4">
-                                            <button
-                                                onClick={() => handleEngageShark(pitchModal, 'email')}
-                                                className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'email' ? 'bg-violet-900/40 text-violet-300 border border-violet-500/50' : 'bg-white/5 text-gray-500 hover:text-gray-300'}`}
-                                            >
-                                                <Mail size={12} /> Email Thread
-                                            </button>
-                                            <button
-                                                onClick={() => handleEngageShark(pitchModal, 'call_script')}
-                                                className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'call_script' ? 'bg-fuchsia-900/40 text-fuchsia-300 border border-fuchsia-500/50' : 'bg-white/5 text-gray-500 hover:text-gray-300'}`}
-                                            >
-                                                <Phone size={12} /> Call Script
-                                            </button>
-                                            <button
-                                                onClick={() => handleEngageShark(pitchModal, 'dm')}
-                                                className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'dm' ? 'bg-sky-900/40 text-sky-300 border border-sky-500/50' : 'bg-white/5 text-gray-500 hover:text-gray-300'}`}
-                                            >
-                                                <MessageCircle size={12} /> Direct Message
-                                            </button>
-                                        </div>
+                                    <button onClick={() => setPitchModal(null)} className="text-gray-500 hover:text-white transition-colors p-2">
+                                        <X size={24} />
+                                    </button>
+                                </div>
 
-                                        <div className="bg-black/60 rounded border border-white/10 p-4">
-                                            <div className="font-mono text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Routing To (Editable):</div>
-                                            <input
-                                                type="text"
-                                                value={pitchRoutingTo}
-                                                onChange={(e) => setPitchRoutingTo(e.target.value)}
-                                                placeholder="UNKNOWN - REQUIRES MANUAL ENTRY"
-                                                className="font-mono text-sm text-violet-400 bg-transparent w-full outline-none border-b border-violet-500/30 focus:border-violet-400 transition-colors py-1"
+                                {/* Modal Body */}
+                                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                                    {isDrafting ? (
+                                        <div className="py-20 w-full flex items-center justify-center">
+                                            <LoadingProgressBar
+                                                active={isDrafting}
+                                                message={`SYNTHESIZING ${outreachType.toUpperCase()} OUTREACH`}
+                                                subMessage="Correlating Venue Tier with Psychological Triggers. Engine requires up to 30-40s."
+                                                colorClass="violet"
+                                                estimatedDurationMs={20000}
                                             />
                                         </div>
-                                        <div className="bg-gray-900/50 rounded-lg border border-white/5 relative group">
-                                            <div className="absolute top-0 right-0 px-3 py-1 bg-black/80 rounded-bl-lg border-l border-b border-white/10 font-mono text-[9px] text-gray-500 tracking-widest">
-                                                EDITABLE BUFFER
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {/* Outreach Protocol Tabs */}
+                                            <div className="flex gap-2 border-b border-white/5 pb-4">
+                                                <button
+                                                    onClick={() => handleEngageShark(pitchModal, 'email')}
+                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'email' ? 'bg-violet-900/40 text-violet-300 border border-violet-500/50' : 'bg-white/5 text-gray-500 hover:text-gray-300'}`}
+                                                >
+                                                    <Mail size={12} /> Email Thread
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEngageShark(pitchModal, 'call_script')}
+                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'call_script' ? 'bg-fuchsia-900/40 text-fuchsia-300 border border-fuchsia-500/50' : 'bg-white/5 text-gray-500 hover:text-gray-300'}`}
+                                                >
+                                                    <Phone size={12} /> Call Script
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEngageShark(pitchModal, 'dm')}
+                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'dm' ? 'bg-sky-900/40 text-sky-300 border border-sky-500/50' : 'bg-white/5 text-gray-500 hover:text-gray-300'}`}
+                                                >
+                                                    <MessageCircle size={12} /> Direct Message
+                                                </button>
                                             </div>
-                                            <textarea
-                                                value={generatedPitch}
-                                                onChange={(e) => setGeneratedPitch(e.target.value)}
-                                                className="w-full h-80 bg-transparent text-gray-300 font-inter text-sm p-4 outline-none resize-none focus:ring-1 ring-violet-500/50 rounded-lg custom-scrollbar leading-relaxed"
-                                            />
+
+                                            <div className="bg-black/60 rounded border border-white/10 p-4">
+                                                <div className="font-mono text-[10px] text-gray-500 mb-2 uppercase tracking-widest">Routing To (Editable):</div>
+                                                <input
+                                                    type="text"
+                                                    value={pitchRoutingTo}
+                                                    onChange={(e) => setPitchRoutingTo(e.target.value)}
+                                                    placeholder="UNKNOWN - REQUIRES MANUAL ENTRY"
+                                                    className="font-mono text-sm text-violet-400 bg-transparent w-full outline-none border-b border-violet-500/30 focus:border-violet-400 transition-colors py-1"
+                                                />
+                                            </div>
+                                            <div className="bg-gray-900/50 rounded-lg border border-white/5 relative group">
+                                                <div className="absolute top-0 right-0 px-3 py-1 bg-black/80 rounded-bl-lg border-l border-b border-white/10 font-mono text-[9px] text-gray-500 tracking-widest">
+                                                    EDITABLE BUFFER
+                                                </div>
+                                                <textarea
+                                                    value={generatedPitch}
+                                                    onChange={(e) => setGeneratedPitch(e.target.value)}
+                                                    className="w-full h-80 bg-transparent text-gray-300 font-inter text-sm p-4 outline-none resize-none focus:ring-1 ring-violet-500/50 rounded-lg custom-scrollbar leading-relaxed"
+                                                />
+                                            </div>
                                         </div>
+                                    )}
+                                </div>
+
+                                {/* Modal Footer */}
+                                {!isDrafting && (
+                                    <div className="p-4 border-t border-white/10 bg-black/80 flex justify-end gap-3">
+                                        <button
+                                            onClick={() => setPitchModal(null)}
+                                            className="px-6 py-2 rounded font-mono text-xs tracking-widest text-gray-400 hover:text-white transition-colors uppercase"
+                                        >
+                                            Abort
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeployPitch(gigs.indexOf(pitchModal))}
+                                            className="bg-red-900/80 text-white border border-red-500/50 hover:bg-red-600 font-bold font-mono text-xs tracking-widest px-8 py-3 rounded flex items-center gap-2 transition-all uppercase shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.6)]"
+                                        >
+                                            <Send size={14} /> DEPLOY PITCH
+                                        </button>
                                     </div>
                                 )}
-                            </div>
 
-                            {/* Modal Footer */}
-                            {!isDrafting && (
-                                <div className="p-4 border-t border-white/10 bg-black/80 flex justify-end gap-3">
-                                    <button
-                                        onClick={() => setPitchModal(null)}
-                                        className="px-6 py-2 rounded font-mono text-xs tracking-widest text-gray-400 hover:text-white transition-colors uppercase"
-                                    >
-                                        Abort
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeployPitch(gigs.indexOf(pitchModal))}
-                                        className="bg-red-900/80 text-white border border-red-500/50 hover:bg-red-600 font-bold font-mono text-xs tracking-widest px-8 py-3 rounded flex items-center gap-2 transition-all uppercase shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.6)]"
-                                    >
-                                        <Send size={14} /> DEPLOY PITCH
-                                    </button>
-                                </div>
-                            )}
-
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
 
             {/* Reputation Explanation Modal */}
-            <AnimatePresence>
-                {repModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-                    >
+            {typeof window !== 'undefined' && createPortal(
+                <AnimatePresence>
+                    {repModal && (
                         <motion.div
-                            initial={{ scale: 0.95, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.95, y: 20 }}
-                            className="bg-[#050505] border border-violet-500/50 shadow-[0_0_50px_rgba(139,92,246,0.15)] rounded-2xl w-full max-w-md flex flex-col overflow-hidden"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
                         >
-                            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-black via-violet-900/20 to-black">
-                                <h3 className="font-mono text-sm tracking-widest text-violet-400 font-bold flex items-center gap-2 uppercase">
-                                    <Search size={16} /> REPUTATION ANALYSIS
-                                </h3>
-                                <button onClick={() => setRepModal(null)} className="text-gray-500 hover:text-white transition-colors p-1">
-                                    <X size={18} />
-                                </button>
-                            </div>
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h4 className="font-cinzel text-xl text-white font-bold">{repModal.name}</h4>
-                                    <div className={`font-mono text-sm tracking-widest uppercase font-bold px-3 py-1 rounded shadow-md border ${repModal.reputation_score >= 80 ? 'bg-green-900/30 text-green-400 border-green-500/50' : repModal.reputation_score >= 50 ? 'bg-fuchsia-900/30 text-fuchsia-400 border-fuchsia-500/50' : 'bg-red-900/30 text-red-500 border-red-500/50'}`}>
-                                        SCORE: {repModal.reputation_score}
+                            <motion.div
+                                initial={{ scale: 0.95, y: 20 }}
+                                animate={{ scale: 1, y: 0 }}
+                                exit={{ scale: 0.95, y: 20 }}
+                                className="bg-[#050505] border border-violet-500/50 shadow-[0_0_50px_rgba(139,92,246,0.15)] rounded-2xl w-full max-w-md flex flex-col overflow-hidden"
+                            >
+                                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-black via-violet-900/20 to-black">
+                                    <h3 className="font-mono text-sm tracking-widest text-violet-400 font-bold flex items-center gap-2 uppercase">
+                                        <Search size={16} /> REPUTATION ANALYSIS
+                                    </h3>
+                                    <button onClick={() => setRepModal(null)} className="text-gray-500 hover:text-white transition-colors p-1">
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="font-cinzel text-xl text-white font-bold">{repModal.name}</h4>
+                                        <div className={`font-mono text-sm tracking-widest uppercase font-bold px-3 py-1 rounded shadow-md border ${repModal.reputation_score >= 80 ? 'bg-green-900/30 text-green-400 border-green-500/50' : repModal.reputation_score >= 50 ? 'bg-fuchsia-900/30 text-fuchsia-400 border-fuchsia-500/50' : 'bg-red-900/30 text-red-500 border-red-500/50'}`}>
+                                            SCORE: {repModal.reputation_score}
+                                        </div>
+                                    </div>
+                                    <div className="bg-black/60 rounded-lg border border-white/10 p-5 mt-4">
+                                        <p className="font-inter text-sm text-gray-300 leading-relaxed">
+                                            {repModal.reputation_explanation || "Insufficient telemetry to generate a detailed reputation profile for this venue."}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="bg-black/60 rounded-lg border border-white/10 p-5 mt-4">
-                                    <p className="font-inter text-sm text-gray-300 leading-relaxed">
-                                        {repModal.reputation_explanation || "Insufficient telemetry to generate a detailed reputation profile for this venue."}
-                                    </p>
+                                <div className="p-4 border-t border-white/10 bg-black/80">
+                                    <button
+                                        onClick={() => setRepModal(null)}
+                                        className="w-full bg-violet-900/20 text-violet-400 border border-violet-500/30 hover:bg-violet-500 hover:text-black font-bold font-mono text-xs tracking-widest py-3 rounded transition-all uppercase"
+                                    >
+                                        Acknowledge
+                                    </button>
                                 </div>
-                            </div>
-                            <div className="p-4 border-t border-white/10 bg-black/80">
-                                <button
-                                    onClick={() => setRepModal(null)}
-                                    className="w-full bg-violet-900/20 text-violet-400 border border-violet-500/30 hover:bg-violet-500 hover:text-black font-bold font-mono text-xs tracking-widest py-3 rounded transition-all uppercase"
-                                >
-                                    Acknowledge
-                                </button>
-                            </div>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
 
         </div>
     );
