@@ -53,6 +53,42 @@ export default function StudioCore() {
         setPlayingPreview(type);
     };
 
+    // Global cleanup to stop audio when navigating away
+    useEffect(() => {
+        return () => {
+            if (previewAudioRef.current) {
+                previewAudioRef.current.pause();
+                previewAudioRef.current.src = "";
+            }
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.src = "";
+            }
+        };
+    }, []);
+
+    const removeTargetFile = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setTargetFile(null);
+        setTargetUrl(null);
+        if (targetInputRef.current) targetInputRef.current.value = "";
+        if (playingPreview === 'target' && previewAudioRef.current) {
+            previewAudioRef.current.pause();
+            setPlayingPreview(null);
+        }
+    };
+
+    const removeRefFile = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setRefFile(null);
+        setRefUrl(null);
+        if (refInputRef.current) refInputRef.current.value = "";
+        if (playingPreview === 'ref' && previewAudioRef.current) {
+            previewAudioRef.current.pause();
+            setPlayingPreview(null);
+        }
+    };
+
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
@@ -334,12 +370,22 @@ export default function StudioCore() {
                                         </div>
                                     </div>
                                     {targetFile && (
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); togglePreview('target', targetFile); }}
-                                            className="w-8 h-8 rounded-full border border-emerald-500/50 flex items-center justify-center text-emerald-400 hover:bg-emerald-500/20 hover:scale-105 transition-all shrink-0"
-                                        >
-                                            {playingPreview === 'target' ? <Pause size={12} /> : <Play size={12} className="ml-1" />}
-                                        </button>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); togglePreview('target', targetFile); }}
+                                                className="w-8 h-8 rounded-full border border-emerald-500/50 flex items-center justify-center text-emerald-400 hover:bg-emerald-500/20 hover:scale-105 transition-all"
+                                                title="Preview Payload"
+                                            >
+                                                {playingPreview === 'target' ? <Pause size={12} /> : <Play size={12} className="ml-1" />}
+                                            </button>
+                                            <button
+                                                onClick={removeTargetFile}
+                                                className="w-8 h-8 rounded-full border border-red-500/50 flex items-center justify-center text-red-500 hover:bg-red-500/20 hover:scale-105 transition-all"
+                                                title="Remove Payload"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
 
@@ -367,12 +413,22 @@ export default function StudioCore() {
                                         </div>
                                     </div>
                                     {refFile && (
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); togglePreview('ref', refFile); }}
-                                            className="w-8 h-8 rounded-full border border-emerald-500/50 flex items-center justify-center text-emerald-400 hover:bg-emerald-500/20 hover:scale-105 transition-all shrink-0"
-                                        >
-                                            {playingPreview === 'ref' ? <Pause size={12} /> : <Play size={12} className="ml-1" />}
-                                        </button>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); togglePreview('ref', refFile); }}
+                                                className="w-8 h-8 rounded-full border border-emerald-500/50 flex items-center justify-center text-emerald-400 hover:bg-emerald-500/20 hover:scale-105 transition-all"
+                                                title="Preview Reference"
+                                            >
+                                                {playingPreview === 'ref' ? <Pause size={12} /> : <Play size={12} className="ml-1" />}
+                                            </button>
+                                            <button
+                                                onClick={removeRefFile}
+                                                className="w-8 h-8 rounded-full border border-red-500/50 flex items-center justify-center text-red-500 hover:bg-red-500/20 hover:scale-105 transition-all"
+                                                title="Remove Reference"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
