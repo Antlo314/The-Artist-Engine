@@ -73,13 +73,13 @@ export default function RecoupmentSandbox() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+            <div className="flex items-end justify-between border-b border-purple-900/10 pb-4">
                 <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-white tracking-widest flex items-center gap-3">
-                        <Activity className="text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
+                    <h2 className="font-cinzel text-3xl font-bold text-purple-900 tracking-widest flex items-center gap-3">
+                        <Activity className="text-red-600 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
                         RECOUPMENT SIMULATOR v2.0
                     </h2>
-                    <p className="font-mono text-xs text-gray-400 mt-1 tracking-widest uppercase">
+                    <p className="font-mono text-xs text-purple-900/60 mt-1 tracking-widest uppercase">
                         The horrifying reality matrix of major label contracts and hidden debt.
                     </p>
                 </div>
@@ -90,20 +90,20 @@ export default function RecoupmentSandbox() {
                 <div className="lg:col-span-5 space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar pr-2 pb-10">
 
                     {/* Core Deal */}
-                    <div className="glass-card p-6 rounded-2xl border border-white/5 bg-black/40">
-                        <h3 className="font-mono text-xs text-emerald-400 tracking-widest uppercase mb-4 border-b border-white/10 pb-2">The 'Bait' (Advance & Royalties)</h3>
+                    <div className="glass-card p-6 rounded-2xl border border-purple-900/10 bg-white/40 shadow-sm">
+                        <h3 className="font-mono text-xs text-emerald-700 tracking-widest uppercase mb-4 border-b border-emerald-200 pb-2">The 'Bait' (Advance & Royalties)</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
+                                <label className="flex justify-between font-mono text-xs text-gray-700 mb-1">
                                     <span>Cash Advance</span>
-                                    <span className="text-white font-bold">${advance.toLocaleString()}</span>
+                                    <span className="text-emerald-900 font-bold">${advance.toLocaleString()}</span>
                                 </label>
                                 <input type="range" min="10000" max="2000000" step="10000" value={advance} onChange={(e) => setAdvance(Number(e.target.value))} className="w-full accent-emerald-500" />
                             </div>
                             <div>
-                                <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
+                                <label className="flex justify-between font-mono text-xs text-gray-700 mb-1">
                                     <span>Artist Royalty Rate</span>
-                                    <span className="text-white font-bold">{royaltyRate}%</span>
+                                    <span className="text-emerald-900 font-bold">{royaltyRate}%</span>
                                 </label>
                                 <input type="range" min="5" max="50" step="1" value={royaltyRate} onChange={(e) => setRoyaltyRate(Number(e.target.value))} className="w-full accent-emerald-500" />
                             </div>
@@ -111,22 +111,22 @@ export default function RecoupmentSandbox() {
                     </div>
 
                     {/* Hidden Debt */}
-                    <div className="glass-card p-6 rounded-2xl border border-red-900/50 bg-red-950/10">
-                        <h3 className="font-mono text-xs text-red-400 tracking-widest uppercase mb-4 border-b border-red-900/30 pb-2 flex items-center gap-2">
+                    <div className="glass-card p-6 rounded-2xl border border-red-500/30 bg-red-50/50 shadow-sm">
+                        <h3 className="font-mono text-xs text-red-700 tracking-widest uppercase mb-4 border-b border-red-200 pb-2 flex items-center gap-2">
                             <AlertTriangle size={14} /> 100% Recoupable Debt
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
+                                <label className="flex justify-between font-mono text-xs text-gray-700 mb-1">
                                     <span>Marketing Budget (Loan)</span>
-                                    <span className="text-red-400 font-bold">${marketingBudget.toLocaleString()}</span>
+                                    <span className="text-red-900 font-bold">${marketingBudget.toLocaleString()}</span>
                                 </label>
                                 <input type="range" min="0" max="1000000" step="10000" value={marketingBudget} onChange={(e) => setMarketingBudget(Number(e.target.value))} className="w-full accent-red-500" />
                             </div>
                             <div>
-                                <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
+                                <label className="flex justify-between font-mono text-xs text-gray-700 mb-1">
                                     <span>Music Video Budget (Loan)</span>
-                                    <span className="text-red-400 font-bold">${videoBudget.toLocaleString()}</span>
+                                    <span className="text-red-900 font-bold">${videoBudget.toLocaleString()}</span>
                                 </label>
                                 <input type="range" min="0" max="500000" step="5000" value={videoBudget} onChange={(e) => setVideoBudget(Number(e.target.value))} className="w-full accent-red-500" />
                             </div>
@@ -134,20 +134,20 @@ export default function RecoupmentSandbox() {
                     </div>
 
                     {/* 360 Cross-Collateralization */}
-                    <div className="glass-card p-6 rounded-2xl border border-purple-900/50 bg-purple-950/10">
-                        <h3 className="font-mono text-xs text-purple-400 tracking-widest uppercase mb-4 border-b border-purple-900/30 pb-2">360 Deal (Cross-Collateralization)</h3>
+                    <div className="glass-card p-6 rounded-2xl border border-purple-500/30 bg-purple-50/50 shadow-sm">
+                        <h3 className="font-mono text-xs text-purple-700 tracking-widest uppercase mb-4 border-b border-purple-200 pb-2">360 Deal (Cross-Collateralization)</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
+                                <label className="flex justify-between font-mono text-xs text-gray-700 mb-1">
                                     <span>Independent Tour/Merch Income</span>
-                                    <span className="text-white font-bold">${tourMerchIncome.toLocaleString()}</span>
+                                    <span className="text-purple-900 font-bold">${tourMerchIncome.toLocaleString()}</span>
                                 </label>
                                 <input type="range" min="0" max="2000000" step="25000" value={tourMerchIncome} onChange={(e) => setTourMerchIncome(Number(e.target.value))} className="w-full accent-purple-500" />
                             </div>
                             <div>
-                                <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
+                                <label className="flex justify-between font-mono text-xs text-gray-700 mb-1">
                                     <span>Label's 360 Cut (%)</span>
-                                    <span className="text-purple-400 font-bold">{threeSixtyCut}%</span>
+                                    <span className="text-purple-900 font-bold">{threeSixtyCut}%</span>
                                 </label>
                                 <input type="range" min="0" max="50" step="5" value={threeSixtyCut} onChange={(e) => setThreeSixtyCut(Number(e.target.value))} className="w-full accent-purple-500" />
                             </div>
@@ -160,35 +160,35 @@ export default function RecoupmentSandbox() {
                 <div className="lg:col-span-7 flex flex-col space-y-6">
 
                     {/* The Big Number */}
-                    <div className="glass-card p-8 rounded-2xl border-l-[4px] border-l-red-500 relative overflow-hidden bg-black/60">
-                        <div className="absolute inset-0 bg-red-900/5 z-0" />
+                    <div className="glass-card p-8 rounded-2xl border-l-[4px] border-l-red-500 relative overflow-hidden bg-white/60 shadow-md">
+                        <div className="absolute inset-0 bg-red-500/5 z-0" />
                         <div className="relative z-10 space-y-2">
-                            <p className="font-mono text-xs text-gray-500 tracking-widest uppercase">Total Debt To Recoup</p>
-                            <h2 className="font-mono text-3xl text-red-500 font-bold mb-6">${totalDebt.toLocaleString()}</h2>
+                            <p className="font-mono text-xs text-gray-700 tracking-widest uppercase">Total Debt To Recoup</p>
+                            <h2 className="font-mono text-3xl text-red-600 font-bold mb-6">${totalDebt.toLocaleString()}</h2>
 
                             <div className="h-px w-full bg-gradient-to-r from-red-500/30 to-transparent my-6" />
 
-                            <p className="font-mono text-xs text-gray-500 tracking-widest uppercase">Streams Required to Break Even</p>
+                            <p className="font-mono text-xs text-gray-700 tracking-widest uppercase">Streams Required to Break Even</p>
                             <motion.h1
                                 key={streamsNeeded}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="font-cinzel text-5xl md:text-7xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] tracking-wider"
+                                className="font-cinzel text-5xl md:text-7xl font-bold text-red-900 drop-shadow-sm tracking-wider"
                             >
                                 {formatNumber(streamsNeeded)}
                             </motion.h1>
-                            <p className="font-inter text-sm text-red-400 font-bold mt-2">
+                            <p className="font-inter text-sm text-red-700 font-bold mt-2">
                                 At a {royaltyRate}% share, you earn exactly $0 on record sales until you hit this number.
                             </p>
                         </div>
                     </div>
 
                     {/* The Reality Bar Breakdown */}
-                    <div className="glass-card p-6 rounded-2xl border border-white/5 bg-black/40">
-                        <h3 className="font-cinzel text-xl text-white tracking-widest border-b border-white/10 pb-4 mb-6">THE REALITY MATRIX</h3>
+                    <div className="glass-card p-6 rounded-2xl border border-purple-900/10 bg-white/40 shadow-sm">
+                        <h3 className="font-cinzel text-xl text-purple-900 tracking-widest border-b border-purple-900/10 pb-4 mb-6">THE REALITY MATRIX</h3>
 
                         {/* Stacked Progress Bar */}
-                        <div className="h-10 w-full bg-gray-900 rounded-full flex overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] mb-6">
+                        <div className="h-10 w-full bg-gray-200 rounded-full flex overflow-hidden shadow-inner mb-6">
                             <motion.div
                                 className="h-full bg-emerald-500 flex items-center justify-center font-mono text-[10px] text-black font-bold"
                                 initial={{ width: 0 }} animate={{ width: `${labelPct}%` }} transition={{ duration: 0.5 }}
@@ -196,7 +196,7 @@ export default function RecoupmentSandbox() {
                                 {labelPct > 10 ? 'LABEL KEEPS' : ''}
                             </motion.div>
                             <motion.div
-                                className="h-full bg-red-600 flex items-center justify-center font-mono text-[10px] text-white font-bold stripe-pattern opacity-80"
+                                className="h-full bg-red-500 flex items-center justify-center font-mono text-[10px] text-white font-bold stripe-pattern opacity-90"
                                 initial={{ width: 0 }} animate={{ width: `${debtPct}%` }} transition={{ duration: 0.5 }}
                             >
                                 {debtPct > 10 ? 'RECOUPED DEBT' : ''}
@@ -211,23 +211,23 @@ export default function RecoupmentSandbox() {
 
                         {/* Financial Ledger */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-emerald-950/20 border border-emerald-500/20 p-4 rounded-xl">
-                                <p className="font-mono text-[10px] text-emerald-500 tracking-widest uppercase mb-1">Label Grosses</p>
-                                <p className="font-mono text-xl text-emerald-400 font-bold">${formatNumber(labelGross)}</p>
+                            <div className="bg-emerald-50 border border-emerald-500/30 p-4 rounded-xl">
+                                <p className="font-mono text-[10px] text-emerald-600 tracking-widest uppercase mb-1">Label Grosses</p>
+                                <p className="font-mono text-xl text-emerald-700 font-bold">${formatNumber(labelGross)}</p>
                             </div>
-                            <div className="bg-red-950/20 border border-red-500/20 p-4 rounded-xl">
-                                <p className="font-mono text-[10px] text-red-500 tracking-widest uppercase mb-1">360 Deal Theft</p>
-                                <p className="font-mono text-xl text-red-400 font-bold">-${formatNumber(crossCollateralizationLoss)}</p>
+                            <div className="bg-red-50 border border-red-500/30 p-4 rounded-xl">
+                                <p className="font-mono text-[10px] text-red-600 tracking-widest uppercase mb-1">360 Deal Theft</p>
+                                <p className="font-mono text-xl text-red-700 font-bold">-${formatNumber(crossCollateralizationLoss)}</p>
                             </div>
-                            <div className="bg-cyan-950/20 border border-cyan-500/20 p-4 rounded-xl relative overflow-hidden group">
+                            <div className="bg-cyan-50 border border-cyan-500/30 p-4 rounded-xl relative overflow-hidden group">
                                 <div className="absolute inset-0 bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <p className="font-mono text-[10px] text-cyan-500 tracking-widest uppercase mb-1">Artist Takes Home</p>
-                                <p className="font-mono text-xl text-cyan-400 font-bold">${formatNumber(artistNet)}</p>
+                                <p className="font-mono text-[10px] text-cyan-600 tracking-widest uppercase mb-1">Artist Takes Home</p>
+                                <p className="font-mono text-xl text-cyan-700 font-bold">${formatNumber(artistNet)}</p>
                             </div>
                         </div>
 
-                        <div className="mt-6 p-4 bg-white/5 border border-white/10 rounded-lg text-sm font-inter text-gray-400 leading-relaxed">
-                            <strong>Summary:</strong> The label generated <span className="text-emerald-400">${formatNumber(labelGross)}</span> from your music to pay off your <span className="text-red-400">${totalDebt.toLocaleString()}</span> total debt. Furthermore, because of your {threeSixtyCut}% 360-Deal, they siphoned <span className="text-red-400">${crossCollateralizationLoss.toLocaleString()}</span> of the income you made independently on the road. You took home the initial cash advance plus whatever was left of your tour money, netting <span className="text-cyan-400">${formatNumber(artistNet)}</span> while the label walked away with millions.
+                        <div className="mt-6 p-4 bg-white/60 border border-purple-900/10 shadow-sm rounded-lg text-sm font-inter text-gray-800 leading-relaxed">
+                            <strong>Summary:</strong> The label generated <span className="text-emerald-700">${formatNumber(labelGross)}</span> from your music to pay off your <span className="text-red-700">${totalDebt.toLocaleString()}</span> total debt. Furthermore, because of your {threeSixtyCut}% 360-Deal, they siphoned <span className="text-red-700">${crossCollateralizationLoss.toLocaleString()}</span> of the income you made independently on the road. You took home the initial cash advance plus whatever was left of your tour money, netting <span className="text-cyan-700">${formatNumber(artistNet)}</span> while the label walked away with millions.
                         </div>
                     </div>
 

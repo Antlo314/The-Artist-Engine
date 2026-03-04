@@ -136,97 +136,97 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Target Logic Side Panel */}
-                <div className="glass-card w-full lg:w-1/3 xl:w-1/4 p-6 rounded-2xl relative overflow-hidden group border border-orange-500/30 shadow-[0_0_40px_rgba(139,92,246,0.05)] flex flex-col h-fit sticky top-20">
+                <div className="glass-card w-full lg:w-1/3 xl:w-1/4 p-6 rounded-2xl relative overflow-hidden group border border-orange-500/30 shadow-[0_0_40px_rgba(249,115,22,0.05)] flex flex-col h-fit sticky top-20">
                     {/* Background Video Layer - Cleaned Up */}
                     <video
                         autoPlay
                         loop
                         muted
                         playsInline
-                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0 mix-blend-luminosity"
+                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0 mix-blend-color-burn"
                     >
                         <source src="/gig-radar.mp4" type="video/mp4" />
                     </video>
 
                     <div className="absolute right-[-50px] top-[-50px] opacity-10 pointer-events-none z-10 mix-blend-overlay">
-                        <Radar size={250} className="text-orange-500 rotate-45" />
+                        <Radar size={250} className="text-orange-600 rotate-45" />
                     </div>
 
                     <div className="flex flex-col gap-6 relative z-10">
                         <div>
-                            <h2 className="font-cinzel text-2xl font-bold text-white tracking-widest flex items-center gap-3">
-                                <Radar className="text-orange-500" size={24} />
+                            <h2 className="font-cinzel text-2xl font-bold text-orange-900 tracking-widest flex items-center gap-3">
+                                <Radar className="text-orange-600" size={24} />
                                 GIG RADAR
                             </h2>
-                            <p className="font-mono text-[10px] text-gray-400 mt-2 tracking-widest uppercase">
+                            <p className="font-mono text-[10px] text-orange-900/60 mt-2 tracking-widest uppercase">
                                 Multi-Vector Grounding<br />Autonomous Array
                             </p>
                         </div>
 
-                        <div className="flex flex-col gap-4 bg-black/60 p-5 rounded-xl border border-orange-500/10 backdrop-blur-md">
+                        <div className="flex flex-col gap-4 bg-white/40 p-5 rounded-xl border border-orange-900/10 backdrop-blur-md">
                             {/* City / Zip */}
-                            <div className="relative flex flex-col text-gray-400 bg-black/50 rounded-lg px-3 py-2 border border-white/5 focus-within:border-orange-500/50 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-500/80 mb-1">Target Point (City / Zip)</span>
+                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-2 border border-orange-900/10 focus-within:border-orange-500/50 focus-within:text-orange-700 transition-colors">
+                                <span className="text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Target Point (City / Zip)</span>
                                 <div className="flex items-center">
                                     <MapPin size={14} className="mr-2 opacity-70" />
-                                    <input placeholder="e.g., Brooklyn, NY or 60601" type="text" value={city} onChange={e => setCity(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white placeholder:text-gray-600" />
+                                    <input placeholder="e.g., Brooklyn, NY or 60601" type="text" value={city} onChange={e => setCity(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-gray-900 placeholder:text-gray-500" />
                                 </div>
                             </div>
 
                             {/* Radius */}
-                            <div className="relative flex flex-col text-gray-400 bg-black/50 rounded-lg px-3 py-2 border border-white/5 focus-within:border-orange-500/50 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-500/80 mb-1">Blast Radius</span>
-                                <select value={radius} onChange={e => setRadius(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white appearance-none cursor-pointer">
-                                    <option className="bg-[#050505] border-none">Exact City</option>
-                                    <option className="bg-[#050505] border-none">10 miles</option>
-                                    <option className="bg-[#050505] border-none">50 miles</option>
-                                    <option className="bg-[#050505] border-none">250 miles</option>
+                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-2 border border-orange-900/10 focus-within:border-orange-500/50 focus-within:text-orange-700 transition-colors">
+                                <span className="text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Blast Radius</span>
+                                <select value={radius} onChange={e => setRadius(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
+                                    <option className="bg-white border-none">Exact City</option>
+                                    <option className="bg-white border-none">10 miles</option>
+                                    <option className="bg-white border-none">50 miles</option>
+                                    <option className="bg-white border-none">250 miles</option>
                                 </select>
                             </div>
 
                             {/* Genre */}
-                            <div className="relative flex flex-col text-gray-400 bg-black/50 rounded-lg px-3 py-2 border border-white/5 focus-within:border-orange-500/50 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-500/80 mb-1">Sonic Vector</span>
-                                <select value={genre} onChange={e => setGenre(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white appearance-none cursor-pointer">
-                                    <option className="bg-[#050505] border-none">House</option>
-                                    <option className="bg-[#050505] border-none">Deep House</option>
-                                    <option className="bg-[#050505] border-none">Techno</option>
-                                    <option className="bg-[#050505] border-none">Trance</option>
-                                    <option className="bg-[#050505] border-none">Drum & Bass</option>
-                                    <option className="bg-[#050505] border-none">Dubstep</option>
-                                    <option className="bg-[#050505] border-none">Trap</option>
-                                    <option className="bg-[#050505] border-none">Hip Hop</option>
-                                    <option className="bg-[#050505] border-none">R&B</option>
-                                    <option className="bg-[#050505] border-none">Pop</option>
-                                    <option className="bg-[#050505] border-none">Rock</option>
-                                    <option className="bg-[#050505] border-none">Metal</option>
-                                    <option className="bg-[#050505] border-none">Country</option>
-                                    <option className="bg-[#050505] border-none">Jazz</option>
-                                    <option className="bg-[#050505] border-none">Afrobeat</option>
-                                    <option className="bg-[#050505] border-none">Reggaeton</option>
-                                    <option className="bg-[#050505] border-none">Acoustic / Live Instrumentation</option>
+                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-2 border border-orange-900/10 focus-within:border-orange-500/50 focus-within:text-orange-700 transition-colors">
+                                <span className="text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Sonic Vector</span>
+                                <select value={genre} onChange={e => setGenre(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
+                                    <option className="bg-white border-none">House</option>
+                                    <option className="bg-white border-none">Deep House</option>
+                                    <option className="bg-white border-none">Techno</option>
+                                    <option className="bg-white border-none">Trance</option>
+                                    <option className="bg-white border-none">Drum & Bass</option>
+                                    <option className="bg-white border-none">Dubstep</option>
+                                    <option className="bg-white border-none">Trap</option>
+                                    <option className="bg-white border-none">Hip Hop</option>
+                                    <option className="bg-white border-none">R&B</option>
+                                    <option className="bg-white border-none">Pop</option>
+                                    <option className="bg-white border-none">Rock</option>
+                                    <option className="bg-white border-none">Metal</option>
+                                    <option className="bg-white border-none">Country</option>
+                                    <option className="bg-white border-none">Jazz</option>
+                                    <option className="bg-white border-none">Afrobeat</option>
+                                    <option className="bg-white border-none">Reggaeton</option>
+                                    <option className="bg-white border-none">Acoustic / Live Instrumentation</option>
                                 </select>
                             </div>
 
                             {/* Tier */}
-                            <div className="relative flex flex-col text-gray-400 bg-black/50 rounded-lg px-3 py-2 border border-white/5 focus-within:border-orange-500/50 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-500/80 mb-1">Venue Tier</span>
-                                <select value={tier} onChange={e => setTier(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white appearance-none cursor-pointer">
-                                    <option className="bg-[#050505] border-none">Grassroots / Mom & Pop (50-250 cap)</option>
-                                    <option className="bg-[#050505] border-none">Mid-Size Touring (250-1000 cap)</option>
-                                    <option className="bg-[#050505] border-none">Top-Tier Theater (1000-3000 cap)</option>
-                                    <option className="bg-[#050505] border-none">Arena / Stadium (3000+ cap)</option>
+                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-2 border border-orange-900/10 focus-within:border-orange-500/50 focus-within:text-orange-700 transition-colors">
+                                <span className="text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Venue Tier</span>
+                                <select value={tier} onChange={e => setTier(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
+                                    <option className="bg-white border-none">Grassroots / Mom & Pop (50-250 cap)</option>
+                                    <option className="bg-white border-none">Mid-Size Touring (250-1000 cap)</option>
+                                    <option className="bg-white border-none">Top-Tier Theater (1000-3000 cap)</option>
+                                    <option className="bg-white border-none">Arena / Stadium (3000+ cap)</option>
                                 </select>
                             </div>
 
                             {/* Timeframe */}
-                            <div className="relative flex flex-col text-gray-400 bg-black/50 rounded-lg px-3 py-2 border border-white/5 focus-within:border-orange-500/50 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-500/80 mb-1">Timeframe</span>
-                                <select value={timeframe} onChange={e => setTimeframe(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white appearance-none cursor-pointer">
-                                    <option className="bg-[#050505] border-none">Active Now</option>
-                                    <option className="bg-[#050505] border-none">Summer 2026</option>
-                                    <option className="bg-[#050505] border-none">Fall 2026</option>
-                                    <option className="bg-[#050505] border-none">Q1 2027</option>
+                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-2 border border-orange-900/10 focus-within:border-orange-500/50 focus-within:text-orange-700 transition-colors">
+                                <span className="text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Timeframe</span>
+                                <select value={timeframe} onChange={e => setTimeframe(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
+                                    <option className="bg-white border-none">Active Now</option>
+                                    <option className="bg-white border-none">Summer 2026</option>
+                                    <option className="bg-white border-none">Fall 2026</option>
+                                    <option className="bg-white border-none">Q1 2027</option>
                                 </select>
                             </div>
                         </div>
@@ -234,7 +234,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                         <button
                             onClick={handleScout}
                             disabled={isScouting}
-                            className="w-full bg-orange-900/40 text-orange-400 border border-orange-500/50 hover:bg-orange-500 hover:text-black font-bold font-mono text-sm tracking-widest px-6 py-4 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-wait uppercase shadow-[0_0_20px_rgba(139,92,246,0.1)] hover:shadow-[0_0_25px_rgba(139,92,246,0.4)]"
+                            className="w-full bg-orange-100/80 text-orange-700 border border-orange-500/50 hover:bg-orange-500 hover:text-white font-bold font-mono text-sm tracking-widest px-6 py-4 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-wait uppercase shadow-[0_0_20px_rgba(249,115,22,0.1)] hover:shadow-[0_0_25px_rgba(249,115,22,0.3)]"
                         >
                             {isScouting ? (
                                 <><Activity size={18} className="animate-spin" /> EXECUTING SWEEP...</>
@@ -259,9 +259,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="col-span-full py-32 flex flex-col items-center justify-center text-gray-600 glass-card rounded-2xl border-dashed border-white/5"
+                                className="col-span-full py-32 flex flex-col items-center justify-center text-gray-500 glass-card rounded-2xl border-dashed border-orange-900/10"
                             >
-                                <Search size={48} className="text-gray-800 mb-4" />
+                                <Search size={48} className="text-orange-900/20 mb-4" />
                                 <p className="font-mono text-sm tracking-widest uppercase">Awaiting coordinates to deploy radar sweeps.</p>
                             </motion.div>
                         )}
@@ -330,38 +330,38 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: idx * 0.1 }}
-                                        className={`glass-card rounded-xl p-6 relative overflow-hidden group transition-all duration-300 ${gig.pipeline_status === 'PITCHED' ? 'border-orange-500/40 opacity-80' : isAlpha ? 'border-orange-400/80 shadow-[0_0_30px_rgba(139,92,246,0.15)] ring-1 ring-orange-400/50' : 'hover:border-orange-500/60'}`}
+                                        className={`glass-card rounded-xl p-6 relative overflow-hidden group transition-all duration-300 ${gig.pipeline_status === 'PITCHED' ? 'border-orange-500/40 opacity-80' : isAlpha ? 'border-orange-400/80 shadow-[0_0_30px_rgba(249,115,22,0.15)] ring-1 ring-orange-400/50' : 'hover:border-orange-500/60 border-orange-900/10'}`}
                                     >
                                         {/* BG Accents */}
-                                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-900/20 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                                        {isAlpha && <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.1),transparent_50%)] pointer-events-none" />}
+                                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-500/10 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                                        {isAlpha && <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.1),transparent_50%)] pointer-events-none" />}
 
                                         <div className="flex items-center justify-between mb-4 relative z-10">
                                             <div className="flex items-center gap-2">
-                                                <span className={`font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-lg bg-orange-900/30 text-orange-400 border border-orange-500/30 ${gig.pipeline_status === 'INTERCEPTED' ? '' : 'opacity-80'}`}>
+                                                <span className={`font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-sm bg-orange-100/50 text-orange-700 border border-orange-500/30 ${gig.pipeline_status === 'INTERCEPTED' ? '' : 'opacity-80'}`}>
                                                     [{gig.pipeline_status}]
                                                 </span>
                                                 {isAlpha && (
-                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-[0_0_15px_rgba(139,92,246,0.4)] bg-fuchsia-900/40 text-fuchsia-400 border border-fuchsia-400/80 animate-pulse">
+                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-[0_0_15px_rgba(249,115,22,0.2)] bg-orange-200/50 text-orange-800 border border-orange-400/80 animate-pulse">
                                                         [ALPHA TARGET]
                                                     </span>
                                                 )}
                                                 {gig.active_search_signal && !isAlpha && (
-                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-lg bg-orange-900/30 text-orange-300 border border-orange-500/30 animate-pulse">
+                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-sm bg-orange-100/50 text-orange-600 border border-orange-500/30 animate-pulse">
                                                         [ACTIVE SEARCH]
                                                     </span>
                                                 )}
                                             </div>
                                             <button
                                                 onClick={() => setRepModal(gig)}
-                                                className={`font-mono text-xs tracking-widest uppercase flex items-center gap-1 font-bold shadow-md bg-black/40 px-2 py-1 rounded cursor-pointer hover:scale-105 transition-transform border border-transparent hover:border-white/20 ${getScoreColor(gig.reputation_score)}`}
+                                                className={`font-mono text-xs tracking-widest uppercase flex items-center gap-1 font-bold shadow-sm bg-white/40 px-2 py-1 rounded cursor-pointer hover:scale-105 transition-transform border border-transparent hover:border-orange-900/20 ${getScoreColor(gig.reputation_score)}`}
                                             >
                                                 REP SCORE: {gig.reputation_score || 'N/A'} <Search size={10} className="ml-1 opacity-70" />
                                             </button>
                                         </div>
 
                                         <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="font-cinzel font-bold text-2xl text-white leading-tight relative z-10">{gig.name}</h3>
+                                            <h3 className="font-cinzel font-bold text-2xl text-orange-900 leading-tight relative z-10">{gig.name}</h3>
                                             <div className="flex gap-2 relative z-10">
                                                 {gig.social_media_url && (
                                                     <a href={gig.social_media_url} target="_blank" rel="noopener noreferrer" className="text-orange-400 opacity-60 hover:opacity-100 hover:text-orange-300 transition-opacity">
@@ -375,68 +375,68 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                                 )}
                                             </div>
                                         </div>
-                                        <p className="font-mono text-xs text-gray-500 mb-4">{gig.tier || tier}</p>
+                                        <p className="font-mono text-xs text-orange-900/60 mb-4">{gig.tier || tier}</p>
 
                                         <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
-                                            <div className="bg-black/40 p-3 rounded border border-white/5 flex flex-col gap-1">
-                                                <span className="font-mono text-[9px] text-orange-500/70 uppercase tracking-widest flex items-center gap-1"><DollarSign size={10} /> Payout Model</span>
-                                                <span className="font-inter text-sm text-gray-200 truncate">{gig.payout_model || 'Unknown'}</span>
+                                            <div className="bg-white/40 p-3 rounded border border-orange-900/10 flex flex-col gap-1">
+                                                <span className="font-mono text-[9px] text-orange-700/80 uppercase tracking-widest flex items-center gap-1"><DollarSign size={10} /> Payout Model</span>
+                                                <span className="font-inter text-sm text-gray-800 truncate">{gig.payout_model || 'Unknown'}</span>
                                             </div>
-                                            <div className="bg-black/40 p-3 rounded border border-white/5 flex flex-col gap-1">
-                                                <span className="font-mono text-[9px] text-orange-500/70 uppercase tracking-widest flex items-center gap-1"><Calendar size={10} /> Lead Time</span>
-                                                <span className="font-inter text-sm text-gray-200 truncate">{gig.lead_time || 'N/A'}</span>
+                                            <div className="bg-white/40 p-3 rounded border border-orange-900/10 flex flex-col gap-1">
+                                                <span className="font-mono text-[9px] text-orange-700/80 uppercase tracking-widest flex items-center gap-1"><Calendar size={10} /> Lead Time</span>
+                                                <span className="font-inter text-sm text-gray-800 truncate">{gig.lead_time || 'N/A'}</span>
                                             </div>
-                                            <div className="bg-black/40 p-3 rounded border border-white/5 flex flex-col gap-1">
-                                                <span className="font-mono text-[9px] text-orange-500/70 uppercase tracking-widest flex items-center justify-between w-full">
+                                            <div className="bg-white/40 p-3 rounded border border-orange-900/10 flex flex-col gap-1">
+                                                <span className="font-mono text-[9px] text-orange-700/80 uppercase tracking-widest flex items-center justify-between w-full">
                                                     <span className="flex items-center gap-1"><Activity size={10} /> Contact Persona</span>
-                                                    {gig.contact_source && <span className="text-orange-500 opacity-80">[{gig.contact_source}]</span>}
+                                                    {gig.contact_source && <span className="text-orange-600 opacity-80">[{gig.contact_source}]</span>}
                                                 </span>
-                                                <span className="font-inter text-sm text-gray-200 truncate">{gig.contact_persona || gig.contact || 'Generic Intel'}</span>
+                                                <span className="font-inter text-sm text-gray-800 truncate">{gig.contact_persona || gig.contact || 'Generic Intel'}</span>
                                             </div>
-                                            <div className="bg-black/40 p-3 rounded border border-white/5 flex flex-col gap-1 col-span-2 md:col-span-1">
-                                                <span className="font-mono text-[9px] text-orange-500/70 uppercase tracking-widest flex items-center gap-1"><Users size={10} /> Similar Acts</span>
-                                                <span className="font-inter text-sm text-gray-200 line-clamp-1 group-hover:line-clamp-none transition-all">{gig.similar_acts ? (Array.isArray(gig.similar_acts) ? gig.similar_acts.join(', ') : gig.similar_acts) : 'None extracted'}</span>
+                                            <div className="bg-white/40 p-3 rounded border border-orange-900/10 flex flex-col gap-1 col-span-2 md:col-span-1">
+                                                <span className="font-mono text-[9px] text-orange-700/80 uppercase tracking-widest flex items-center gap-1"><Users size={10} /> Similar Acts</span>
+                                                <span className="font-inter text-sm text-gray-800 line-clamp-1 group-hover:line-clamp-none transition-all">{gig.similar_acts ? (Array.isArray(gig.similar_acts) ? gig.similar_acts.join(', ') : gig.similar_acts) : 'None extracted'}</span>
                                             </div>
                                         </div>
 
                                         {/* Financial Telemetry */}
-                                        <div className="flex items-center justify-between bg-black/50 border border-white/5 rounded-lg p-3 mb-6 relative z-10 w-full">
-                                            <div className="flex flex-col text-center w-1/3 border-r border-white/10">
-                                                <span className="font-mono text-[9px] text-gray-500 uppercase tracking-widest mb-1">Capacity</span>
-                                                <span className="font-cinzel text-lg font-bold text-gray-300">{gig.capacity || 'N/A'}</span>
+                                        <div className="flex items-center justify-between bg-white/50 border border-orange-900/10 rounded-lg p-3 mb-6 relative z-10 w-full">
+                                            <div className="flex flex-col text-center w-1/3 border-r border-orange-900/10">
+                                                <span className="font-mono text-[9px] text-orange-900/50 uppercase tracking-widest mb-1">Capacity</span>
+                                                <span className="font-cinzel text-lg font-bold text-orange-800">{gig.capacity || 'N/A'}</span>
                                             </div>
-                                            <div className="flex flex-col text-center w-1/3 border-r border-white/10">
-                                                <span className="font-mono text-[9px] text-gray-500 uppercase tracking-widest mb-1">Avg Ticket</span>
-                                                <span className="font-cinzel text-lg font-bold text-gray-300">{gig.avg_ticket_price_usd ? `$${gig.avg_ticket_price_usd}` : 'N/A'}</span>
+                                            <div className="flex flex-col text-center w-1/3 border-r border-orange-900/10">
+                                                <span className="font-mono text-[9px] text-orange-900/50 uppercase tracking-widest mb-1">Avg Ticket</span>
+                                                <span className="font-cinzel text-lg font-bold text-orange-800">{gig.avg_ticket_price_usd ? `$${gig.avg_ticket_price_usd}` : 'N/A'}</span>
                                             </div>
                                             <div className="flex flex-col text-center w-1/3 px-2">
-                                                <span className="font-mono text-[9px] text-orange-400/80 uppercase tracking-widest mb-1">Gross Potential</span>
-                                                <span className="font-cinzel text-xl font-bold text-orange-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : 'N/A'}</span>
+                                                <span className="font-mono text-[9px] text-orange-600 uppercase tracking-widest mb-1">Gross Potential</span>
+                                                <span className="font-cinzel text-xl font-bold text-orange-600 drop-shadow-[0_0_8px_rgba(249,115,22,0.1)]">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : 'N/A'}</span>
                                             </div>
                                         </div>
 
-                                        <div className="border-t border-white/10 pt-4 pb-16 relative z-10">
+                                        <div className="border-t border-orange-900/10 pt-4 pb-16 relative z-10">
                                             {gig.leverage_point && (
-                                                <div className="mb-4 bg-orange-900/10 border border-orange-500/20 rounded p-3">
-                                                    <div className="flex items-center gap-2 font-mono text-[10px] text-orange-500/80 mb-1 uppercase tracking-widest">
+                                                <div className="mb-4 bg-orange-100/50 border border-orange-500/20 rounded p-3">
+                                                    <div className="flex items-center gap-2 font-mono text-[10px] text-orange-700 mb-1 uppercase tracking-widest">
                                                         <AlertTriangle size={12} /> Tactical Leverage Point
                                                     </div>
-                                                    <p className="text-xs text-orange-100/90 font-inter italic leading-snug">"{gig.leverage_point}"</p>
+                                                    <p className="text-xs text-orange-900/80 font-inter italic leading-snug">"{gig.leverage_point}"</p>
                                                 </div>
                                             )}
-                                            <div className="flex items-center gap-2 font-mono text-xs text-orange-400/80 mb-2 uppercase tracking-widest drop-shadow-md">
+                                            <div className="flex items-center gap-2 font-mono text-xs text-orange-600 mb-2 uppercase tracking-widest drop-shadow-sm">
                                                 <BrainCircuit size={12} /> Shark Negotiation Strategy
                                             </div>
-                                            <p className="text-sm text-gray-300 font-inter leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
+                                            <p className="text-sm text-gray-700 font-inter leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
                                                 {gig.strategy}
                                             </p>
                                         </div>
 
-                                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/90 to-transparent z-20 flex justify-center border-t border-white/5">
+                                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white/90 via-white/80 to-transparent z-20 flex justify-center border-t border-orange-900/10">
                                             <button
                                                 onClick={() => handleEngageShark(gig)}
                                                 disabled={gig.pipeline_status === 'PITCHED'}
-                                                className="w-full bg-orange-900/20 text-orange-400 border border-orange-500/50 hover:bg-orange-500 hover:text-black font-bold font-mono text-xs tracking-widest px-4 py-3 rounded flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase shadow-[0_0_15px_rgba(139,92,246,0.1)] hover:shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+                                                className="w-full bg-orange-100 text-orange-700 border border-orange-500/50 hover:bg-orange-500 hover:text-white font-bold font-mono text-xs tracking-widest px-4 py-3 rounded flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase shadow-[0_0_15px_rgba(249,115,22,0.1)] hover:shadow-[0_0_20px_rgba(249,115,22,0.3)]"
                                             >
                                                 {gig.pipeline_status === 'PITCHED' ? 'PITCH DEPLOYED' : <><Send size={14} /> ONE-CLICK ENGAGE</>}
                                             </button>

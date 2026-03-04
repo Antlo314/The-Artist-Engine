@@ -207,26 +207,26 @@ export default function TheCodex() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+            <div className="flex items-end justify-between border-b border-purple-900/10 pb-4">
                 <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-white tracking-widest flex items-center gap-3">
-                        <BookOpen className="text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+                    <h2 className="font-cinzel text-3xl font-bold text-purple-900 tracking-widest flex items-center gap-3">
+                        <BookOpen className="text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
                         THE CODEX
                     </h2>
-                    <p className="font-mono text-xs text-gray-400 mt-1 tracking-widest uppercase">
+                    <p className="font-mono text-xs text-purple-900/60 mt-1 tracking-widest uppercase">
                         Entertainment Law Dictionary & Predatory Terminology Translations
                     </p>
                 </div>
             </div>
 
-            <div className="glass-card p-4 flex items-center gap-4 rounded-xl border border-white/5 bg-black/40">
+            <div className="glass-card p-4 flex items-center gap-4 rounded-xl border border-purple-900/10 bg-white/40 shadow-sm">
                 <Search className="text-amber-500" size={20} />
                 <input
                     type="text"
                     placeholder="Search predatory jargon... (e.g., 'Recoupment', 'Gross Revenue')"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent text-white font-mono text-sm focus:outline-none placeholder-gray-600"
+                    className="flex-1 bg-transparent text-purple-900 font-mono text-sm focus:outline-none placeholder-purple-900/40"
                 />
             </div>
 
@@ -239,7 +239,7 @@ export default function TheCodex() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ delay: idx * 0.05 }}
-                            className="glass-card p-6 rounded-2xl border border-white/5 hover:border-amber-500/30 transition-colors relative overflow-hidden group"
+                            className="glass-card p-6 rounded-2xl border border-purple-900/10 bg-white/40 hover:border-amber-500/30 transition-colors relative overflow-hidden group shadow-sm"
                         >
                             <div className={`absolute top-0 left-0 w-1 h-full 
                                 ${entry.dangerLevel === 'CRITICAL' ? 'bg-red-500' :
@@ -249,25 +249,25 @@ export default function TheCodex() {
                             />
 
                             <div className="flex justify-between items-start mb-4">
-                                <h3 className="font-cinzel text-xl text-white font-bold tracking-widest pl-3">{entry.term}</h3>
-                                <span className={`font-mono text-[10px] tracking-widest px-2 py-1 rounded bg-black/40 border
-                                    ${entry.dangerLevel === 'CRITICAL' ? 'text-red-400 border-red-500/30' :
-                                        entry.dangerLevel === 'HIGH' ? 'text-purple-400 border-purple-500/30' :
-                                            entry.dangerLevel === 'WARNING' ? 'text-orange-400 border-orange-500/30' :
-                                                'text-emerald-400 border-emerald-500/30'}`}>
+                                <h3 className="font-cinzel text-xl text-purple-900 font-bold tracking-widest pl-3">{entry.term}</h3>
+                                <span className={`font-mono text-[10px] tracking-widest px-2 py-1 rounded bg-white/60 shadow-sm border
+                                    ${entry.dangerLevel === 'CRITICAL' ? 'text-red-700 border-red-500/30' :
+                                        entry.dangerLevel === 'HIGH' ? 'text-purple-700 border-purple-500/30' :
+                                            entry.dangerLevel === 'WARNING' ? 'text-orange-700 border-orange-500/30' :
+                                                'text-emerald-700 border-emerald-500/30'}`}>
                                     {entry.dangerLevel}
                                 </span>
                             </div>
 
-                            <p className="font-inter text-sm text-gray-300 font-bold mb-2 pl-3">"{entry.translation}"</p>
-                            <p className="font-mono text-xs text-gray-500 leading-relaxed pl-3 bg-white/5 p-3 rounded-md">
+                            <p className="font-inter text-sm text-gray-800 font-bold mb-2 pl-3">"{entry.translation}"</p>
+                            <p className="font-mono text-xs text-gray-600 leading-relaxed pl-3 bg-purple-900/5 p-3 rounded-md border border-purple-900/5">
                                 {entry.meaning}
                             </p>
                         </motion.div>
                     ))}
                 </AnimatePresence>
                 {filteredEntries.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-gray-500 font-mono text-sm tracking-widest">
+                    <div className="col-span-full py-12 text-center text-purple-900/40 font-mono text-sm tracking-widest">
                         NO CODEX ENTRIES FOUND. YOU ARE IN UNCHARTED TERRITORY.
                     </div>
                 )}

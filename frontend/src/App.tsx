@@ -40,7 +40,7 @@ export default function App() {
     const navItems = [
         { id: 'radar', label: 'Gig Radar', icon: Radio },
         { id: 'legal', label: 'Legal War Room', icon: Scale },
-        { id: 'studio', label: 'Audio Core', icon: Mic2 },
+        { id: 'studio', label: 'PureTone Audio Lab', icon: Mic2 },
         { id: 'profile', label: 'Profile', icon: ShieldCheck },
     ];
 
