@@ -56,7 +56,7 @@ export default function App() {
     };
 
     return (
-        <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden relative selection:bg-cyan-200/50">
+        <div className="flex h-screen w-full bg-[#a5b5ba] overflow-hidden relative selection:bg-white/50">
 
             {/* Global Video Background */}
             <video
@@ -64,14 +64,17 @@ export default function App() {
                 loop
                 muted
                 playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none z-0 invert"
+                className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none z-0 invert mix-blend-overlay"
             >
                 <source src="/data_dust.mp4" type="video/mp4" />
             </video>
 
+            {/* Glassmorphic Layer Over Video */}
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-[30px] shadow-[inset_0_0_100px_rgba(255,255,255,0.2)] pointer-events-none z-0" />
+
             {/* Background Ambient Glows */}
-            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-cyan-900/20 rounded-full blur-[120px] pointer-events-none z-0" />
-            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-green-900/10 rounded-full blur-[150px] pointer-events-none z-0" />
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-white/30 rounded-full blur-[120px] pointer-events-none z-0 mix-blend-soft-light" />
+            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-cyan-100/30 rounded-full blur-[150px] pointer-events-none z-0 mix-blend-soft-light" />
 
             {/* Mobile Header (Tactical Density) */}
             <div className="md:hidden fixed top-0 w-full glass-panel z-50 flex items-center justify-between p-4 border-b border-cyan-200/40 bg-[#ffffff]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
