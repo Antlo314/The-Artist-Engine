@@ -38,7 +38,6 @@ export default function App() {
     }, []);
 
     const navItems = [
-        { id: 'dashboard', label: 'CMD Center', icon: BarChart2 },
         { id: 'radar', label: 'Gig Radar', icon: Radio },
         { id: 'legal', label: 'Legal War Room', icon: Scale },
         { id: 'studio', label: 'Audio Core', icon: Mic2 },
@@ -57,7 +56,7 @@ export default function App() {
     };
 
     return (
-        <div className="flex h-screen w-full bg-[#050505] overflow-hidden relative selection:bg-cyan-900/50">
+        <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden relative selection:bg-cyan-200/50">
 
             {/* Global Video Background */}
             <video
@@ -65,7 +64,7 @@ export default function App() {
                 loop
                 muted
                 playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none z-0 mix-blend-screen"
+                className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none z-0 invert"
             >
                 <source src="/data_dust.mp4" type="video/mp4" />
             </video>
@@ -75,14 +74,14 @@ export default function App() {
             <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-green-900/10 rounded-full blur-[150px] pointer-events-none z-0" />
 
             {/* Mobile Header (Tactical Density) */}
-            <div className="md:hidden fixed top-0 w-full glass-panel z-50 flex items-center justify-between p-4 border-b border-cyan-900/40 bg-[#020202]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+            <div className="md:hidden fixed top-0 w-full glass-panel z-50 flex items-center justify-between p-4 border-b border-cyan-200/40 bg-[#ffffff]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
                 <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded bg-black border border-cyan-500/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,240,255,0.2)]">
-                        <Activity size={14} className="text-cyan-400" />
+                    <div className="h-7 w-7 rounded bg-white border border-cyan-500/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,240,255,0.2)]">
+                        <Activity size={14} className="text-cyan-600" />
                     </div>
                     <div className="flex flex-col">
-                        <h1 className="font-cinzel text-[13px] font-bold tracking-widest text-white leading-tight">THE ARTIST</h1>
-                        <span className="font-mono text-[8px] text-cyan-500 tracking-[0.3em] uppercase leading-none">ENGINE.OS</span>
+                        <h1 className="font-cinzel text-[13px] font-bold tracking-widest text-[#1e293b] leading-tight cursor-pointer hover:text-cyan-600 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>
+                        <span className="font-mono text-[8px] text-cyan-600 tracking-[0.3em] uppercase leading-none">ENGINE.OS</span>
                     </div>
                 </div>
                 <div className="font-mono text-[9px] tracking-widest text-green-400 flex items-center gap-1.5 bg-green-900/30 px-2 py-1 border border-green-500/50 rounded drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]">
@@ -91,13 +90,13 @@ export default function App() {
             </div>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 w-full z-50 border-t border-cyan-900/30 flex justify-around p-2 pb-safe bg-[#020202]/95 backdrop-blur-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.9)]">
+            <nav className="md:hidden fixed bottom-0 w-full z-50 border-t border-cyan-200/30 flex justify-around p-2 pb-safe bg-[#ffffff]/95 backdrop-blur-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
                 {navItems.map((item) => (
                     <button
                         key={item.id}
                         onClick={() => setActiveView(item.id)}
                         className={`flex flex-col items-center gap-1 p-2 w-full transition-all duration-300 relative group
-                            ${activeView === item.id ? 'text-cyan-400' : 'text-gray-600 hover:text-gray-400'}`}
+                            ${activeView === item.id ? 'text-cyan-600' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                         <item.icon size={22} className={`transition-all duration-300 ${activeView === item.id ? 'drop-shadow-[0_0_10px_rgba(0,240,255,0.8)] -translate-y-1 scale-110' : ''}`} />
                         <span className={`text-[8px] font-mono tracking-widest uppercase transition-all duration-300 ${activeView === item.id ? 'font-bold opacity-100' : 'opacity-70'}`}>
@@ -111,17 +110,17 @@ export default function App() {
             </nav>
 
             {/* Sidebar Navigation (Desktop) */}
-            <nav className="hidden md:flex relative z-40 h-full w-64 glass-panel border-r border-white/5 flex-col transition-transform duration-300">
+            <nav className="hidden md:flex relative z-40 h-full w-64 glass-panel border-r border-slate-200 flex-col transition-transform duration-300">
 
                 {/* Brand Header */}
-                <div className="p-6 border-b border-white/5">
+                <div className="p-6 border-b border-slate-200">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="h-8 w-8 rounded bg-black border border-cyan-500/50 flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-                            <ShieldCheck size={16} className="text-cyan-400" />
+                        <div className="h-8 w-8 rounded bg-white border border-cyan-500/50 flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                            <ShieldCheck size={16} className="text-cyan-600" />
                         </div>
                         <div>
-                            <h1 className="font-cinzel text-lg font-bold text-white tracking-widest leading-none">THE ARTIST</h1>
-                            <span className="font-cinzel text-xs text-cyan-400 tracking-[0.2em]">ENGINE.OS</span>
+                            <h1 className="font-cinzel text-lg font-bold text-[#1e293b] tracking-widest leading-none cursor-pointer hover:text-cyan-600 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>
+                            <span className="font-cinzel text-xs text-cyan-600 tracking-[0.2em]">ENGINE.OS</span>
                         </div>
                     </div>
 
@@ -144,8 +143,8 @@ export default function App() {
                             onClick={() => setActiveView(item.id)}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-300 relative group
                 ${activeView === item.id
-                                    ? 'bg-gradient-to-r from-cyan-900/40 to-transparent text-white border-l-2 border-cyan-400'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5 border-l-2 border-transparent'
+                                    ? 'bg-gradient-to-r from-cyan-100/40 to-transparent text-[#1e293b] border-l-2 border-cyan-500'
+                                    : 'text-gray-500 hover:text-[#1e293b] hover:bg-slate-100 border-l-2 border-transparent'
                                 }`}
                         >
                             <item.icon size={18} className={activeView === item.id ? 'text-cyan-400' : 'text-gray-500 group-hover:text-gray-300'} />
@@ -158,12 +157,12 @@ export default function App() {
                 </div>
 
                 {/* User / Meta Footer */}
-                <div className="p-4 border-t border-white/5 bg-black/20">
+                <div className="p-4 border-t border-slate-200 bg-slate-100/50">
                     <div className="flex items-center justify-between">
                         <div>
-                            <div className="text-xs font-bold text-white tracking-wider uppercase">{profile.artistAlias}</div>
+                            <div className="text-xs font-bold text-[#1e293b] tracking-wider uppercase">{profile.artistAlias}</div>
                             <div className="text-[10px] font-mono text-gray-500 flex items-center gap-1 mt-1 uppercase">
-                                <Activity size={10} className="text-cyan-500" /> SYSTEM ID: {profile.agentName}
+                                <Activity size={10} className="text-cyan-600" /> SYSTEM ID: {profile.agentName}
                             </div>
                         </div>
                         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-800 to-black border border-gray-700 flex items-center justify-center overflow-hidden">
@@ -182,15 +181,23 @@ export default function App() {
             {/* Main Content Area */}
             <main className="flex-1 overflow-hidden flex flex-col relative z-10 md:pt-0 pt-16">
                 {/* Top StatusBar for Desktop */}
-                <header className="hidden md:flex h-14 glass-panel border-b border-white/5 items-center justify-between px-8">
-                    <div className="font-mono text-xs text-gray-500 tracking-widest">
-                        LOC: // SECTOR-7G / {activeView.toUpperCase()} / MODULE-READY
+                <header className="hidden md:flex h-14 glass-panel border-b border-slate-200 items-center justify-between px-8">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setActiveView('dashboard')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded transition-all duration-300 font-mono text-xs tracking-widest uppercase ${activeView === 'dashboard' ? 'bg-cyan-100 text-cyan-700 border border-cyan-300' : 'text-gray-500 hover:text-[#1e293b] hover:bg-slate-100 border border-transparent'}`}
+                        >
+                            <BarChart2 size={14} className={activeView === 'dashboard' ? 'text-cyan-600' : 'text-gray-400'} /> CMD Center
+                        </button>
+                        <div className="font-mono text-xs text-gray-500 tracking-widest">
+                            LOC: // SECTOR-7G / {activeView.toUpperCase()} / MODULE-READY
+                        </div>
                     </div>
                     <div className="flex items-center gap-6">
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] font-mono text-gray-500 tracking-widest uppercase mb-0.5">TREASURY BALANCE</span>
-                            <div className="flex items-center gap-2 text-sm text-white font-mono font-bold">
-                                <DollarSign size={14} className="text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]" />
+                            <div className="flex items-center gap-2 text-sm text-[#1e293b] font-mono font-bold">
+                                <DollarSign size={14} className="text-green-600 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]" />
                                 {(() => {
                                     const bal = profile.treasuryBalance || '42500.00';
                                     const parts = bal.split('.');
@@ -224,12 +231,12 @@ export default function App() {
                             {/* Mobile Lockdown Overlay */}
                             {['studio'].includes(activeView) && (
                                 <div className="md:hidden flex flex-col items-center justify-center min-h-[50vh] text-center px-4 mt-12">
-                                    <div className="glass-card p-8 rounded-2xl border border-red-500/30 flex flex-col items-center bg-black/60 shadow-[0_0_50px_rgba(239,68,68,0.1)] relative overflow-hidden w-full">
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-transparent" />
+                                    <div className="glass-card p-8 rounded-2xl border border-red-500/30 flex flex-col items-center bg-white/60 shadow-[0_0_50px_rgba(239,68,68,0.1)] relative overflow-hidden w-full">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-transparent" />
                                         <AlertTriangle size={48} className="text-red-500 mb-6 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-pulse" />
-                                        <h2 className="font-cinzel text-xl text-white font-bold tracking-widest mb-2">MOBILE LOCKDOWN</h2>
-                                        <h3 className="font-mono text-[10px] text-red-500 tracking-widest uppercase mb-6 font-bold bg-red-900/20 px-3 py-1 rounded inline-block">Protocol Engaged</h3>
-                                        <p className="font-mono text-xs text-gray-400 leading-relaxed uppercase border-t border-white/10 pt-6">
+                                        <h2 className="font-cinzel text-xl text-[#1e293b] font-bold tracking-widest mb-2">MOBILE LOCKDOWN</h2>
+                                        <h3 className="font-mono text-[10px] text-red-600 tracking-widest uppercase mb-6 font-bold bg-red-100/80 px-3 py-1 rounded inline-block">Protocol Engaged</h3>
+                                        <p className="font-mono text-xs text-gray-600 leading-relaxed uppercase border-t border-slate-200 pt-6">
                                             Desktop Terminal Required.<br /><br />
                                             Data density exceeds safe mobile display protocols.
                                         </p>
