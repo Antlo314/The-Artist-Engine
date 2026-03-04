@@ -80,7 +80,7 @@ export default function App() {
                         <Activity size={14} className="text-cyan-600" />
                     </div>
                     <div className="flex flex-col">
-                        <h1 className="font-cinzel text-[13px] font-bold tracking-widest text-[#1e293b] leading-tight cursor-pointer hover:text-cyan-600 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>
+                        <h1 className="font-cinzel text-[13px] font-bold tracking-widest text-red-700 leading-tight cursor-pointer hover:text-cyan-600 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>
                         <span className="font-mono text-[8px] text-cyan-600 tracking-[0.3em] uppercase leading-none">ENGINE.OS</span>
                     </div>
                 </div>
@@ -119,7 +119,7 @@ export default function App() {
                             <ShieldCheck size={16} className="text-cyan-600" />
                         </div>
                         <div>
-                            <h1 className="font-cinzel text-lg font-bold text-[#1e293b] tracking-widest leading-none cursor-pointer hover:text-cyan-600 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>
+                            <h1 className="font-cinzel text-lg font-bold text-red-700 tracking-widest leading-none cursor-pointer hover:text-cyan-600 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>
                             <span className="font-cinzel text-xs text-cyan-600 tracking-[0.2em]">ENGINE.OS</span>
                         </div>
                     </div>
@@ -143,8 +143,8 @@ export default function App() {
                             onClick={() => setActiveView(item.id)}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-300 relative group
                 ${activeView === item.id
-                                    ? 'bg-gradient-to-r from-cyan-100/40 to-transparent text-[#1e293b] border-l-2 border-cyan-500'
-                                    : 'text-gray-500 hover:text-[#1e293b] hover:bg-slate-100 border-l-2 border-transparent'
+                                    ? 'bg-gradient-to-r from-cyan-100/40 to-transparent text-red-700 border-l-2 border-cyan-500'
+                                    : 'text-gray-500 hover:text-red-700 hover:bg-slate-100 border-l-2 border-transparent'
                                 }`}
                         >
                             <item.icon size={18} className={activeView === item.id ? 'text-cyan-400' : 'text-gray-500 group-hover:text-gray-300'} />
@@ -160,7 +160,7 @@ export default function App() {
                 <div className="p-4 border-t border-slate-200 bg-slate-100/50">
                     <div className="flex items-center justify-between">
                         <div>
-                            <div className="text-xs font-bold text-[#1e293b] tracking-wider uppercase">{profile.artistAlias}</div>
+                            <div className="text-xs font-bold text-red-700 tracking-wider uppercase">{profile.artistAlias}</div>
                             <div className="text-[10px] font-mono text-gray-500 flex items-center gap-1 mt-1 uppercase">
                                 <Activity size={10} className="text-cyan-600" /> SYSTEM ID: {profile.agentName}
                             </div>
@@ -185,7 +185,7 @@ export default function App() {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setActiveView('dashboard')}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded transition-all duration-300 font-mono text-xs tracking-widest uppercase ${activeView === 'dashboard' ? 'bg-cyan-100 text-cyan-700 border border-cyan-300' : 'text-gray-500 hover:text-[#1e293b] hover:bg-slate-100 border border-transparent'}`}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded transition-all duration-300 font-mono text-xs tracking-widest uppercase ${activeView === 'dashboard' ? 'bg-cyan-100 text-cyan-700 border border-cyan-300' : 'text-gray-500 hover:text-red-700 hover:bg-slate-100 border border-transparent'}`}
                         >
                             <BarChart2 size={14} className={activeView === 'dashboard' ? 'text-cyan-600' : 'text-gray-400'} /> CMD Center
                         </button>
@@ -196,7 +196,7 @@ export default function App() {
                     <div className="flex items-center gap-6">
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] font-mono text-gray-500 tracking-widest uppercase mb-0.5">TREASURY BALANCE</span>
-                            <div className="flex items-center gap-2 text-sm text-[#1e293b] font-mono font-bold">
+                            <div className="flex items-center gap-2 text-sm text-red-700 font-mono font-bold">
                                 <DollarSign size={14} className="text-green-600 drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]" />
                                 {(() => {
                                     const bal = profile.treasuryBalance || '42500.00';
@@ -234,7 +234,7 @@ export default function App() {
                                     <div className="glass-card p-8 rounded-2xl border border-red-500/30 flex flex-col items-center bg-white/60 shadow-[0_0_50px_rgba(239,68,68,0.1)] relative overflow-hidden w-full">
                                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-transparent" />
                                         <AlertTriangle size={48} className="text-red-500 mb-6 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-pulse" />
-                                        <h2 className="font-cinzel text-xl text-[#1e293b] font-bold tracking-widest mb-2">MOBILE LOCKDOWN</h2>
+                                        <h2 className="font-cinzel text-xl text-red-700 font-bold tracking-widest mb-2">MOBILE LOCKDOWN</h2>
                                         <h3 className="font-mono text-[10px] text-red-600 tracking-widest uppercase mb-6 font-bold bg-red-100/80 px-3 py-1 rounded inline-block">Protocol Engaged</h3>
                                         <p className="font-mono text-xs text-gray-600 leading-relaxed uppercase border-t border-slate-200 pt-6">
                                             Desktop Terminal Required.<br /><br />

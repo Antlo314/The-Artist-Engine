@@ -4,7 +4,7 @@
 
 @theme {
     --color-studio-dark: #0f172a;
-    --color-studio-900: #1e293b;
+    --color-studio-900: #b91c1c;
     --color-studio-800: #334155;
     --color-studio-700: #475569;
     --color-studio-accent: #00f0ff;
@@ -16,8 +16,8 @@
 
 @layer base {
     body {
-        background-color: #050505;
-        color: #d1d5db;
+        background-color: #f8fafc;
+        color: #b91c1c;
         font-family: var(--font-inter);
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
@@ -45,17 +45,17 @@
 
 @layer utilities {
     .glass-panel {
-        background-color: rgba(5, 5, 5, 0.6);
+        background-color: rgba(255, 255, 255, 0.6);
         backdrop-filter: blur(20px);
-        border: 1px solid rgba(0, 240, 255, 0.15);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 240, 255, 0.05);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05), inset 0 0 10px rgba(0, 240, 255, 0.1);
     }
 
     .glass-card {
-        background-color: rgba(2, 2, 2, 0.65);
+        background-color: rgba(255, 255, 255, 0.65);
         backdrop-filter: blur(12px);
-        border: 1px solid rgba(0, 240, 255, 0.15);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(0, 240, 255, 0.03);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), inset 0 0 15px rgba(0, 240, 255, 0.1);
         transition-property: color, background-color, border-color, shadow, transform, box-shadow;
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         transition-duration: 300ms;
@@ -83,11 +83,11 @@
     }
 
     ::-webkit-scrollbar-track {
-        background: #050505;
+        background: #f8fafc;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: #1f2937;
+        background: #cbd5e1;
         border-radius: 3px;
     }
 
