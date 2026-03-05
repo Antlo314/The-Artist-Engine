@@ -46,9 +46,18 @@ export default function Dashboard() {
 
                         <div>
                             <div className="text-[10px] font-mono text-red-900/60 tracking-widest uppercase mb-1">{stat.label}</div>
-                            <div className="font-mono text-3xl font-bold text-red-800 tracking-tight">
-                                {stat.value}
-                            </div>
+                            {stat.label === 'REVENUE BALANCE' ? (
+                                <div className="flex flex-col gap-1">
+                                    <div className="font-mono text-3xl font-bold text-red-800 tracking-tight leading-none">{stat.value}</div>
+                                    <div className="font-mono text-sm text-yellow-700 tracking-tight font-bold flex items-center gap-1 drop-shadow-sm">
+                                        <span className="font-sans font-bold text-yellow-600">Ξ</span> 14.50 ETH
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="font-mono text-3xl font-bold text-red-800 tracking-tight">
+                                    {stat.value}
+                                </div>
+                            )}
                         </div>
 
                         {/* Sparkline decoration */}

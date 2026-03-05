@@ -135,8 +135,11 @@ async def system_status():
 
 @app.post("/api/scout")
 async def scout_gigs(request: ScoutRequest):
-    logs = ["[GIG RADAR] Initiating Multi-Vector Google Grounding Search..."]
-    client = get_genai_client()
+    import httpx
+    logs = ["[GIG RADAR] Initiating Multi-Vector Google Grounding Search (REST Mode)..."]
+    api_key = get_api_key()
+    if not api_key:
+         return {"status": "error", "error": "GEMINI_API_KEY is not configured.", "log": "\n".join(logs)}
     
     cities_knowledge = """
     US States and Capitals Knowledge Base:
@@ -188,24 +191,25 @@ async def scout_gigs(request: ScoutRequest):
     }}
     '''
     
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "systemInstruction": {"parts": [{"text": cities_knowledge}]},
+        "tools": [{"googleSearch": {}}],
+        "generationConfig": {"temperature": 0.6}
+    }
+    
     try:
-        response = await client.aio.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-            config={
-                'system_instruction': cities_knowledge,
-                'tools': [{'google_search': {}}],
-                'temperature': 0.6
-            }
-        )
+        async with httpx.AsyncClient(timeout=40.0) as client:
+            resp = await client.post(url, json=payload)
+        resp.raise_for_status()
         
-        if response.candidates and response.candidates[0].grounding_metadata:
-             logs.append("[GIG RADAR] Live Search Vectors Engaged. Validating Grounding...")
-        else:
-             logs.append("[GIG RADAR] Grounding metadata warning. Results may be internal knowledge.")
-             
-        # Clean markdown code blocks if gemini returned them
-        raw_text = response.text.strip()
+        resp_data = resp.json()
+        candidates = resp_data.get("candidates", [])
+        if not candidates:
+            raise Exception("No candidates returned from Gemini.")
+            
+        raw_text = candidates[0]["content"]["parts"][0]["text"].strip()
         if raw_text.startswith("```json"):
             raw_text = raw_text[7:]
         if raw_text.startswith("```"):
@@ -230,15 +234,17 @@ async def scout_gigs(request: ScoutRequest):
             Timeframe target: {request.timeframe}.
             Use internal world knowledge. Respond in strict JSON only, same schema as before (including contact_persona, contact_source, website_url, social_media_url, payout_model, lead_time, similar_acts, reputation_score, reputation_explanation, capacity, avg_ticket_price_usd, gross_potential_usd, leverage_point, and active_search_signal). Ensure NO missing fields.
             '''
-            fb_resp = await client.aio.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=fallback_prompt,
-                config={
-                    'system_instruction': cities_knowledge,
-                    'response_mime_type': 'application/json'
-                }
-            )
-            data = json.loads(fb_resp.text)
+            fb_payload = {
+                "contents": [{"parts": [{"text": fallback_prompt}]}],
+                "systemInstruction": {"parts": [{"text": cities_knowledge}]},
+                "generationConfig": {"responseMimeType": "application/json"}
+            }
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                fb_resp = await client.post(url, json=fb_payload)
+            fb_resp.raise_for_status()
+            fb_data = fb_resp.json()
+            data = json.loads(fb_data["candidates"][0]["content"]["parts"][0]["text"])
+            
             logs.append("[GIG RADAR] Fallback matrix applied successfully.")
             return {"status": "success", "gigs": data, "log": "\n".join(logs)}
         except Exception as fb_err:
@@ -625,4 +631,4 @@ async def extract_stems(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)

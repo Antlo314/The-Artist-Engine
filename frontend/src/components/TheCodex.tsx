@@ -207,26 +207,26 @@ export default function TheCodex() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-purple-900/10 pb-4">
+            <div className="flex items-end justify-between border-b border-purple-900/40 pb-4">
                 <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-purple-900 tracking-widest flex items-center gap-3">
-                        <BookOpen className="text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                    <h2 className="font-cinzel text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                        <BookOpen className="text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
                         THE CODEX
                     </h2>
-                    <p className="font-mono text-xs text-purple-900/60 mt-1 tracking-widest uppercase">
+                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md">
                         Entertainment Law Dictionary & Predatory Terminology Translations
                     </p>
                 </div>
             </div>
 
-            <div className="glass-card p-4 flex items-center gap-4 rounded-xl border border-purple-900/10 bg-white/40 shadow-sm">
-                <Search className="text-amber-500" size={20} />
+            <div className="glass-card p-4 flex items-center gap-4 rounded-xl border border-purple-900/30 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md">
+                <Search className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" size={20} />
                 <input
                     type="text"
                     placeholder="Search predatory jargon... (e.g., 'Recoupment', 'Gross Revenue')"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent text-purple-900 font-mono text-sm focus:outline-none placeholder-purple-900/40"
+                    className="flex-1 bg-transparent text-purple-300 font-mono text-sm focus:outline-none placeholder-purple-400/40 text-glow"
                 />
             </div>
 
@@ -239,35 +239,35 @@ export default function TheCodex() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ delay: idx * 0.05 }}
-                            className="glass-card p-6 rounded-2xl border border-purple-900/10 bg-white/40 hover:border-amber-500/30 transition-colors relative overflow-hidden group shadow-sm"
+                            className="glass-card p-6 rounded-2xl border border-purple-900/30 bg-black/40 hover:bg-black/60 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all relative overflow-hidden group shadow-[inset_0_0_20px_rgba(168,85,247,0.05)] backdrop-blur-md"
                         >
-                            <div className={`absolute top-0 left-0 w-1 h-full 
-                                ${entry.dangerLevel === 'CRITICAL' ? 'bg-red-500' :
-                                    entry.dangerLevel === 'HIGH' ? 'bg-purple-500' :
-                                        entry.dangerLevel === 'WARNING' ? 'bg-orange-500' :
-                                            'bg-emerald-500'}`}
+                            <div className={`absolute top-0 left-0 w-1 h-full shadow-[0_0_10px_currentColor]
+                                ${entry.dangerLevel === 'CRITICAL' ? 'bg-red-500 text-red-500' :
+                                    entry.dangerLevel === 'HIGH' ? 'bg-purple-500 text-purple-500' :
+                                        entry.dangerLevel === 'WARNING' ? 'bg-orange-500 text-orange-500' :
+                                            'bg-emerald-500 text-emerald-500'}`}
                             />
 
                             <div className="flex justify-between items-start mb-4">
-                                <h3 className="font-cinzel text-xl text-purple-900 font-bold tracking-widest pl-3">{entry.term}</h3>
-                                <span className={`font-mono text-[10px] tracking-widest px-2 py-1 rounded bg-white/60 shadow-sm border
-                                    ${entry.dangerLevel === 'CRITICAL' ? 'text-red-700 border-red-500/30' :
-                                        entry.dangerLevel === 'HIGH' ? 'text-purple-700 border-purple-500/30' :
-                                            entry.dangerLevel === 'WARNING' ? 'text-orange-700 border-orange-500/30' :
-                                                'text-emerald-700 border-emerald-500/30'}`}>
+                                <h3 className="font-cinzel text-xl text-purple-400 font-bold tracking-widest pl-3 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">{entry.term}</h3>
+                                <span className={`font-mono text-[10px] tracking-widest px-2 py-1 rounded bg-black/60 shadow-sm border backdrop-blur-md
+                                    ${entry.dangerLevel === 'CRITICAL' ? 'text-red-400 border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.3)]' :
+                                        entry.dangerLevel === 'HIGH' ? 'text-purple-400 border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.3)]' :
+                                            entry.dangerLevel === 'WARNING' ? 'text-orange-400 border-orange-500/50 shadow-[0_0_10px_rgba(249,115,22,0.3)]' :
+                                                'text-emerald-400 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]'}`}>
                                     {entry.dangerLevel}
                                 </span>
                             </div>
 
-                            <p className="font-inter text-sm text-gray-800 font-bold mb-2 pl-3">"{entry.translation}"</p>
-                            <p className="font-mono text-xs text-gray-600 leading-relaxed pl-3 bg-purple-900/5 p-3 rounded-md border border-purple-900/5">
+                            <p className="font-inter text-sm text-gray-300 font-bold mb-2 pl-3 drop-shadow-md">"{entry.translation}"</p>
+                            <p className="font-mono text-xs text-gray-400 leading-relaxed pl-3 bg-purple-900/20 p-3 rounded-md border border-purple-900/30 shadow-inner">
                                 {entry.meaning}
                             </p>
                         </motion.div>
                     ))}
                 </AnimatePresence>
                 {filteredEntries.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-purple-900/40 font-mono text-sm tracking-widest">
+                    <div className="col-span-full py-12 text-center text-purple-400/50 font-mono text-sm tracking-widest drop-shadow-sm">
                         NO CODEX ENTRIES FOUND. YOU ARE IN UNCHARTED TERRITORY.
                     </div>
                 )}

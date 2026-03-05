@@ -7,8 +7,8 @@
     --color-studio-900: #b91c1c;
     --color-studio-800: #334155;
     --color-studio-700: #475569;
-    --color-studio-accent: #00f0ff;
-    --color-studio-neon: #00f0ff;
+    --color-studio-accent: #b91c1c;
+    --color-studio-neon: #dc2626;
 
     --font-inter: 'Inter', sans-serif;
     --font-cinzel: 'Cinzel', serif;
@@ -24,7 +24,7 @@
     }
 
     body::selection {
-        background-color: rgba(0, 240, 255, 0.3);
+        background-color: rgba(220, 38, 38, 0.3);
         color: var(--color-studio-neon);
     }
 
@@ -45,32 +45,32 @@
 
 @layer utilities {
     .glass-panel {
-        background-color: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(0, 240, 255, 0.3);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05), inset 0 0 10px rgba(0, 240, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05), inset 0 0 10px rgba(0, 0, 0, 0.05);
     }
 
     .glass-card {
-        background-color: rgba(255, 255, 255, 0.65);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(0, 240, 255, 0.3);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), inset 0 0 15px rgba(0, 240, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), inset 0 0 15px rgba(0, 0, 0, 0.05);
         transition-property: color, background-color, border-color, shadow, transform, box-shadow;
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         transition-duration: 300ms;
     }
 
     .glass-card:hover {
-        border-color: rgba(0, 240, 255, 0.5);
+        border-color: rgba(220, 38, 38, 0.3);
     }
 
     .text-glow {
-        text-shadow: 0 0 10px rgba(0, 240, 255, 0.5), 0 0 20px rgba(0, 240, 255, 0.3);
+        text-shadow: 0 0 10px rgba(220, 38, 38, 0.3), 0 0 20px rgba(220, 38, 38, 0.1);
     }
 
     .border-glow {
-        box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 15px rgba(0, 240, 255, 0.05);
+        box-shadow: 0 0 15px rgba(220, 38, 38, 0.1), inset 0 0 15px rgba(0, 0, 0, 0.05);
     }
 }
 
@@ -92,6 +92,6 @@
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: rgba(0, 240, 255, 0.5);
+        background: rgba(220, 38, 38, 0.5);
     }
 }
