@@ -45,7 +45,7 @@ export default function Dashboard() {
                         </div>
 
                         <div>
-                            <div className="text-[10px] font-mono text-red-900/60 tracking-widest uppercase mb-1">{stat.label}</div>
+                            <div className="text-xs sm:text-[10px] font-mono text-red-900/60 tracking-widest uppercase mb-1">{stat.label}</div>
                             {stat.label === 'REVENUE BALANCE' ? (
                                 <div className="flex flex-col gap-1">
                                     <div className="font-mono text-3xl font-bold text-red-800 tracking-tight leading-none">{stat.value}</div>
@@ -94,7 +94,7 @@ export default function Dashboard() {
                     {/* Fake Graph Lines - Tron style */}
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(220,38,38,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(220,38,38,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.1),transparent_70%)]" />
-                    <div className="text-red-700 font-mono text-sm tracking-widest flex items-center gap-2 relative z-10 shadow-[0_0_15px_rgba(220,38,38,0.1)] bg-white/80 px-4 py-2 border border-red-500/30 rounded">
+                    <div className="text-red-700 font-mono text-xs sm:text-sm tracking-widest flex items-center gap-2 relative z-10 shadow-[0_0_20px_rgba(220,38,38,0.2)] bg-white/95 backdrop-blur-md px-4 py-3 sm:py-2 border border-red-500/30 rounded">
                         <Activity size={16} className="text-red-600 animate-pulse" />
                         AWAITING DATA SYNC...
                     </div>

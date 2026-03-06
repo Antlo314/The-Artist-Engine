@@ -167,18 +167,18 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
                         <div className="flex flex-col gap-4 bg-white/40 p-5 rounded-xl border border-orange-900/10 backdrop-blur-md">
                             {/* City / Zip */}
-                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-400 mb-1">Target Point (City / Zip)</span>
+                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Target Point (City / Zip)</span>
                                 <div className="flex items-center">
                                     <MapPin size={14} className="mr-2 opacity-70" />
-                                    <input placeholder="e.g., Brooklyn, NY or 60601" type="text" value={city} onChange={e => setCity(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white placeholder:text-gray-500" />
+                                    <input placeholder="e.g., Brooklyn, NY or 60601" type="text" value={city} onChange={e => setCity(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white placeholder:text-gray-500" />
                                 </div>
                             </div>
 
                             {/* Radius */}
-                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-400 mb-1">Blast Radius</span>
-                                <select value={radius} onChange={e => setRadius(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white appearance-none cursor-pointer">
+                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Blast Radius</span>
+                                <select value={radius} onChange={e => setRadius(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
                                     <option className="bg-black text-white border-none">Exact City</option>
                                     <option className="bg-black text-white border-none">10 miles</option>
                                     <option className="bg-black text-white border-none">50 miles</option>
@@ -187,9 +187,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </div>
 
                             {/* Genre */}
-                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-2 border border-orange-900/10 focus-within:border-orange-800/50 focus-within:text-orange-700 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Sonic Vector</span>
-                                <select value={genre} onChange={e => setGenre(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
+                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-3 sm:py-2 border border-orange-900/10 focus-within:border-orange-800/50 focus-within:text-orange-700 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Sonic Vector</span>
+                                <select value={genre} onChange={e => setGenre(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
                                     <option className="bg-white border-none">House</option>
                                     <option className="bg-white border-none">Deep House</option>
                                     <option className="bg-white border-none">Techno</option>
@@ -211,9 +211,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </div>
 
                             {/* Tier */}
-                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-2 border border-orange-900/10 focus-within:border-orange-800/50 focus-within:text-orange-700 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Venue Tier</span>
-                                <select value={tier} onChange={e => setTier(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
+                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-3 sm:py-2 border border-orange-900/10 focus-within:border-orange-800/50 focus-within:text-orange-700 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Venue Tier</span>
+                                <select value={tier} onChange={e => setTier(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
                                     <option className="bg-white border-none">Grassroots / Mom & Pop (50-250 cap)</option>
                                     <option className="bg-white border-none">Mid-Size Touring (250-1000 cap)</option>
                                     <option className="bg-white border-none">Top-Tier Theater (1000-3000 cap)</option>
@@ -222,9 +222,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </div>
 
                             {/* Timeframe */}
-                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[9px] uppercase tracking-widest text-orange-400 mb-1">Timeframe</span>
-                                <select value={timeframe} onChange={e => setTimeframe(e.target.value)} className="bg-transparent border-none outline-none text-sm font-mono w-full text-white appearance-none cursor-pointer">
+                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Timeframe</span>
+                                <select value={timeframe} onChange={e => setTimeframe(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
                                     <option className="bg-black text-white border-none">Active Now</option>
                                     <option className="bg-black text-white border-none">Summer 2026</option>
                                     <option className="bg-black text-white border-none">Fall 2026</option>

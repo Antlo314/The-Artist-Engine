@@ -45,23 +45,27 @@ export default function LegalCore() {
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-0">
-                    {/* Vertical Navigation Tabs */}
-                    <div className="flex lg:flex-col gap-2 bg-black/40 backdrop-blur-xl border border-purple-900/40 p-4 lg:pr-6 lg:rounded-l-2xl shadow-xl overflow-x-auto lg:overflow-x-visible lg:w-72 shrink-0 custom-scrollbar z-10 relative">
-                        {tabs.map((tab) => {
-                            const Icon = tab.icon;
-                            const isActive = activeTab === tab.id;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`relative px-4 lg:px-6 py-4 font-mono text-xs tracking-widest uppercase transition-all flex items-center gap-3 whitespace-nowrap lg:whitespace-normal text-left lg:rounded-l-lg lg:rounded-tr-none lg:border-r-2
-                                    ${isActive ? 'text-purple-300 bg-purple-900/30 border-purple-400 shadow-[inset_4px_0_15px_rgba(168,85,247,0.3)] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/60 hover:text-purple-300 hover:bg-black/60 border-transparent rounded-lg lg:rounded-l-lg lg:rounded-r-none'}`}
-                                >
-                                    <Icon size={16} className={`${isActive ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/40'}`} />
-                                    {tab.label}
-                                </button>
-                            );
-                        })}
+                    {/* Vertical Navigation Tabs with Mobile Scroll Fade */}
+                    <div className="relative z-10 shrink-0">
+                        <div className="flex lg:flex-col gap-2 bg-black/40 backdrop-blur-xl border border-purple-900/40 p-4 lg:pr-6 lg:rounded-l-2xl shadow-xl overflow-x-auto lg:overflow-x-visible lg:w-72 custom-scrollbar">
+                            {tabs.map((tab) => {
+                                const Icon = tab.icon;
+                                const isActive = activeTab === tab.id;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`relative px-4 lg:px-6 py-4 font-mono text-xs tracking-widest uppercase transition-all flex items-center gap-3 whitespace-nowrap lg:whitespace-normal text-left lg:rounded-l-lg lg:rounded-tr-none lg:border-r-2
+                                        ${isActive ? 'text-purple-300 bg-purple-900/30 border-purple-400 shadow-[inset_4px_0_15px_rgba(168,85,247,0.3)] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/60 hover:text-purple-300 hover:bg-black/60 border-transparent rounded-lg lg:rounded-l-lg lg:rounded-r-none'}`}
+                                    >
+                                        <Icon size={16} className={`${isActive ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/40'}`} />
+                                        {tab.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        {/* Fade indicator for horizontal scroll on mobile */}
+                        <div className="lg:hidden absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-black/90 to-transparent pointer-events-none rounded-r" />
                     </div>
 
                     {/* Content Area */}

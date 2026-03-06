@@ -93,20 +93,20 @@ export default function App() {
             </div>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 w-full z-50 border-t border-gray-300/30 flex justify-around p-2 pb-safe bg-[#ffffff]/95 backdrop-blur-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 border-t border-gray-300/30 flex justify-between px-2 pb-safe bg-[#ffffff]/95 backdrop-blur-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
                 {navItems.map((item) => (
                     <button
                         key={item.id}
                         onClick={() => setActiveView(item.id)}
-                        className={`flex flex-col items-center gap-1 p-2 w-full transition-all duration-300 relative group
+                        className={`flex flex-col items-center justify-center gap-1.5 py-3 px-1 w-1/4 transition-all duration-300 relative group
                             ${activeView === item.id ? 'text-red-700' : 'text-gray-800 hover:text-red-700'}`}
                     >
-                        <item.icon size={22} className={`transition-all duration-300 ${activeView === item.id ? 'drop-shadow-[0_0_10px_rgba(220,38,38,0.4)] -translate-y-1 scale-110' : ''}`} />
-                        <span className={`text-[8px] font-mono tracking-widest uppercase transition-all duration-300 ${activeView === item.id ? 'font-bold opacity-100' : 'opacity-70'}`}>
+                        <item.icon size={24} className={`transition-all duration-300 ${activeView === item.id ? 'drop-shadow-[0_0_10px_rgba(220,38,38,0.4)] -translate-y-1 scale-110' : ''}`} />
+                        <span className={`text-[9px] sm:text-[10px] text-center leading-tight font-mono tracking-widest uppercase transition-all duration-300 ${activeView === item.id ? 'font-bold opacity-100' : 'opacity-70'}`}>
                             {item.label}
                         </span>
                         {activeView === item.id && (
-                            <motion.div layoutId="mobile-nav-indicator" className="absolute top-0 w-8 h-[2px] bg-red-600 rounded-full shadow-[0_0_8px_rgba(220,38,38,0.5)]" />
+                            <motion.div layoutId="mobile-nav-indicator" className="absolute top-0 w-10 h-[2px] bg-red-600 rounded-full shadow-[0_0_8px_rgba(220,38,38,0.5)]" />
                         )}
                     </button>
                 ))}

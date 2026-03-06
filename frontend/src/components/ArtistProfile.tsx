@@ -104,7 +104,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                         className="w-full bg-black/50 border-b border-yellow-900/30 text-black font-cinzel text-xl text-center py-2 px-4 focus:outline-none focus:border-yellow-800 focus:bg-yellow-900/10 transition-all placeholder:text-gray-600 tracking-widest"
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="font-mono text-[9px] text-yellow-900/70 uppercase tracking-widest pl-2 mb-1 block">Manager Name</label>
                                         <input
@@ -136,7 +136,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                         className="w-full bg-black/50 border border-yellow-900/20 text-black font-inter text-sm py-2 px-3 rounded focus:outline-none focus:border-yellow-800 focus:bg-yellow-900/10 transition-all placeholder:text-gray-600"
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="font-mono text-[9px] text-yellow-900/70 uppercase tracking-widest pl-2 mb-1 block">Fiat Treasury (USD)</label>
                                         <input
