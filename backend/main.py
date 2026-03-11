@@ -191,25 +191,19 @@ async def scout_gigs(request: ScoutRequest):
     }}
     '''
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "systemInstruction": {"parts": [{"text": cities_knowledge}]},
-        "tools": [{"googleSearch": {}}],
-        "generationConfig": {"temperature": 0.6}
-    }
-    
     try:
-        async with httpx.AsyncClient(timeout=40.0) as client:
-            resp = await client.post(url, json=payload)
-        resp.raise_for_status()
-        
-        resp_data = resp.json()
-        candidates = resp_data.get("candidates", [])
-        if not candidates:
-            raise Exception("No candidates returned from Gemini.")
-            
-        raw_text = candidates[0]["content"]["parts"][0]["text"].strip()
+        client = get_genai_client()
+        response = await client.aio.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=cities_knowledge,
+                tools=[{"google_search": {}}],
+                temperature=0.6,
+                response_mime_type="application/json"
+            )
+        )
+        raw_text = response.text.strip()
         if raw_text.startswith("```json"):
             raw_text = raw_text[7:]
         if raw_text.startswith("```"):
@@ -224,8 +218,8 @@ async def scout_gigs(request: ScoutRequest):
         logs.append(f"[GIG RADAR] Intercepted {len(data['venues'])} target vectors.")
         return {"status": "success", "gigs": data, "log": "\n".join(logs)}
         
-    except Exception as e:
-        logs.append(f"[GIG RADAR] System Error: {str(e)}")
+    except Exception as fb_err:
+        logs.append(f"[GIG RADAR] System Error: {str(fb_err)}")
         # Fallback to internal knowledge
         logs.append("[GIG RADAR] Executing Fallback Knowledge Retrieval Protocol...")
         try:
@@ -234,22 +228,21 @@ async def scout_gigs(request: ScoutRequest):
             Timeframe target: {request.timeframe}.
             Use internal world knowledge. Respond in strict JSON only, same schema as before (including contact_persona, contact_source, website_url, social_media_url, payout_model, lead_time, similar_acts, reputation_score, reputation_explanation, capacity, avg_ticket_price_usd, gross_potential_usd, leverage_point, and active_search_signal). Ensure NO missing fields.
             '''
-            fb_payload = {
-                "contents": [{"parts": [{"text": fallback_prompt}]}],
-                "systemInstruction": {"parts": [{"text": cities_knowledge}]},
-                "generationConfig": {"responseMimeType": "application/json"}
-            }
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                fb_resp = await client.post(url, json=fb_payload)
-            fb_resp.raise_for_status()
-            fb_data = fb_resp.json()
-            data = json.loads(fb_data["candidates"][0]["content"]["parts"][0]["text"])
+            fb_response = await client.aio.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=fallback_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=cities_knowledge,
+                    response_mime_type="application/json"
+                )
+            )
+            data = json.loads(fb_response.text)
             
             logs.append("[GIG RADAR] Fallback matrix applied successfully.")
             return {"status": "success", "gigs": data, "log": "\n".join(logs)}
-        except Exception as fb_err:
-             logs.append(f"[GIG RADAR] Terminal Failure on Fallback: {str(fb_err)}")
-             return {"status": "error", "error": str(fb_err), "log": "\n".join(logs)}
+        except Exception as final_err:
+             logs.append(f"[GIG RADAR] Terminal Failure on Fallback: {str(final_err)}")
+             return {"status": "error", "error": str(final_err), "log": "\n".join(logs)}
 
 # ---------------------------------------------------------------------------
 # PILLAR 2.5: GIG RADAR (Auto-Pitch Generator)

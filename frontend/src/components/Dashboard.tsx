@@ -61,11 +61,11 @@ export default function Dashboard() {
                         </div>
 
                         {/* Sparkline decoration */}
-                        <div className="w-full h-1 bg-red-900/10 rounded-full mt-4 overflow-hidden relative">
+                        <div className="w-full h-1 bg-sky-800/10 rounded-full mt-4 overflow-hidden relative">
                             <motion.div
                                 className="absolute left-0 top-0 h-full bg-red-500/50"
                                 initial={{ width: 0 }}
-                                animate={{ width: `${Math.random() * 60 + 20}%` }}
+                                animate={{ width: `${(i * 25 + 35) % 60 + 20}%` }}
                                 transition={{ duration: 1.5, delay: i * 0.2 }}
                             />
                         </div>
@@ -74,27 +74,27 @@ export default function Dashboard() {
             </div>
 
             {/* Main Graph Area */}
-            <div className="glass-card p-8 rounded-xl min-h-[400px] border-glow flex flex-col relative overflow-hidden group border-red-500/30 shadow-[0_0_40px_rgba(220,38,38,0.05)]">
-                {/* Background Art - Cleaned Up */}
+            <div className="glass-card p-4 md:p-8 rounded-xl min-h-[300px] md:min-h-[400px] border-glow flex flex-col relative overflow-hidden group border-red-400/30 shadow-[0_0_40px_rgba(220,38,38,0.05)]">
+                {/* Background Art - Blended and Resized */}
                 <div
-                    className="absolute inset-0 bg-cover bg-center opacity-40 z-0 group-hover:opacity-50 transition-opacity duration-700 pointer-events-none mix-blend-color-burn"
-                    style={{ backgroundImage: "url('/cmd_center.png')" }}
+                    className="absolute inset-0 bg-[length:150%] md:bg-cover bg-center md:bg-right-bottom opacity-15 z-0 group-hover:opacity-30 transition-all duration-700 pointer-events-none mix-blend-multiply"
+                    style={{ backgroundImage: "url('/site/dashboard_hero_art_1773233156229.png')" }}
                 />
 
                 <div className="absolute top-0 right-0 p-4 z-10">
-                    <div className="h-4 w-4 rounded-sm border border-red-500/20 bg-red-900/10 flex items-center justify-center">
+                    <div className="h-4 w-4 rounded-sm border border-red-400/20 bg-sky-800/10 flex items-center justify-center">
                         <BarChart size={10} className="text-red-500" />
                     </div>
                 </div>
 
-                <h3 className="font-cinzel text-xl text-red-700 tracking-widest mb-1">REVENUE VELOCITY</h3>
-                <p className="font-mono text-[10px] text-red-900/60 tracking-widest uppercase">7-Day Trajectory Overview</p>
+                <h3 className="font-cinzel text-lg md:text-xl text-red-700 tracking-widest mb-1 relative z-10">REVENUE VELOCITY</h3>
+                <p className="font-mono text-[9px] md:text-[10px] text-red-900/60 tracking-widest uppercase relative z-10">7-Day Trajectory Overview</p>
 
                 <div className="flex-1 flex items-center justify-center mt-8 border border-red-900/10 bg-white/40 rounded-lg relative overflow-hidden">
                     {/* Fake Graph Lines - Tron style */}
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(220,38,38,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(220,38,38,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.1),transparent_70%)]" />
-                    <div className="text-red-700 font-mono text-xs sm:text-sm tracking-widest flex items-center gap-2 relative z-10 shadow-[0_0_20px_rgba(220,38,38,0.2)] bg-white/95 backdrop-blur-md px-4 py-3 sm:py-2 border border-red-500/30 rounded">
+                    <div className="text-red-700 font-mono text-xs sm:text-sm tracking-widest flex items-center gap-2 relative z-10 shadow-[0_0_20px_rgba(220,38,38,0.2)] bg-white/95 backdrop-blur-md px-4 py-3 sm:py-2 border border-red-400/30 rounded">
                         <Activity size={16} className="text-red-600 animate-pulse" />
                         AWAITING DATA SYNC...
                     </div>

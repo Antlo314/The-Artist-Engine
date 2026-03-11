@@ -56,25 +56,21 @@ export default function App() {
     };
 
     return (
-        <div className="flex h-screen w-full bg-[#a5b5ba] overflow-hidden relative selection:bg-white/50">
+        <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative selection:bg-white/50">
 
             {/* Global Video Background */}
-            <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none z-0 invert mix-blend-color-burn"
-            >
-                <source src="/data_dust.mp4" type="video/mp4" />
-            </video>
+            <img
+                src="/site/light_abstract_bg_1773233140940.png"
+                alt="Background"
+                className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none z-0 mix-blend-normal"
+            />
 
             {/* Glassmorphic Layer Over Video */}
             <div className="absolute inset-0 bg-white/5 backdrop-blur-[10px] shadow-[inset_0_0_100px_rgba(255,255,255,0.05)] pointer-events-none z-0" />
 
             {/* Background Ambient Glows */}
-            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-white/10 rounded-full blur-[120px] pointer-events-none z-0 mix-blend-soft-light" />
-            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-red-500/10 rounded-full blur-[150px] pointer-events-none z-0 mix-blend-soft-light" />
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-sky-200/40 rounded-full blur-[120px] pointer-events-none z-0 mix-blend-normal" />
+            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-white/60 rounded-full blur-[150px] pointer-events-none z-0 mix-blend-normal" />
 
             {/* Mobile Header (Tactical Density) */}
             <div className="md:hidden fixed top-0 w-full glass-panel z-50 flex items-center justify-between p-4 border-b border-gray-300/40 bg-[#ffffff]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
@@ -93,7 +89,7 @@ export default function App() {
             </div>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 border-t border-gray-300/30 flex justify-between px-2 pb-safe bg-[#ffffff]/95 backdrop-blur-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 border-t border-gray-300/30 flex justify-between px-2 pb-4 bg-[#ffffff]/95 backdrop-blur-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
                 {navItems.map((item) => (
                     <button
                         key={item.id}
@@ -146,7 +142,7 @@ export default function App() {
                             onClick={() => setActiveView(item.id)}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-300 relative group
                 ${activeView === item.id
-                                    ? 'bg-gradient-to-r from-red-100/40 to-transparent text-red-700 border-l-2 border-red-600'
+                                    ? 'bg-gradient-to-r from-red-100/40 to-transparent text-red-700 border-l-2 border-red-500'
                                     : 'text-gray-800 hover:text-red-700 hover:bg-slate-100 border-l-2 border-transparent'
                                 }`}
                         >
@@ -188,7 +184,7 @@ export default function App() {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setActiveView('dashboard')}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded transition-all duration-300 font-mono text-xs tracking-widest uppercase ${activeView === 'dashboard' ? 'bg-red-50 text-red-700 border border-red-300' : 'text-gray-800 hover:text-red-700 hover:bg-slate-100 border border-transparent'}`}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded transition-all duration-300 font-mono text-xs tracking-widest uppercase ${activeView === 'dashboard' ? 'bg-sky-50 text-red-700 border border-red-300' : 'text-gray-800 hover:text-red-700 hover:bg-slate-100 border border-transparent'}`}
                         >
                             <BarChart2 size={14} className={activeView === 'dashboard' ? 'text-red-600' : 'text-gray-800'} /> CMD Center
                         </button>
@@ -256,11 +252,11 @@ export default function App() {
                             {/* Mobile Lockdown Overlay */}
                             {['studio'].includes(activeView) && (
                                 <div className="md:hidden flex flex-col items-center justify-center min-h-[50vh] text-center px-4 mt-12">
-                                    <div className="glass-card p-8 rounded-2xl border border-red-500/30 flex flex-col items-center bg-white/60 shadow-[0_0_50px_rgba(239,68,68,0.1)] relative overflow-hidden w-full">
+                                    <div className="glass-card p-8 rounded-2xl border border-red-400/30 flex flex-col items-center bg-white/60 shadow-[0_0_50px_rgba(220,38,38,0.1)] relative overflow-hidden w-full">
                                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-transparent" />
-                                        <AlertTriangle size={48} className="text-red-500 mb-6 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-pulse" />
+                                        <AlertTriangle size={48} className="text-red-500 mb-6 drop-shadow-[0_0_15px_rgba(220,38,38,0.8)] animate-pulse" />
                                         <h2 className="font-cinzel text-xl text-red-700 font-bold tracking-widest mb-2">MOBILE LOCKDOWN</h2>
-                                        <h3 className="font-mono text-[10px] text-red-600 tracking-widest uppercase mb-6 font-bold bg-red-100/80 px-3 py-1 rounded inline-block">Protocol Engaged</h3>
+                                        <h3 className="font-mono text-[10px] text-red-600 tracking-widest uppercase mb-6 font-bold bg-sky-50/80 px-3 py-1 rounded inline-block">Protocol Engaged</h3>
                                         <p className="font-mono text-xs text-gray-600 leading-relaxed uppercase border-t border-slate-200 pt-6">
                                             Desktop Terminal Required.<br /><br />
                                             Data density exceeds safe mobile display protocols.

@@ -3,12 +3,12 @@
 @import "tailwindcss";
 
 @theme {
-    --color-studio-dark: #0f172a;
-    --color-studio-900: #b91c1c;
-    --color-studio-800: #334155;
+    --color-studio-dark: #f8fafc; /* Now actually the light background */
+    --color-studio-900: #0f172a; /* Main dark text */
+    --color-studio-800: #334155; /* Secondary text */
     --color-studio-700: #475569;
-    --color-studio-accent: #b91c1c;
-    --color-studio-neon: #dc2626;
+    --color-studio-accent: #dc2626; /* Vibrant red accent */
+    --color-studio-neon: #ef4444;
 
     --font-inter: 'Inter', sans-serif;
     --font-cinzel: 'Cinzel', serif;
@@ -16,16 +16,16 @@
 
 @layer base {
     body {
-        background-color: #a5b5ba;
-        color: #b91c1c;
+        background-color: #f8fafc;
+        color: #0f172a;
         font-family: var(--font-inter);
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
     }
 
     body::selection {
-        background-color: rgba(220, 38, 38, 0.3);
-        color: var(--color-studio-neon);
+        background-color: rgba(220, 38, 38, 0.2);
+        color: var(--color-studio-accent);
     }
 
     /* Global SVG Noise Overlay Removed for Clarity */
@@ -45,32 +45,34 @@
 
 @layer utilities {
     .glass-panel {
-        background-color: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05), inset 0 0 10px rgba(0, 0, 0, 0.05);
+        background-color: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 8px 32px 0 rgba(220, 38, 38, 0.05); /* Slight red tint to shadow */
     }
 
     .glass-card {
-        background-color: rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), inset 0 0 15px rgba(0, 0, 0, 0.05);
+        background-color: rgba(255, 255, 255, 0.55);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.04), inset 0 0 20px rgba(255, 255, 255, 0.5);
         transition-property: color, background-color, border-color, shadow, transform, box-shadow;
         transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 300ms;
+        transition-duration: 400ms;
     }
 
     .glass-card:hover {
         border-color: rgba(220, 38, 38, 0.3);
+        box-shadow: 0 15px 50px rgba(220, 38, 38, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.8);
+        transform: translateY(-2px);
     }
 
     .text-glow {
-        text-shadow: 0 0 10px rgba(220, 38, 38, 0.3), 0 0 20px rgba(220, 38, 38, 0.1);
+        text-shadow: 0 0 10px rgba(220, 38, 38, 0.2), 0 0 20px rgba(220, 38, 38, 0.1);
     }
 
     .border-glow {
-        box-shadow: 0 0 15px rgba(220, 38, 38, 0.1), inset 0 0 15px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 0 15px rgba(220, 38, 38, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.5);
     }
 }
 
