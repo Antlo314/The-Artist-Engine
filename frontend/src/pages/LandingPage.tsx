@@ -13,17 +13,15 @@ export default function LandingPage() {
                 {/* Cinematic Letterbox - Top */}
                 <div className="absolute top-0 left-0 w-full h-[12vh] bg-black z-20 shadow-[0_20px_50px_rgba(0,0,0,1)]" />
 
-                <div className="absolute inset-0 flex items-center justify-center opacity-60 mix-blend-screen">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                     <video
                         autoPlay
                         loop
                         muted
                         playsInline
-                        webkit-playsinline="true"
-                        className="w-[100vw] h-[100vh] lg:w-full lg:min-h-full object-cover contrast-[1.2]"
+                        className="w-full h-full object-cover contrast-125 saturate-150 brightness-75"
                     >
                         <source src="/site/core_engine.mp4" type="video/mp4" />
-                        <source src="/site/core_engine.webm" type="video/webm" />
                     </video>
                 </div>
 
