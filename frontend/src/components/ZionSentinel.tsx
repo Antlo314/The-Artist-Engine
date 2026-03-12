@@ -210,7 +210,7 @@ export default function ZionSentinel() {
                             <>
                                 <textarea
                                     className="flex-1 bg-transparent p-4 lg:p-6 text-xs lg:text-sm font-mono text-gray-300 focus:outline-none resize-none placeholder-gray-600 min-h-[250px] lg:min-h-[400px] z-10 relative custom-scrollbar leading-relaxed"
-                                    placeholder={`PASTE OR DRAG ${scanType === 'contract' ? 'CONTRACT TEXT (.pdf, .docx, .txt)' : 'VENUE OFFER'} HERE FOR FORENSIC REVIEW...`}
+                                    placeholder={`PASTE OR DRAG ${scanType === 'contract' ? 'CONTRACT TEXT (.pdf, .docx, .txt)' : 'VENUE OFFER'} HERE FOR FORENSIC REVIEW...\\n\\n(MAX LIMIT: ~15 PAGES / 7,500 WORDS PER SCAN)`}
                                     value={contractText}
                                     onChange={e => setContractText(e.target.value)}
                                 />
@@ -218,6 +218,7 @@ export default function ZionSentinel() {
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-40 px-4 text-center">
                                         <UploadCloud size={48} className="mb-2 lg:mb-4 lg:w-16 lg:h-16 text-purple-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
                                         <span className="font-cinzel text-sm sm:text-base lg:text-xl tracking-widest text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_10px_rgba(168,85,247,0.7)] text-glow">DRAG & DROP MODULE</span>
+                                        <span className="font-mono text-[10px] text-purple-300/60 mt-2 tracking-widest font-bold drop-shadow-md">NEXUS LIMIT: ~15 PAGES OR 7,500 WORDS</span>
                                     </div>
                                 )}
                             </>
