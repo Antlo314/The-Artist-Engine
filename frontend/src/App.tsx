@@ -75,8 +75,8 @@ export default function App() {
             {/* Mobile Header (Tactical Density) */}
             <div className="md:hidden fixed top-0 w-full glass-panel z-50 flex items-center justify-between p-4 border-b border-gray-300/40 bg-[#ffffff]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
                 <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded bg-white border border-gray-400/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,0,0,0.1)]">
-                        <Activity size={14} className="text-black" />
+                    <div className="h-7 w-7 rounded bg-white border border-gray-400/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,0,0,0.1)] overflow-hidden">
+                        <img src="/site/favicon.png" alt="Logo" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex flex-col">
                         <h1 className="font-cinzel text-[13px] font-bold tracking-widest text-black leading-tight cursor-pointer hover:text-red-700 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>
@@ -114,8 +114,8 @@ export default function App() {
                 {/* Brand Header */}
                 <div className="p-6 border-b border-slate-200">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="h-8 w-8 rounded bg-white border border-gray-400/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,0,0,0.1)]">
-                            <ShieldCheck size={16} className="text-black" />
+                        <div className="h-8 w-8 rounded bg-white border border-gray-400/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,0,0,0.1)] overflow-hidden">
+                            <img src="/site/favicon.png" alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <div>
                             <h1 className="font-cinzel text-lg font-bold text-black tracking-widest leading-none cursor-pointer hover:text-red-700 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>

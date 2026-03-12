@@ -77,8 +77,8 @@ export default function Dashboard() {
             <div className="glass-card p-4 md:p-8 rounded-xl min-h-[300px] md:min-h-[400px] border-glow flex flex-col relative overflow-hidden group border-red-400/30 shadow-[0_0_40px_rgba(220,38,38,0.05)]">
                 {/* Background Art - Blended and Resized */}
                 <div
-                    className="absolute inset-0 bg-[length:150%] md:bg-cover bg-center md:bg-right-bottom opacity-15 z-0 group-hover:opacity-30 transition-all duration-700 pointer-events-none mix-blend-multiply"
-                    style={{ backgroundImage: "url('/site/dashboard_hero_art_1773233156229.png')" }}
+                    className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-[0.05] z-0 group-hover:opacity-10 transition-all duration-700 pointer-events-none mix-blend-multiply"
+                    style={{ backgroundImage: "url('/site/favicon.png')" }}
                 />
 
                 <div className="absolute top-0 right-0 p-4 z-10">

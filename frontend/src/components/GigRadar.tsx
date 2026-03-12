@@ -101,7 +101,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 throw new Error(data.error);
             }
         } catch (err: any) {
-            setGeneratedPitch('NETWORK ERROR GENERATING PITCH. OFFLINE MANUAL OVERRIDE REQUIRED.');
+            setGeneratedPitch(`ERROR GENERATING PITCH: ${err.message}. ${err.message.includes('Failed to fetch') ? '(Is the Python backend running?)' : 'MANUAL OVERRIDE REQUIRED.'}`);
         } finally {
             setIsDrafting(false);
         }
@@ -137,7 +137,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Target Logic Side Panel */}
-                <div className="glass-card w-full lg:w-1/3 xl:w-1/4 p-6 rounded-2xl relative overflow-hidden group border border-orange-800/30 shadow-[0_0_40px_rgba(249,115,22,0.05)] flex flex-col h-fit sticky top-20">
+                <div className="glass-card w-full lg:w-1/3 xl:w-1/4 p-6 rounded-2xl relative overflow-hidden group border border-orange-800/30 shadow-[0_0_40px_rgba(249,115,22,0.05)] flex flex-col h-auto lg:h-fit lg:sticky lg:top-20 z-30">
                     {/* Background Video Layer - Cleaned Up */}
                     <video
                         autoPlay
@@ -165,7 +165,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </p>
                         </div>
 
-                        <div className="flex flex-col gap-4 bg-white/40 p-5 rounded-xl border border-orange-900/10 backdrop-blur-md">
+                        <div className="flex flex-col gap-4 bg-white/40 p-5 rounded-xl border border-orange-900/10 backdrop-blur-md relative z-20">
                             {/* City / Zip */}
                             <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
                                 <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Target Point (City / Zip)</span>
@@ -377,7 +377,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                                 )}
                                             </div>
                                         </div>
-                                        <p className="font-mono text-xs text-orange-200/80 mb-4 drop-shadow-md">{gig.tier || tier}</p>
+                                        <p className="font-mono text-xs text-orange-200/80 mb-4 drop-shadow-md truncate">{gig.tier || tier}</p>
 
                                         <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
                                             <div className="bg-white/40 p-3 rounded border border-orange-900/10 flex flex-col gap-1">
@@ -429,7 +429,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                             <div className="flex items-center gap-2 font-mono text-xs text-orange-900 mb-2 uppercase tracking-widest drop-shadow-sm">
                                                 <BrainCircuit size={12} /> Shark Negotiation Strategy
                                             </div>
-                                            <p className="text-sm text-gray-700 font-inter leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
+                                            <p className="text-sm text-gray-700 font-inter leading-relaxed line-clamp-2 md:line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
                                                 {gig.strategy}
                                             </p>
                                         </div>
