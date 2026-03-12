@@ -80,10 +80,10 @@ export default function App() {
                     </div>
                     <div className="flex flex-col">
                         <h1 className="font-cinzel text-[13px] font-bold tracking-widest text-black leading-tight cursor-pointer hover:text-red-700 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>
-                        <span className="font-mono text-[8px] text-gray-800 tracking-[0.3em] uppercase leading-none">ENGINE.OS</span>
+                        <span className="font-mono text-[8px] text-gray-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] tracking-[0.3em] uppercase leading-none">ENGINE.OS</span>
                     </div>
                 </div>
-                <div className="font-mono text-[9px] tracking-widest text-gray-800 flex items-center gap-1.5 bg-gray-200/50 px-2 py-1 border border-gray-400/50 rounded drop-shadow-[0_0_8px_rgba(0,0,0,0.1)]">
+                <div className="font-mono text-[9px] tracking-widest text-black font-bold flex items-center gap-1.5 bg-gray-200/50 px-2 py-1 border border-gray-400/50 rounded drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" /> SYNCED
                 </div>
             </div>
@@ -98,7 +98,7 @@ export default function App() {
                             ${activeView === item.id ? 'text-red-700' : 'text-gray-800 hover:text-red-700'}`}
                     >
                         <item.icon size={24} className={`transition-all duration-300 ${activeView === item.id ? 'drop-shadow-[0_0_10px_rgba(220,38,38,0.4)] -translate-y-1 scale-110' : ''}`} />
-                        <span className={`text-[9px] sm:text-[10px] text-center leading-tight font-mono tracking-widest uppercase transition-all duration-300 ${activeView === item.id ? 'font-bold opacity-100' : 'opacity-70'}`}>
+                        <span className={`text-[9px] sm:text-[10px] text-center leading-tight font-mono tracking-widest uppercase transition-all duration-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] ${activeView === item.id ? 'font-bold opacity-100 text-red-800' : 'opacity-80 text-gray-900 font-semibold'}`}>
                             {item.label}
                         </span>
                         {activeView === item.id && (
@@ -119,31 +119,31 @@ export default function App() {
                         </div>
                         <div>
                             <h1 className="font-cinzel text-lg font-bold text-black tracking-widest leading-none cursor-pointer hover:text-red-700 transition-colors" onClick={() => setActiveView('dashboard')}>THE ARTIST</h1>
-                            <span className="font-cinzel text-xs text-gray-800 tracking-[0.2em]">ENGINE.OS</span>
+                            <span className="font-cinzel text-xs text-gray-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)] tracking-[0.2em]">ENGINE.OS</span>
                         </div>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between text-[10px] font-mono tracking-widest text-gray-800">
+                    <div className="mt-4 flex items-center justify-between text-[10px] font-mono tracking-widest text-gray-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]">
                         <span>SYSTEM ALIGNMENT</span>
                         {systemStatus ? (
-                            <span className="text-gray-800 flex items-center gap-1 drop-shadow-[0_0_4px_rgba(0,0,0,0.1)]"><span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" /> OMEGA TIER</span>
+                            <span className="text-black flex items-center gap-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]"><span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse drop-shadow-md" /> OMEGA TIER</span>
                         ) : (
-                            <span className="text-red-600 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-600" /> OFFLINE</span>
+                            <span className="text-red-700 flex items-center gap-1 drop-shadow-[0_1px_1px_rgba(220,38,38,0.3)]"><span className="w-1.5 h-1.5 rounded-full bg-red-600" /> OFFLINE</span>
                         )}
                     </div>
                 </div>
 
                 {/* Nav Links */}
                 <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
-                    <div className="text-[10px] font-mono tracking-widest text-gray-600 mb-4 px-2 uppercase">Core Modules</div>
+                    <div className="text-[10px] font-mono tracking-widest text-gray-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)] mb-4 px-2 uppercase">Core Modules</div>
                     {navItems.map((item) => (
                         <button
                             key={item.id}
                             onClick={() => setActiveView(item.id)}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-300 relative group
                 ${activeView === item.id
-                                    ? 'bg-gradient-to-r from-red-100/40 to-transparent text-red-700 border-l-2 border-red-500'
-                                    : 'text-gray-800 hover:text-red-700 hover:bg-slate-100 border-l-2 border-transparent'
+                                    ? 'bg-gradient-to-r from-red-100/40 to-transparent text-red-800 border-l-2 border-red-500 font-bold drop-shadow-[0_1px_1px_rgba(220,38,38,0.2)]'
+                                    : 'text-gray-900 font-semibold hover:text-red-700 hover:bg-slate-100 border-l-2 border-transparent drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]'
                                 }`}
                         >
                             <item.icon size={18} className={activeView === item.id ? 'text-red-600' : 'text-gray-800 group-hover:text-red-600'} />
@@ -159,9 +159,9 @@ export default function App() {
                 <div className="p-4 border-t border-slate-200 bg-slate-100/50">
                     <div className="flex items-center justify-between">
                         <div>
-                            <div className="text-xs font-bold text-black tracking-wider uppercase">{profile.artistAlias}</div>
-                            <div className="text-[10px] font-mono text-gray-600 flex items-center gap-1 mt-1 uppercase">
-                                <Activity size={10} className="text-red-600" /> SYSTEM ID: {profile.agentName}
+                            <div className="text-xs font-bold text-black drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)] tracking-wider uppercase">{profile.artistAlias}</div>
+                            <div className="text-[10px] font-mono text-gray-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)] flex items-center gap-1 mt-1 uppercase">
+                                <Activity size={10} className="text-red-600 drop-shadow-[0_0_2px_rgba(220,38,38,0.5)]" /> SYSTEM ID: {profile.agentName}
                             </div>
                         </div>
                         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-800 to-black border border-gray-700 flex items-center justify-center overflow-hidden">
@@ -188,7 +188,7 @@ export default function App() {
                         >
                             <BarChart2 size={14} className={activeView === 'dashboard' ? 'text-red-600' : 'text-gray-800'} /> CMD Center
                         </button>
-                        <div className="font-mono text-xs text-gray-600 tracking-widest">
+                        <div className="font-mono text-xs text-gray-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)] tracking-widest">
                             LOC: // SECTOR-7G / {activeView.toUpperCase()} / MODULE-READY
                         </div>
                     </div>
@@ -196,8 +196,8 @@ export default function App() {
                         <div className="flex items-center gap-6 border border-gray-400/30 p-1.5 rounded-lg bg-white/20 shadow-[inset_0_0_10px_rgba(255,255,255,0.5)]">
                             {/* FIAT WALLET */}
                             <div className="flex flex-col items-end px-2">
-                                <span className="text-[9px] font-mono text-gray-700 tracking-widest uppercase mb-0.5">FIAT (STRIPE)</span>
-                                <div className="flex items-center gap-2 text-sm text-black font-mono font-bold">
+                                <span className="text-[9px] font-mono text-gray-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)] tracking-widest uppercase mb-0.5">FIAT (STRIPE)</span>
+                                <div className="flex items-center gap-2 text-sm text-black font-mono font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
                                     <DollarSign size={14} className="text-red-700 drop-shadow-[0_0_3px_rgba(220,38,38,0.4)]" />
                                     {(() => {
                                         const bal = profile.treasuryBalance || '42500.00';
@@ -211,10 +211,10 @@ export default function App() {
 
                             {/* CRYPTO WALLET */}
                             <div className="hidden sm:flex flex-col items-start px-2 bg-gradient-to-r from-yellow-500/10 to-transparent rounded">
-                                <span className="text-[9px] font-mono text-yellow-900 tracking-widest uppercase mb-0.5 flex items-center gap-1">
+                                <span className="text-[9px] font-mono text-yellow-900 font-bold drop-shadow-[0_1px_1px_rgba(113,63,18,0.3)] tracking-widest uppercase mb-0.5 flex items-center gap-1">
                                     <Fingerprint size={10} className="text-yellow-700" /> CRYPTO (ON-CHAIN)
                                 </span>
-                                <div className="flex items-center gap-2 text-sm text-black font-mono font-bold">
+                                <div className="flex items-center gap-2 text-sm text-black font-mono font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
                                     <span className="text-yellow-700 font-sans font-bold">Ξ</span>
                                     {(() => {
                                         const cryptoBal = profile.cryptoBalance || '14.50';
