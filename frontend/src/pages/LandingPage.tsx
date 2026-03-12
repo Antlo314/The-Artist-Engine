@@ -9,11 +9,11 @@ export default function LandingPage() {
     return (
         <div className="min-h-screen bg-black text-white overflow-hidden relative selection:bg-red-500/30">
             {/* Ambient Background */}
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-screen">
+            <div className="absolute inset-0 z-0 pointer-events-none opacity-60 mix-blend-screen">
                 <img
-                    src="/site/light_abstract_bg_1773233140940.png"
-                    alt="Abstract Core"
-                    className="w-full h-full object-cover hue-rotate-180 contrast-125"
+                    src="/site/engine_os_landing_hero.png"
+                    alt="Engine OS Core"
+                    className="w-full h-full object-cover"
                 />
             </div>
 
