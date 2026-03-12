@@ -155,7 +155,7 @@ export default function FeaturesPage() {
                         <p className="font-mono text-sm text-gray-400 tracking-widest uppercase">The old industry model vs. The Artist Engine</p>
                     </div>
 
-                    <div className="glass-panel border border-gray-800 rounded-3xl overflow-hidden bg-black/60 backdrop-blur-xl">
+                    <div className="border border-gray-800 rounded-3xl overflow-hidden bg-black/40 backdrop-blur-2xl shadow-[0_0_80px_rgba(0,0,0,0.5)]">
                         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-800">
                             
                             {/* Feature Column */}
