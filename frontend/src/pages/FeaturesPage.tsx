@@ -155,7 +155,7 @@ export default function FeaturesPage() {
                         <p className="font-mono text-sm text-gray-400 tracking-widest uppercase">The old industry model vs. The Artist Engine</p>
                     </div>
 
-                    <div className="border border-gray-800 rounded-3xl overflow-hidden bg-black/40 backdrop-blur-2xl shadow-[0_0_80px_rgba(0,0,0,0.5)]">
+                    <div className="border border-gray-800 rounded-3xl overflow-hidden bg-black/80 backdrop-blur-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)]">
                         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-800">
                             
                             {/* Feature Column */}
@@ -167,7 +167,7 @@ export default function FeaturesPage() {
                             </div>
 
                             {/* Traditional Model */}
-                            <div className="p-8 bg-black/40">
+                            <div className="p-8 bg-black/80">
                                 <h3 className="font-cinzel text-xl font-bold text-gray-500 text-center mb-12 tracking-widest">TRADITIONAL AGENCY</h3>
                                 <div className="space-y-8">
                                     <div className="flex flex-col h-12 justify-center">

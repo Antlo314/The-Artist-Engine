@@ -10,11 +10,15 @@ export default function LandingPage() {
         <div className="min-h-screen bg-black text-white overflow-hidden relative selection:bg-red-500/30">
             {/* Ambient Background */}
             <div className="absolute inset-0 z-0 pointer-events-none opacity-60 mix-blend-screen">
-                <img
-                    src="/site/engine_os_landing_hero.png"
-                    alt="Engine OS Core"
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                     className="w-full h-full object-cover"
-                />
+                >
+                    <source src="/site/core_engine.mp4" type="video/mp4" />
+                </video>
             </div>
 
             {/* Fog / Grain Overlay */}
