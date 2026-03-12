@@ -396,7 +396,7 @@ export default function StudioCore() {
             {/* Global Header */}
             <div className="flex items-end justify-between border-b border-blue-900/10 pb-4">
                 <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest text-glow flex items-center gap-3 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]">
+                    <h2 className="font-cinzel text-3xl font-bold text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest text-glow flex items-center gap-3 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)] glitch-hover cursor-pointer w-fit">
                         <Mic2 className="text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" />
                         AUDIO MASTER CORE
                     </h2>
@@ -430,7 +430,7 @@ export default function StudioCore() {
                             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                             onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
                             onDrop={handleDrop}
-                            className={`md:col-span-2 glass-card bg-black/40 rounded-2xl p-10 flex flex-col items-center justify-center border-dashed border-2 hover:border-cyan-500/50 transition-all min-h-[400px] relative overflow-hidden group backdrop-blur-md ${isDragging ? 'border-cyan-400 bg-cyan-900/20 shadow-[0_0_30px_rgba(34,211,238,0.3)]' : 'border-blue-900/30 hover:bg-black/60 cursor-default'}`}
+                            className={`md:col-span-2 glass-card bg-black/40 shape-cyber-leaf p-10 flex flex-col items-center justify-center border-dashed border-2 hover:border-cyan-500/50 transition-all min-h-[400px] relative overflow-hidden group backdrop-blur-md ${isDragging ? 'border-cyan-400 bg-cyan-900/20 shadow-[0_0_30px_rgba(34,211,238,0.3)]' : 'border-blue-900/30 hover:bg-black/60 cursor-default'}`}
                         >
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity z-0" />
                             {/* Audio Core Ambient Soundwaves Video Background */}
@@ -568,7 +568,7 @@ export default function StudioCore() {
                         </div>
 
                         {/* Sidebar Info - Oracle Engine Mode */}
-                        <div className="md:col-span-1 glass-card bg-black/40 backdrop-blur-md rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden border border-blue-900/30">
+                        <div className="md:col-span-1 glass-card bg-black/40 backdrop-blur-md shape-chamfer-br p-6 flex flex-col gap-4 relative overflow-hidden border border-blue-900/30">
                             <h3 className="font-mono text-[11px] tracking-widest text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-b border-blue-900/30 pb-2 flex items-center justify-between drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
                                 <span className="flex items-center gap-2"><Activity size={14} /> AUDIO INSIGHTS</span>
                                 {isOracleScanning && <span className="animate-pulse bg-blue-50/500 text-blue-950 px-2 rounded">SCANNING OMEGA CORE...</span>}
@@ -701,7 +701,7 @@ export default function StudioCore() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="glass-card bg-black/60 backdrop-blur-md border border-cyan-900/50 rounded-2xl h-[400px] flex flex-col items-center justify-center relative overflow-hidden shadow-[inset_0_0_50px_rgba(34,211,238,0.1)]"
+                        className="glass-card bg-black/60 backdrop-blur-md border border-cyan-900/50 shape-cyber-leaf h-[400px] flex flex-col items-center justify-center relative overflow-hidden shadow-[inset_0_0_50px_rgba(34,211,238,0.1)]"
                     >
                         {/* Audio Processing Video Background */}
                         <video
@@ -741,7 +741,7 @@ export default function StudioCore() {
                         className="flex flex-col gap-6"
                     >
                         {/* Player & Toggle */}
-                        <div className="glass-card p-6 flex items-center justify-between rounded-2xl border-blue-900 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                        <div className="glass-card p-6 flex items-center justify-between shape-cyber-leaf border-blue-900 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
                             <div className="flex items-center gap-6">
                                 {masterAudioUrl && (
                                     <audio

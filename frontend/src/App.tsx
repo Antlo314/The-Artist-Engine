@@ -27,7 +27,31 @@ export default function App() {
         };
     });
 
-    // Save changes automatically
+    // Custom Cyber Cursor State
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const [isHovering, setIsHovering] = useState(false);
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            setMousePos({ x: e.clientX, y: e.clientY });
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
+
+    useEffect(() => {
+        const handleMouseOver = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName.toLowerCase() === 'button' || target.tagName.toLowerCase() === 'a' || target.closest('button') || target.closest('a') || target.tagName.toLowerCase() === 'input') {
+                setIsHovering(true);
+            } else {
+                setIsHovering(false);
+            }
+        };
+        window.addEventListener('mouseover', handleMouseOver);
+        return () => window.removeEventListener('mouseover', handleMouseOver);
+    }, []);
+
     useEffect(() => {
         localStorage.setItem('sovereign_identity', JSON.stringify(profile));
     }, [profile]);
@@ -56,21 +80,44 @@ export default function App() {
     };
 
     return (
-        <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative selection:bg-white/50">
+        <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative selection:bg-white/50 custom-cursor-active">
+
+            {/* Custom Cyber Cursor */}
+            <motion.div 
+                className="fixed top-0 left-0 w-6 h-6 rounded-full border border-red-500 pointer-events-none z-[100000] mix-blend-difference flex items-center justify-center hidden md:flex"
+                animate={{ 
+                    x: mousePos.x - 12, 
+                    y: mousePos.y - 12,
+                    scale: isHovering ? 1.8 : 1,
+                    backgroundColor: isHovering ? 'rgba(220,38,38,0.2)' : 'transparent',
+                    borderColor: isHovering ? 'rgba(220,38,38,1)' : 'rgba(220,38,38,0.5)'
+                }}
+                transition={{ type: 'spring', stiffness: 500, damping: 28, mass: 0.5 }}
+            >
+                <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+            </motion.div>
 
             {/* Global Video Background */}
             <img
                 src="/site/light_abstract_bg_1773233140940.png"
                 alt="Background"
-                className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none z-0 mix-blend-normal"
+                className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none z-0 mix-blend-normal transform scale-[1.02]"
             />
 
             {/* Glassmorphic Layer Over Video */}
             <div className="absolute inset-0 bg-white/5 backdrop-blur-[10px] shadow-[inset_0_0_100px_rgba(255,255,255,0.05)] pointer-events-none z-0" />
 
             {/* Background Ambient Glows */}
-            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-sky-200/40 rounded-full blur-[120px] pointer-events-none z-0 mix-blend-normal" />
-            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-white/60 rounded-full blur-[150px] pointer-events-none z-0 mix-blend-normal" />
+            <motion.div 
+                animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.6, 0.4] }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-sky-200/40 rounded-full blur-[120px] pointer-events-none z-0 mix-blend-normal" 
+            />
+            <motion.div 
+                animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.8, 0.6] }}
+                transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-white/60 rounded-full blur-[150px] pointer-events-none z-0 mix-blend-normal" 
+            />
 
             {/* Mobile Header (Tactical Density) */}
             <div className="md:hidden fixed top-0 w-full glass-panel z-50 flex items-center justify-between p-4 border-b border-gray-300/40 bg-[#ffffff]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
@@ -108,8 +155,8 @@ export default function App() {
                 ))}
             </nav>
 
-            {/* Sidebar Navigation (Desktop) */}
-            <nav className="hidden md:flex relative z-40 h-full w-64 glass-panel border-r border-slate-200 flex-col transition-transform duration-300">
+            {/* Sidebar Navigation (Desktop) - Asymmetric Shape and Shadow */}
+            <nav className="hidden md:flex relative z-40 h-full w-64 glass-panel border-r border-slate-200 flex-col transition-transform duration-300 rounded-tr-[3rem] rounded-br-[3rem] shadow-[20px_0_50px_rgba(0,0,0,0.03)] my-2 ml-2 h-[calc(100vh-16px)]">
 
                 {/* Brand Header */}
                 <div className="p-6 border-b border-slate-200">

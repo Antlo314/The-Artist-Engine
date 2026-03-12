@@ -13,32 +13,61 @@ export default function Dashboard() {
         <div className="space-y-6">
 
             {/* Header */}
-            <div className="flex items-end justify-between border-b border-red-900/10 pb-4">
-                <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-red-700 tracking-widest text-glow">COMMAND CENTER</h2>
-                    <p className="font-mono text-xs text-red-900/60 tracking-widest uppercase mt-1">Holistic View // System Nomimal // Level 4 Access</p>
+            <div className="flex items-end justify-between border-b border-red-900/10 pb-4 relative z-10">
+                <div className="flex items-center gap-4">
+                    <div>
+                        <h2 className="font-cinzel text-3xl font-bold text-red-700 tracking-widest text-glow glitch-hover cursor-pointer">COMMAND CENTER</h2>
+                        <p className="font-mono text-xs text-red-900/60 tracking-widest uppercase mt-1">Holistic View // System Nomimal // Level 4 Access</p>
+                    </div>
                 </div>
-                <div className="hidden md:flex items-center gap-2">
-                    <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                    </span>
-                    <span className="font-mono text-[10px] tracking-widest text-green-400 bg-green-900/30 px-2 py-1 border border-green-500/50 rounded drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]">
-                        LIVE TELEMETRY
-                    </span>
+                
+                <div className="hidden md:flex items-center gap-4">
+                    {/* Faux EQ Node Simulator */}
+                    <div className="flex items-end gap-[2px] h-6 mr-4 opacity-70">
+                        {[40, 70, 30, 90, 50, 80].map((h, idx) => (
+                            <motion.div
+                                key={idx}
+                                animate={{ height: [`${h}%`, `${h * 0.4}%`, `${h * 1.2}%`, `${h}%`] }}
+                                transition={{ duration: 1.5 + (idx * 0.2), repeat: Infinity, ease: "easeInOut" }}
+                                className="w-1 bg-red-600 rounded-t-sm"
+                            />
+                        ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                        <span className="font-mono text-[10px] tracking-widest text-green-400 bg-green-900/30 px-2 py-1 border border-green-500/50 rounded drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]">
+                            LIVE TELEMETRY
+                        </span>
+                    </div>
                 </div>
             </div>
 
             {/* Hero Sparklines */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+                }}
+            >
                 {stats.map((stat, i) => (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.1 }}
+                        variants={{
+                            hidden: { opacity: 0, y: 30, scale: 0.9 },
+                            visible: { opacity: 1, y: 0, scale: 1 }
+                        }}
+                        whileHover={{ scale: 1.05, translateY: -5 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                         key={i}
-                        className="glass-card p-6 rounded-xl flex flex-col justify-between group"
+                        className={`glass-card p-6 flex flex-col justify-between group relative overflow-hidden ${i % 2 === 0 ? 'shape-cyber-leaf' : 'rounded-full px-8 items-center text-center shape-chamfer-br'}`}
                     >
+                        <div className={`absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent z-0 pointer-events-none ${i % 2 !== 0 && 'rotate-180'}`} />
                         <div className="flex items-start justify-between">
                             <stat.icon size={20} className={`${stat.color} mb-4 group-hover:scale-110 transition-transform`} />
                             <Activity size={14} className="text-red-900/20" />
@@ -61,9 +90,9 @@ export default function Dashboard() {
                         </div>
 
                         {/* Sparkline decoration */}
-                        <div className="w-full h-1 bg-sky-800/10 rounded-full mt-4 overflow-hidden relative">
+                        <div className="w-full h-1 bg-sky-800/10 rounded-full mt-4 overflow-hidden relative z-10">
                             <motion.div
-                                className="absolute left-0 top-0 h-full bg-red-500/50"
+                                className="absolute left-0 top-0 h-full bg-red-500/50 mix-blend-screen"
                                 initial={{ width: 0 }}
                                 animate={{ width: `${(i * 25 + 35) % 60 + 20}%` }}
                                 transition={{ duration: 1.5, delay: i * 0.2 }}
@@ -71,7 +100,7 @@ export default function Dashboard() {
                         </div>
                     </motion.div>
                 ))}
-            </div>
+            </motion.div>
 
             {/* Main Graph Area */}
             <div className="glass-card p-4 md:p-8 rounded-xl min-h-[300px] md:min-h-[400px] border-glow flex flex-col relative overflow-hidden group border-red-400/30 shadow-[0_0_40px_rgba(220,38,38,0.05)]">

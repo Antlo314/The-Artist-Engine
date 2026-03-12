@@ -31,8 +31,8 @@ export default function LegalCore() {
 
             <div className="z-10 relative flex flex-col h-full space-y-8">
                 {/* Header */}
-                <div className="flex flex-col border-b border-purple-900/30 pb-4 lg:pb-6">
-                    <h1 className="font-cinzel text-2xl sm:text-3xl lg:text-5xl font-bold text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-[0.2em] uppercase flex items-center gap-2 lg:gap-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]">
+                <div className="flex flex-col border-b border-purple-900/30 pb-4 lg:pb-6 relative z-10">
+                    <h1 className="font-cinzel text-2xl sm:text-3xl lg:text-5xl font-bold text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-[0.2em] uppercase flex items-center gap-2 lg:gap-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)] glitch-hover cursor-pointer w-fit">
                         <Shield className="text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] w-6 h-6 lg:w-9 lg:h-9 shrink-0" />
                         LEGAL WAR ROOM
                     </h1>
@@ -55,8 +55,8 @@ export default function LegalCore() {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`relative px-2 py-3 lg:px-6 lg:py-4 font-mono text-[9px] sm:text-xs tracking-widest uppercase transition-all flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2 text-center lg:text-left rounded-lg lg:rounded-l-lg lg:rounded-tr-none lg:border-r-2
-                                        ${isActive ? 'text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-purple-900/30 border-purple-400 shadow-[inset_4px_0_15px_rgba(168,85,247,0.3)] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/60 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] hover:text-purple-300 hover:bg-black/60 border-transparent'}`}
+                                        className={`relative px-2 py-3 lg:px-6 lg:py-4 font-mono text-[9px] sm:text-xs tracking-widest uppercase transition-all duration-300 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2 text-center lg:text-left shape-cyber-leaf hover:scale-[1.02]
+                                        ${isActive ? 'text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-purple-900/30 border border-purple-400 shadow-[inset_4px_0_15px_rgba(168,85,247,0.3)] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/60 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] hover:text-purple-300 hover:bg-black/60 border border-purple-900/20'}`}
                                     >
                                         <Icon className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-4 lg:h-4 shrink-0 ${isActive ? 'text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/40 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'}`} />
                                         <span>{tab.label}</span>

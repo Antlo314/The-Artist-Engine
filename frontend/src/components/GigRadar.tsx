@@ -142,7 +142,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Target Logic Side Panel */}
-                <div className="glass-card w-full lg:w-1/3 xl:w-1/4 p-6 rounded-2xl relative overflow-hidden group border border-orange-800/30 shadow-[0_0_40px_rgba(249,115,22,0.05)] flex flex-col h-auto lg:h-fit lg:sticky lg:top-20 z-30">
+                <div className="glass-card w-full lg:w-1/3 xl:w-1/4 p-6 shape-chamfer-br relative overflow-hidden group border border-orange-800/30 shadow-[0_0_40px_rgba(249,115,22,0.05)] flex flex-col h-auto lg:h-fit lg:sticky lg:top-20 z-30 transition-transform duration-500 hover:scale-[1.01]">
                     {/* Background Video Layer - Cleaned Up */}
                     <video
                         autoPlay
@@ -161,7 +161,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
                     <div className="flex flex-col gap-6 relative z-10">
                         <div>
-                            <h2 className="font-cinzel text-2xl font-bold text-orange-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-3">
+                            <h2 className="font-cinzel text-2xl font-bold text-orange-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-3 glitch-hover cursor-pointer w-fit">
                                 <Radar className="text-orange-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" size={24} />
                                 GIG RADAR
                             </h2>
@@ -181,9 +181,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </div>
 
                             {/* Radius */}
-                            <div className="relative flex flex-col text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
+                            <div className="relative flex flex-col text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors glass-well">
                                 <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-1">Blast Radius</span>
-                                <select value={radius} onChange={e => setRadius(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
+                                <select title="Blast Radius" value={radius} onChange={e => setRadius(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
                                     <option className="bg-black text-white border-none">Exact City</option>
                                     <option className="bg-black text-white border-none">10 miles</option>
                                     <option className="bg-black text-white border-none">50 miles</option>
@@ -227,9 +227,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </div>
 
                             {/* Timeframe */}
-                            <div className="relative flex flex-col text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
+                            <div className="relative flex flex-col text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors glass-well">
                                 <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-1">Timeframe</span>
-                                <select value={timeframe} onChange={e => setTimeframe(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
+                                <select title="Timeframe" value={timeframe} onChange={e => setTimeframe(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
                                     <option className="bg-black text-white border-none">Active Now</option>
                                     <option className="bg-black text-white border-none">Summer 2026</option>
                                     <option className="bg-black text-white border-none">Fall 2026</option>
@@ -334,10 +334,11 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 return (
                                     <motion.div
                                         key={idx}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                        className={`glass-card rounded-xl p-6 relative overflow-hidden group transition-all duration-300 backdrop-blur-md border ${gig.pipeline_status === 'PITCHED' ? 'border-orange-800/40 bg-black/80 opacity-80' : isAlpha ? 'bg-black/60 border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)] ring-1 ring-orange-500/50' : 'bg-black/40 hover:bg-black/60 hover:border-orange-500/50 border-orange-900/30'}`}
+                                        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        transition={{ delay: idx * 0.1, type: "spring", stiffness: 300, damping: 25 }}
+                                        whileHover={{ scale: 1.02, y: -4 }}
+                                        className={`glass-card p-6 relative overflow-hidden group transition-all duration-300 backdrop-blur-md border shape-cyber-leaf ${gig.pipeline_status === 'PITCHED' ? 'border-orange-800/40 bg-black/80 opacity-80' : isAlpha ? 'bg-black/60 border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)] ring-1 ring-orange-500/50' : 'bg-black/40 hover:bg-black/60 hover:border-orange-500/50 border-orange-900/30'}`}
                                     >
                                         {/* BG Accents */}
                                         <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-800/10 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
