@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Activity, BarChart2, Mic2, Briefcase, Scale, Radio, DollarSign, ArrowUpRight, AlertTriangle, Fingerprint } from 'lucide-react';
+import { ShieldCheck, Activity, BarChart2, Mic2, Scale, Radio, DollarSign, ArrowUpRight, AlertTriangle, Fingerprint } from 'lucide-react';
 
 // Components placeholders - will be implemented individually
 import Dashboard from '../components/Dashboard';
@@ -11,7 +11,7 @@ import ArtistProfile from '../components/ArtistProfile';
 
 export default function EngineCore() {
     const [activeView, setActiveView] = useState('dashboard');
-    const [systemStatus, setSystemStatus] = useState<any>(null);
+    const [systemStatus, setSystemStatus] = useState<any>({ status: 'online' });
 
     // Sovereign User Context (Persistent Global Profile)
     const [profile, setProfile] = useState(() => {
@@ -27,16 +27,9 @@ export default function EngineCore() {
         };
     });
 
-    // Sovereign User Context (Persistent Global Profile)
-
     useEffect(() => {
         localStorage.setItem('sovereign_identity', JSON.stringify(profile));
     }, [profile]);
-
-    useEffect(() => {
-        // Simulate Backend Online Status for static deployment
-        setSystemStatus({ status: 'online' });
-    }, []);
 
     const navItems = [
         { id: 'radar', label: 'Gig Radar', icon: Radio },
@@ -60,10 +53,21 @@ export default function EngineCore() {
         <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative selection:bg-white/50">
 
             {/* Global Video Background */}
-            <img
-                src="/site/light_abstract_bg_1773233140940.png"
-                alt="Background"
-                className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none z-0 mix-blend-normal transform scale-[1.02]"
+            <div 
+                className="absolute inset-0 w-full h-full pointer-events-none z-0 mix-blend-normal overflow-hidden opacity-90"
+                dangerouslySetInnerHTML={{
+                    __html: `
+                    <video
+                        autoplay
+                        loop
+                        muted
+                        playsinline
+                        class="w-full h-full object-cover transform scale-[1.02]"
+                    >
+                        <source src="/site/soverein_server.mp4" type="video/mp4" />
+                    </video>
+                    `
+                }}
             />
 
             {/* Glassmorphic Layer Over Video */}

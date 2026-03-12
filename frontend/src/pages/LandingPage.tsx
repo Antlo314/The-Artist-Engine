@@ -13,17 +13,22 @@ export default function LandingPage() {
                 {/* Cinematic Letterbox - Top */}
                 <div className="absolute top-0 left-0 w-full h-[12vh] bg-black z-20 shadow-[0_20px_50px_rgba(0,0,0,1)]" />
 
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                    <video
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-cover contrast-125 saturate-150 brightness-75"
-                    >
-                        <source src="/site/core_engine.mp4" type="video/mp4" />
-                    </video>
-                </div>
+                <div 
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                        <video
+                            autoplay
+                            loop
+                            muted
+                            playsinline
+                            class="w-full h-full object-cover contrast-125 saturate-150 brightness-75"
+                        >
+                            <source src="/site/core_engine.mp4" type="video/mp4" />
+                        </video>
+                        `
+                    }}
+                />
 
                 {/* Cinematic Letterbox - Bottom */}
                 <div className="absolute bottom-0 left-0 w-full h-[12vh] bg-black z-20 shadow-[0_-20px_50px_rgba(0,0,0,1)] flex items-end justify-center pb-4">

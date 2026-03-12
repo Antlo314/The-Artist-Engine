@@ -62,9 +62,26 @@ export default function FeaturesPage() {
         <div className="min-h-screen bg-black text-white overflow-hidden relative selection:bg-red-500/30">
             <MarketingNav />
             
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-20">
-                 <div className="absolute top-[20%] left-[10%] w-[800px] h-[800px] bg-red-900/40 rounded-full blur-[120px]" />
-                 <div className="absolute bottom-[20%] right-[10%] w-[800px] h-[800px] bg-cyan-900/30 rounded-full blur-[120px]" />
+            {/* Ambient Background (Video + Glows) */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                <div 
+                    className="absolute inset-0 w-full h-full mix-blend-screen opacity-10"
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                        <video
+                            autoplay
+                            loop
+                            muted
+                            playsinline
+                            class="w-full h-full object-cover"
+                        >
+                            <source src="/site/data_stream.mp4" type="video/mp4" />
+                        </video>
+                        `
+                    }}
+                />
+                <div className="absolute top-[20%] left-[10%] w-[800px] h-[800px] bg-red-900/20 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[20%] right-[10%] w-[800px] h-[800px] bg-cyan-900/20 rounded-full blur-[120px]" />
             </div>
 
             <main className="relative z-20 container mx-auto px-4 pt-40 pb-24">
