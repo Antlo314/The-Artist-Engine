@@ -79,10 +79,10 @@ export default function FeaturesPage() {
                     <span className="font-mono text-sm tracking-[0.3em] text-red-500 uppercase font-bold border border-red-900/50 px-4 py-2 bg-red-900/10 rounded-full mb-8 inline-block">
                         System Architecture V2.1
                     </span>
-                    <h1 className="font-cinzel text-4xl md:text-7xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] mb-8">
+                    <h1 className="font-cinzel text-3xl md:text-7xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] mb-4 md:mb-8">
                         THE SOVEREIGN PLAYBOOK.
                     </h1>
-                    <p className="font-mono text-sm md:text-base text-gray-400 tracking-widest max-w-3xl mx-auto uppercase leading-relaxed">
+                    <p className="font-mono text-xs md:text-base text-gray-400 tracking-widest max-w-3xl mx-auto uppercase leading-relaxed">
                         The Artist Engine isn't just software. It's a localized, autonomous agency replacement. You no longer need a manager, a lawyer, or a mastering engineer. You only need the Engine.
                     </p>
                 </motion.div>
@@ -96,7 +96,7 @@ export default function FeaturesPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, margin: "-100px" }}
                             transition={{ duration: 0.8 }}
-                            className={`flex flex-col ${feat.reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-16`}
+                            className={`flex flex-col ${feat.reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-8 lg:gap-16`}
                         >
                             {/* Visual Asset (Mockup) */}
                             <div className="w-full lg:w-1/2 relative group">
@@ -114,16 +114,16 @@ export default function FeaturesPage() {
 
                             {/* Copy & Selling Points */}
                             <div className="w-full lg:w-1/2 space-y-8">
-                                <div className="flex items-center gap-4">
-                                    <feat.icon className={`${feat.color} w-10 h-10`} />
-                                    <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-widest text-white uppercase drop-shadow-lg">
+                                <div className="flex items-center gap-3 md:gap-4">
+                                    <feat.icon className={`${feat.color} w-8 h-8 md:w-10 md:h-10`} />
+                                    <h2 className="font-cinzel text-2xl md:text-5xl font-bold tracking-widest text-white uppercase drop-shadow-lg">
                                         {feat.title.split(':')[0]}
                                     </h2>
                                 </div>
-                                <h3 className={`font-mono text-lg tracking-[0.2em] ${feat.color} uppercase font-bold`}>
+                                <h3 className={`font-mono text-sm md:text-lg tracking-[0.2em] ${feat.color} uppercase font-bold`}>
                                     // {feat.tagline}
                                 </h3>
-                                <p className="font-mono text-sm md:text-base text-gray-400 leading-relaxed uppercase tracking-wider">
+                                <p className="font-mono text-xs md:text-base text-gray-400 leading-relaxed uppercase tracking-wider">
                                     {feat.desc}
                                 </p>
 

@@ -7,7 +7,7 @@ export default function LandingPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-black text-white overflow-hidden relative selection:bg-red-500/30">
+        <div className="min-h-screen bg-black text-white overflow-x-hidden relative selection:bg-red-500/30">
             {/* Ambient Background */}
             <div className="absolute inset-0 z-0 pointer-events-none bg-black overflow-hidden relative">
                 {/* Cinematic Letterbox - Top */}
@@ -44,7 +44,7 @@ export default function LandingPage() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1.2, ease: "easeOut" }}
-                    className="flex flex-col items-center"
+                    className="flex flex-col items-center mt-24 mb-16"
                 >
                     <div className="mb-6 flex items-center justify-center space-x-3">
                         <div className="w-12 h-12 border border-red-500/30 rounded-lg flex items-center justify-center bg-black/40 backdrop-blur-md shadow-[0_0_15px_rgba(220,38,38,0.2)]">
@@ -70,17 +70,17 @@ export default function LandingPage() {
                     <div className="flex flex-col sm:flex-row gap-6">
                         <button
                             onClick={() => navigate('/engine')}
-                            className="group relative px-8 py-4 bg-transparent overflow-hidden rounded-sm border border-red-500/50 hover:border-red-400 transition-colors"
+                            className="group relative px-6 py-4 md:px-8 bg-transparent overflow-hidden rounded-sm border border-red-500/50 hover:border-red-400 transition-colors"
                         >
                             <div className="absolute inset-0 bg-red-600/10 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
-                            <div className="relative flex items-center gap-3 font-mono tracking-widest text-sm text-red-50 font-bold uppercase drop-shadow-md">
+                            <div className="relative flex items-center justify-center gap-3 font-mono tracking-widest text-xs md:text-sm text-red-50 font-bold uppercase drop-shadow-md">
                                 Enter The Engine <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                             </div>
                         </button>
 
                         <button
                             onClick={() => navigate('/features')}
-                            className="px-8 py-4 bg-transparent border border-gray-700 hover:border-gray-500 transition-colors rounded-sm font-mono tracking-widest text-sm text-gray-300 hover:text-white uppercase"
+                            className="px-6 py-4 md:px-8 bg-transparent border border-gray-700 hover:border-gray-500 transition-colors rounded-sm font-mono tracking-widest text-xs md:text-sm text-gray-300 hover:text-white uppercase flex items-center justify-center"
                         >
                             View Architecture
                         </button>
@@ -92,19 +92,19 @@ export default function LandingPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1, duration: 1 }}
-                    className="absolute bottom-12 w-full max-w-5xl px-4 grid grid-cols-1 md:grid-cols-3 gap-8"
+                    className="w-full max-w-5xl px-2 grid grid-cols-3 gap-2 md:gap-8 pb-12 mt-auto"
                 >
-                    <div className="flex flex-col items-center opacity-60 hover:opacity-100 transition-opacity">
-                        <Target className="text-red-500 mb-2" size={20} />
-                        <span className="font-mono text-[9px] tracking-[0.2em] text-gray-400 uppercase">Multi-Vector Gig Radar</span>
+                    <div className="flex flex-col items-center text-center opacity-60 hover:opacity-100 transition-opacity">
+                        <Target className="text-red-500 mb-1 md:mb-2 w-5 h-5 md:w-6 md:h-6" />
+                        <span className="font-mono text-[8px] md:text-[9px] tracking-wider md:tracking-[0.2em] text-gray-400 uppercase">Gig Radar</span>
                     </div>
-                    <div className="flex flex-col items-center opacity-60 hover:opacity-100 transition-opacity">
-                        <Shield className="text-purple-500 mb-2" size={20} />
-                        <span className="font-mono text-[9px] tracking-[0.2em] text-gray-400 uppercase">Zion Protocol Defense</span>
+                    <div className="flex flex-col items-center text-center opacity-60 hover:opacity-100 transition-opacity">
+                        <Shield className="text-purple-500 mb-1 md:mb-2 w-5 h-5 md:w-6 md:h-6" />
+                        <span className="font-mono text-[8px] md:text-[9px] tracking-wider md:tracking-[0.2em] text-gray-400 uppercase">Zion Protocol</span>
                     </div>
-                    <div className="flex flex-col items-center opacity-60 hover:opacity-100 transition-opacity">
-                        <Zap className="text-cyan-500 mb-2" size={20} />
-                        <span className="font-mono text-[9px] tracking-[0.2em] text-gray-400 uppercase">Neural Audio Mastering</span>
+                    <div className="flex flex-col items-center text-center opacity-60 hover:opacity-100 transition-opacity">
+                        <Zap className="text-cyan-500 mb-1 md:mb-2 w-5 h-5 md:w-6 md:h-6" />
+                        <span className="font-mono text-[8px] md:text-[9px] tracking-wider md:tracking-[0.2em] text-gray-400 uppercase">Neural Audio</span>
                     </div>
                 </motion.div>
             </main>
