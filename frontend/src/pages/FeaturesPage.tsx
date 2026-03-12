@@ -159,11 +159,14 @@ export default function FeaturesPage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-800">
                             
                             {/* Feature Column */}
-                            <div className="p-8 hidden md:flex flex-col justify-end space-y-8">
-                                <div className="font-mono text-xs text-gray-500 uppercase tracking-widest h-12 flex items-center">Client Acquisition</div>
-                                <div className="font-mono text-xs text-gray-500 uppercase tracking-widest h-12 flex items-center">Legal Defense</div>
-                                <div className="font-mono text-xs text-gray-500 uppercase tracking-widest h-12 flex items-center">Audio Processing</div>
-                                <div className="font-mono text-xs text-gray-500 uppercase tracking-widest h-12 flex items-center">Revenue Split</div>
+                            <div className="p-8 hidden md:block">
+                                <h3 className="font-cinzel text-xl font-bold text-gray-700 text-left mb-12 tracking-widest border-b border-gray-800 pb-2">CAPABILITY</h3>
+                                <div className="space-y-8">
+                                    <div className="font-mono text-xs text-gray-500 uppercase tracking-widest h-12 flex items-center">Client Acquisition</div>
+                                    <div className="font-mono text-xs text-gray-500 uppercase tracking-widest h-12 flex items-center">Legal Defense</div>
+                                    <div className="font-mono text-xs text-gray-500 uppercase tracking-widest h-12 flex items-center">Audio Processing</div>
+                                    <div className="font-mono text-xs text-gray-500 uppercase tracking-widest h-12 flex items-center">Revenue Split</div>
+                                </div>
                             </div>
 
                             {/* Traditional Model */}
