@@ -27,30 +27,7 @@ export default function App() {
         };
     });
 
-    // Custom Cyber Cursor State
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-    const [isHovering, setIsHovering] = useState(false);
-
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            setMousePos({ x: e.clientX, y: e.clientY });
-        };
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
-
-    useEffect(() => {
-        const handleMouseOver = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-            if (target.tagName.toLowerCase() === 'button' || target.tagName.toLowerCase() === 'a' || target.closest('button') || target.closest('a') || target.tagName.toLowerCase() === 'input') {
-                setIsHovering(true);
-            } else {
-                setIsHovering(false);
-            }
-        };
-        window.addEventListener('mouseover', handleMouseOver);
-        return () => window.removeEventListener('mouseover', handleMouseOver);
-    }, []);
+    // Sovereign User Context (Persistent Global Profile)
 
     useEffect(() => {
         localStorage.setItem('sovereign_identity', JSON.stringify(profile));
@@ -80,22 +57,7 @@ export default function App() {
     };
 
     return (
-        <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative selection:bg-white/50 custom-cursor-active">
-
-            {/* Custom Cyber Cursor */}
-            <motion.div 
-                className="fixed top-0 left-0 w-6 h-6 rounded-full border border-red-500 pointer-events-none z-[100000] mix-blend-difference flex items-center justify-center hidden md:flex"
-                animate={{ 
-                    x: mousePos.x - 12, 
-                    y: mousePos.y - 12,
-                    scale: isHovering ? 1.8 : 1,
-                    backgroundColor: isHovering ? 'rgba(220,38,38,0.2)' : 'transparent',
-                    borderColor: isHovering ? 'rgba(220,38,38,1)' : 'rgba(220,38,38,0.5)'
-                }}
-                transition={{ type: 'spring', stiffness: 500, damping: 28, mass: 0.5 }}
-            >
-                <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
-            </motion.div>
+        <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative selection:bg-white/50">
 
             {/* Global Video Background */}
             <img

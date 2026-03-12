@@ -125,10 +125,7 @@
         clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
     }
 
-    /* Hide Default Cursor (Replaced by Framer Motion) */
-    .custom-cursor-active, .custom-cursor-active * {
-        cursor: none !important;
-    }
+    /* Hidden Default Cursor (Replaced by Framer) - REMOVED for performance */
 }
 
 @keyframes glitch-anim {
