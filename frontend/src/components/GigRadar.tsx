@@ -75,25 +75,30 @@ export default function GigRadar({ profile }: GigRadarProps) {
         setPitchRoutingTo(type === 'dm' ? targetGig.social_media_url || 'Unknown Social Link' : targetGig.contact || '');
         setGeneratedPitch('');
         setIsDrafting(true);
+        
+        const safeString = (val: any, fallback: string) => (val && typeof val === 'string' && val.trim().length > 0) ? val : fallback;
+
         try {
             const response = await fetch('/api/draft-pitch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    venue_name: targetGig.name,
-                    venue_tier: targetGig.tier || tier,
-                    genre: genre,
-                    contact_persona: targetGig.contact_persona || 'Booking Team',
-                    payout_model: targetGig.payout_model || 'Standard',
-                    artist_name: profile.artistAlias || 'The Artist',
-                    agent_name: profile.agentName || 'The Manager',
+                    venue_name: safeString(targetGig.name, 'Unknown Venue'),
+                    venue_tier: safeString(targetGig.tier, tier),
+                    genre: safeString(genre, 'Unknown Genre'),
+                    contact_persona: safeString(targetGig.contact_persona, targetGig.contact ? targetGig.contact : 'Booking Team'),
+                    payout_model: safeString(targetGig.payout_model, 'Standard Target'),
+                    artist_name: safeString(profile.artistAlias, 'The Artist'),
+                    agent_name: safeString(profile.agentName, 'The Manager'),
                     agent_email: profile.agentEmail || null,
                     agent_phone: profile.agentPhone || null,
                     agent_social: profile.agentSocial || null,
                     outreach_type: type
                 })
             });
-            if (!response.ok) throw new Error(`Status ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`Status ${response.status}`);
+            }
             const data = await response.json();
             if (data.status === 'success') {
                 setGeneratedPitch(data.pitch);
