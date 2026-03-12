@@ -9,16 +9,24 @@ export default function LandingPage() {
     return (
         <div className="min-h-screen bg-black text-white overflow-hidden relative selection:bg-red-500/30">
             {/* Ambient Background */}
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-60 mix-blend-screen">
-                <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover"
-                >
-                    <source src="/site/core_engine.mp4" type="video/mp4" />
-                </video>
+            <div className="absolute inset-0 z-0 pointer-events-none bg-black overflow-hidden relative">
+                {/* Cinematic Letterbox - Top */}
+                <div className="absolute top-0 left-0 w-full h-[12vh] bg-black z-20 shadow-[0_20px_50px_rgba(0,0,0,1)]" />
+
+                <div className="absolute inset-0 flex items-center justify-center opacity-60 mix-blend-screen">
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full min-h-full object-cover contrast-[1.2]"
+                    >
+                        <source src="/site/core_engine.mp4" type="video/mp4" />
+                    </video>
+                </div>
+
+                {/* Cinematic Letterbox - Bottom */}
+                <div className="absolute bottom-0 left-0 w-full h-[12vh] bg-black z-20 shadow-[0_-20px_50px_rgba(0,0,0,1)]" />
             </div>
 
             {/* Fog / Grain Overlay */}
