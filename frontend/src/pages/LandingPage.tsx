@@ -19,14 +19,18 @@ export default function LandingPage() {
                         loop
                         muted
                         playsInline
-                        className="w-full min-h-full object-cover contrast-[1.2]"
+                        webkit-playsinline="true"
+                        className="w-[100vw] h-[100vh] lg:w-full lg:min-h-full object-cover contrast-[1.2]"
                     >
                         <source src="/site/core_engine.mp4" type="video/mp4" />
+                        <source src="/site/core_engine.webm" type="video/webm" />
                     </video>
                 </div>
 
                 {/* Cinematic Letterbox - Bottom */}
-                <div className="absolute bottom-0 left-0 w-full h-[12vh] bg-black z-20 shadow-[0_-20px_50px_rgba(0,0,0,1)]" />
+                <div className="absolute bottom-0 left-0 w-full h-[12vh] bg-black z-20 shadow-[0_-20px_50px_rgba(0,0,0,1)] flex items-end justify-center pb-4">
+                     <span className="font-mono text-[10px] text-gray-800 tracking-widest uppercase hidden md:block">System Link Established</span>
+                </div>
             </div>
 
             {/* Fog / Grain Overlay */}
