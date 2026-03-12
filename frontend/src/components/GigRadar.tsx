@@ -124,8 +124,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
         const score = parseInt(scoreStr, 10);
         if (isNaN(score)) return 'text-gray-800';
         if (score >= 80) return 'text-green-400';
-        if (score >= 50) return 'text-fuchsia-400';
-        return 'text-red-500';
+        if (score >= 50) return 'text-fuchsia-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]';
+        return 'text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]';
     };
 
     const getSocialIcon = (url: string | undefined | null) => {
@@ -156,24 +156,24 @@ export default function GigRadar({ profile }: GigRadarProps) {
                     <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
 
                     <div className="absolute right-[-50px] top-[-50px] opacity-10 pointer-events-none z-10 mix-blend-overlay">
-                        <Radar size={250} className="text-orange-900 rotate-45" />
+                        <Radar size={250} className="text-orange-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] rotate-45" />
                     </div>
 
                     <div className="flex flex-col gap-6 relative z-10">
                         <div>
-                            <h2 className="font-cinzel text-2xl font-bold text-orange-900 tracking-widest flex items-center gap-3">
-                                <Radar className="text-orange-900" size={24} />
+                            <h2 className="font-cinzel text-2xl font-bold text-orange-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-3">
+                                <Radar className="text-orange-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" size={24} />
                                 GIG RADAR
                             </h2>
-                            <p className="font-mono text-[10px] text-orange-900/60 mt-2 tracking-widest uppercase">
+                            <p className="font-mono text-[10px] text-orange-900/60 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mt-2 tracking-widest uppercase">
                                 Multi-Vector Grounding<br />Autonomous Array
                             </p>
                         </div>
 
                         <div className="flex flex-col gap-4 bg-white/40 p-5 rounded-xl border border-orange-900/10 backdrop-blur-md relative z-20">
                             {/* City / Zip */}
-                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Target Point (City / Zip)</span>
+                            <div className="relative flex flex-col text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-1">Target Point (City / Zip)</span>
                                 <div className="flex items-center">
                                     <MapPin size={14} className="mr-2 opacity-70" />
                                     <input placeholder="e.g., Brooklyn, NY or 60601" type="text" value={city} onChange={e => setCity(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white placeholder:text-gray-500" />
@@ -181,8 +181,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </div>
 
                             {/* Radius */}
-                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Blast Radius</span>
+                            <div className="relative flex flex-col text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-1">Blast Radius</span>
                                 <select value={radius} onChange={e => setRadius(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
                                     <option className="bg-black text-white border-none">Exact City</option>
                                     <option className="bg-black text-white border-none">10 miles</option>
@@ -192,8 +192,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </div>
 
                             {/* Genre */}
-                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-3 sm:py-2 border border-orange-900/10 focus-within:border-orange-800/50 focus-within:text-orange-700 transition-colors">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Sonic Vector</span>
+                            <div className="relative flex flex-col text-orange-900/70 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-white/50 rounded-lg px-3 py-3 sm:py-2 border border-orange-900/10 focus-within:border-orange-800/50 focus-within:text-orange-700 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-700/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-1">Sonic Vector</span>
                                 <select value={genre} onChange={e => setGenre(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
                                     <option className="bg-white border-none">House</option>
                                     <option className="bg-white border-none">Deep House</option>
@@ -216,8 +216,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </div>
 
                             {/* Tier */}
-                            <div className="relative flex flex-col text-orange-900/70 bg-white/50 rounded-lg px-3 py-3 sm:py-2 border border-orange-900/10 focus-within:border-orange-800/50 focus-within:text-orange-700 transition-colors">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-700/80 mb-1">Venue Tier</span>
+                            <div className="relative flex flex-col text-orange-900/70 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-white/50 rounded-lg px-3 py-3 sm:py-2 border border-orange-900/10 focus-within:border-orange-800/50 focus-within:text-orange-700 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-700/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-1">Venue Tier</span>
                                 <select value={tier} onChange={e => setTier(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-gray-900 appearance-none cursor-pointer">
                                     <option className="bg-white border-none">Grassroots / Mom & Pop (50-250 cap)</option>
                                     <option className="bg-white border-none">Mid-Size Touring (250-1000 cap)</option>
@@ -227,8 +227,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             </div>
 
                             {/* Timeframe */}
-                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Timeframe</span>
+                            <div className="relative flex flex-col text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
+                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-1">Timeframe</span>
                                 <select value={timeframe} onChange={e => setTimeframe(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
                                     <option className="bg-black text-white border-none">Active Now</option>
                                     <option className="bg-black text-white border-none">Summer 2026</option>
@@ -241,7 +241,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                         <button
                             onClick={handleScout}
                             disabled={isScouting}
-                            className="w-full bg-orange-900/20 text-orange-400 border border-orange-500/50 hover:bg-orange-600 hover:text-black font-bold font-mono text-sm tracking-widest px-6 py-4 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-wait uppercase shadow-[0_0_20px_rgba(249,115,22,0.2)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
+                            className="w-full bg-orange-900/20 text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-orange-500/50 hover:bg-orange-600 hover:text-black font-bold font-mono text-sm tracking-widest px-6 py-4 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-wait uppercase shadow-[0_0_20px_rgba(249,115,22,0.2)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
                         >
                             {isScouting ? (
                                 <><Activity size={18} className="animate-spin" /> EXECUTING SWEEP...</>
@@ -254,7 +254,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 </div>
 
                 {error && (
-                    <div className="bg-red-900/20 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg font-mono text-xs tracking-widest flex items-center gap-3 mt-4 w-[calc(100%-2rem)] mx-4 md:w-auto md:mx-0">
+                    <div className="bg-red-900/20 border border-red-500/50 text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] px-4 py-3 rounded-lg font-mono text-xs tracking-widest flex items-center gap-3 mt-4 w-[calc(100%-2rem)] mx-4 md:w-auto md:mx-0">
                         <ShieldAlert size={16} /> {error}
                     </div>
                 )}
@@ -268,7 +268,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 animate={{ opacity: 1 }}
                                 className="col-span-full py-32 flex flex-col items-center justify-center text-gray-900 glass-card rounded-2xl border-dashed border-orange-900/10"
                             >
-                                <Search size={48} className="text-orange-900/20 mb-4" />
+                                <Search size={48} className="text-orange-900/20 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-4" />
                                 <p className="font-mono text-sm tracking-widest uppercase">Awaiting coordinates to deploy radar sweeps.</p>
                             </motion.div>
                         )}
@@ -345,16 +345,16 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
                                         <div className="flex items-center justify-between mb-4 relative z-10">
                                             <div className="flex items-center gap-2">
-                                                <span className={`font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-sm bg-orange-900/30 text-orange-400 border border-orange-500/30 ${gig.pipeline_status === 'INTERCEPTED' ? '' : 'opacity-80'}`}>
+                                                <span className={`font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-sm bg-orange-900/30 text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-orange-500/30 ${gig.pipeline_status === 'INTERCEPTED' ? '' : 'opacity-80'}`}>
                                                     [{gig.pipeline_status}]
                                                 </span>
                                                 {isAlpha && (
-                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-[0_0_15px_rgba(249,115,22,0.5)] bg-orange-600/20 text-orange-400 border border-orange-400 animate-pulse">
+                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-[0_0_15px_rgba(249,115,22,0.5)] bg-orange-600/20 text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-orange-400 animate-pulse">
                                                         [ALPHA TARGET]
                                                     </span>
                                                 )}
                                                 {gig.active_search_signal && !isAlpha && (
-                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-sm bg-orange-900/50 text-orange-300 border border-orange-500/30 animate-pulse">
+                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-sm bg-orange-900/50 text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-orange-500/30 animate-pulse">
                                                         [ACTIVE SEARCH]
                                                     </span>
                                                 )}
@@ -368,40 +368,40 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                         </div>
 
                                         <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="font-cinzel font-bold text-2xl text-orange-400 leading-tight relative z-10 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]">{gig.name}</h3>
+                                            <h3 className="font-cinzel font-bold text-2xl text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] leading-tight relative z-10 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]">{gig.name}</h3>
                                             <div className="flex gap-2 relative z-10">
                                                 {gig.social_media_url && (
-                                                    <a href={gig.social_media_url} target="_blank" rel="noopener noreferrer" className="text-orange-400 opacity-60 hover:opacity-100 hover:text-orange-300 transition-opacity drop-shadow-md">
+                                                    <a href={gig.social_media_url} target="_blank" rel="noopener noreferrer" className="text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] opacity-60 hover:opacity-100 hover:text-orange-300 transition-opacity drop-shadow-md">
                                                         {getSocialIcon(gig.social_media_url)}
                                                     </a>
                                                 )}
                                                 {gig.website_url && (
-                                                    <a href={gig.website_url} target="_blank" rel="noopener noreferrer" className="text-orange-400 opacity-60 hover:opacity-100 hover:text-orange-300 transition-opacity drop-shadow-md">
+                                                    <a href={gig.website_url} target="_blank" rel="noopener noreferrer" className="text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] opacity-60 hover:opacity-100 hover:text-orange-300 transition-opacity drop-shadow-md">
                                                         <Globe size={14} />
                                                     </a>
                                                 )}
                                             </div>
                                         </div>
-                                        <p className="font-mono text-xs text-orange-200/80 mb-4 drop-shadow-md truncate">{gig.tier || tier}</p>
+                                        <p className="font-mono text-xs text-orange-200/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-4 drop-shadow-md truncate">{gig.tier || tier}</p>
 
                                         <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
                                             <div className="bg-white/40 p-3 rounded border border-orange-900/10 flex flex-col gap-1">
-                                                <span className="font-mono text-[9px] text-orange-700/80 uppercase tracking-widest flex items-center gap-1"><DollarSign size={10} /> Payout Model</span>
+                                                <span className="font-mono text-[9px] text-orange-700/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] uppercase tracking-widest flex items-center gap-1"><DollarSign size={10} /> Payout Model</span>
                                                 <span className="font-inter text-sm text-gray-800 truncate">{gig.payout_model || 'Unknown'}</span>
                                             </div>
                                             <div className="bg-white/40 p-3 rounded border border-orange-900/10 flex flex-col gap-1">
-                                                <span className="font-mono text-[9px] text-orange-700/80 uppercase tracking-widest flex items-center gap-1"><Calendar size={10} /> Lead Time</span>
+                                                <span className="font-mono text-[9px] text-orange-700/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] uppercase tracking-widest flex items-center gap-1"><Calendar size={10} /> Lead Time</span>
                                                 <span className="font-inter text-sm text-gray-800 truncate">{gig.lead_time || 'N/A'}</span>
                                             </div>
                                             <div className="bg-white/40 p-3 rounded border border-orange-900/10 flex flex-col gap-1">
-                                                <span className="font-mono text-[9px] text-orange-700/80 uppercase tracking-widest flex items-center justify-between w-full">
+                                                <span className="font-mono text-[9px] text-orange-700/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] uppercase tracking-widest flex items-center justify-between w-full">
                                                     <span className="flex items-center gap-1"><Activity size={10} /> Contact Persona</span>
-                                                    {gig.contact_source && <span className="text-orange-900 opacity-80">[{gig.contact_source}]</span>}
+                                                    {gig.contact_source && <span className="text-orange-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] opacity-80">[{gig.contact_source}]</span>}
                                                 </span>
                                                 <span className="font-inter text-sm text-gray-800 truncate">{gig.contact_persona || gig.contact || 'Generic Intel'}</span>
                                             </div>
                                             <div className="bg-white/40 p-3 rounded border border-orange-900/10 flex flex-col gap-1 col-span-2 md:col-span-1">
-                                                <span className="font-mono text-[9px] text-orange-700/80 uppercase tracking-widest flex items-center gap-1"><Users size={10} /> Similar Acts</span>
+                                                <span className="font-mono text-[9px] text-orange-700/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] uppercase tracking-widest flex items-center gap-1"><Users size={10} /> Similar Acts</span>
                                                 <span className="font-inter text-sm text-gray-800 line-clamp-1 group-hover:line-clamp-none transition-all">{gig.similar_acts ? (Array.isArray(gig.similar_acts) ? gig.similar_acts.join(', ') : gig.similar_acts) : 'None extracted'}</span>
                                             </div>
                                         </div>
@@ -409,29 +409,29 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                         {/* Financial Telemetry */}
                                         <div className="flex items-center justify-between bg-black/40 border border-orange-500/30 rounded-lg p-3 mb-6 relative z-10 w-full backdrop-blur-md">
                                             <div className="flex flex-col text-center w-1/3 border-r border-orange-900/30">
-                                                <span className="font-mono text-[9px] text-orange-400/80 uppercase tracking-widest mb-1">Capacity</span>
-                                                <span className="font-cinzel text-lg font-bold text-orange-300">{gig.capacity || 'N/A'}</span>
+                                                <span className="font-mono text-[9px] text-orange-400/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] uppercase tracking-widest mb-1">Capacity</span>
+                                                <span className="font-cinzel text-lg font-bold text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">{gig.capacity || 'N/A'}</span>
                                             </div>
                                             <div className="flex flex-col text-center w-1/3 border-r border-orange-900/30">
-                                                <span className="font-mono text-[9px] text-orange-400/80 uppercase tracking-widest mb-1">Avg Ticket</span>
-                                                <span className="font-cinzel text-lg font-bold text-orange-300">{gig.avg_ticket_price_usd ? `$${gig.avg_ticket_price_usd}` : 'N/A'}</span>
+                                                <span className="font-mono text-[9px] text-orange-400/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] uppercase tracking-widest mb-1">Avg Ticket</span>
+                                                <span className="font-cinzel text-lg font-bold text-orange-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">{gig.avg_ticket_price_usd ? `$${gig.avg_ticket_price_usd}` : 'N/A'}</span>
                                             </div>
                                             <div className="flex flex-col text-center w-1/3 px-2">
-                                                <span className="font-mono text-[9px] text-orange-400 uppercase tracking-widest mb-1 drop-shadow-md">Gross Potential</span>
-                                                <span className="font-cinzel text-xl font-bold text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : 'N/A'}</span>
+                                                <span className="font-mono text-[9px] text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] uppercase tracking-widest mb-1 drop-shadow-md">Gross Potential</span>
+                                                <span className="font-cinzel text-xl font-bold text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : 'N/A'}</span>
                                             </div>
                                         </div>
 
                                         <div className="border-t border-orange-900/10 pt-4 pb-16 relative z-10">
                                             {gig.leverage_point && (
                                                 <div className="mb-4 bg-orange-100/50 border border-orange-800/20 rounded p-3">
-                                                    <div className="flex items-center gap-2 font-mono text-[10px] text-orange-700 mb-1 uppercase tracking-widest">
+                                                    <div className="flex items-center gap-2 font-mono text-[10px] text-orange-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-1 uppercase tracking-widest">
                                                         <AlertTriangle size={12} /> Tactical Leverage Point
                                                     </div>
-                                                    <p className="text-xs text-orange-900/80 font-inter italic leading-snug">"{gig.leverage_point}"</p>
+                                                    <p className="text-xs text-orange-900/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-inter italic leading-snug">"{gig.leverage_point}"</p>
                                                 </div>
                                             )}
-                                            <div className="flex items-center gap-2 font-mono text-xs text-orange-900 mb-2 uppercase tracking-widest drop-shadow-sm">
+                                            <div className="flex items-center gap-2 font-mono text-xs text-orange-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-2 uppercase tracking-widest drop-shadow-sm">
                                                 <BrainCircuit size={12} /> Shark Negotiation Strategy
                                             </div>
                                             <p className="text-sm text-gray-700 font-inter leading-relaxed line-clamp-2 md:line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
@@ -443,7 +443,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                             <button
                                                 onClick={() => handleEngageShark(gig)}
                                                 disabled={gig.pipeline_status === 'PITCHED'}
-                                                className="w-full bg-orange-900/20 text-orange-400 border border-orange-500/50 hover:bg-orange-600 hover:text-black font-bold font-mono text-xs tracking-widest px-4 py-3 rounded flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase shadow-[0_0_15px_rgba(249,115,22,0.2)] hover:shadow-[0_0_25px_rgba(249,115,22,0.5)]"
+                                                className="w-full bg-orange-900/20 text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-orange-500/50 hover:bg-orange-600 hover:text-black font-bold font-mono text-xs tracking-widest px-4 py-3 rounded flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase shadow-[0_0_15px_rgba(249,115,22,0.2)] hover:shadow-[0_0_25px_rgba(249,115,22,0.5)]"
                                             >
                                                 {gig.pipeline_status === 'PITCHED' ? 'PITCH DEPLOYED' : <><Send size={14} /> ONE-CLICK ENGAGE</>}
                                             </button>
@@ -476,10 +476,10 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 <div className="p-4 border-b border-gray-500/10 flex items-center justify-between bg-black/50">
                                     <div>
                                         <h3 className="font-cinzel text-xl font-bold text-black flex items-center gap-2">
-                                            <AlertTriangle size={20} className="text-orange-800" />
+                                            <AlertTriangle size={20} className="text-orange-800 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" />
                                             AUTO-PITCH TERMINAL
                                         </h3>
-                                        <p className="font-mono text-[10px] text-orange-700 tracking-widest uppercase mt-1">
+                                        <p className="font-mono text-[10px] text-orange-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase mt-1">
                                             TARGET: {pitchModal.name} // PERSONA: {pitchModal.contact_persona || 'N/A'}
                                         </p>
                                     </div>
@@ -506,19 +506,19 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                             <div className="flex gap-2 border-b border-gray-500/5 pb-4">
                                                 <button
                                                     onClick={() => handleEngageShark(pitchModal, 'email')}
-                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'email' ? 'bg-orange-900/40 text-orange-900 border border-orange-800/50' : 'bg-white/5 text-gray-900 hover:text-gray-300'}`}
+                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'email' ? 'bg-orange-900/40 text-orange-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-orange-800/50' : 'bg-white/5 text-gray-900 hover:text-gray-300'}`}
                                                 >
                                                     <Mail size={12} /> Email Thread
                                                 </button>
                                                 <button
                                                     onClick={() => handleEngageShark(pitchModal, 'call_script')}
-                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'call_script' ? 'bg-fuchsia-900/40 text-fuchsia-300 border border-fuchsia-500/50' : 'bg-white/5 text-gray-900 hover:text-gray-300'}`}
+                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'call_script' ? 'bg-fuchsia-900/40 text-fuchsia-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-fuchsia-500/50' : 'bg-white/5 text-gray-900 hover:text-gray-300'}`}
                                                 >
                                                     <Phone size={12} /> Call Script
                                                 </button>
                                                 <button
                                                     onClick={() => handleEngageShark(pitchModal, 'dm')}
-                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'dm' ? 'bg-sky-900/40 text-sky-300 border border-sky-500/50' : 'bg-white/5 text-gray-900 hover:text-gray-300'}`}
+                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'dm' ? 'bg-sky-900/40 text-sky-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-sky-500/50' : 'bg-white/5 text-gray-900 hover:text-gray-300'}`}
                                                 >
                                                     <MessageCircle size={12} /> Direct Message
                                                 </button>
@@ -531,7 +531,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                                     value={pitchRoutingTo}
                                                     onChange={(e) => setPitchRoutingTo(e.target.value)}
                                                     placeholder="UNKNOWN - REQUIRES MANUAL ENTRY"
-                                                    className="font-mono text-sm text-orange-700 bg-transparent w-full outline-none border-b border-orange-800/30 focus:border-orange-700 transition-colors py-1"
+                                                    className="font-mono text-sm text-orange-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] bg-transparent w-full outline-none border-b border-orange-800/30 focus:border-orange-700 transition-colors py-1"
                                                 />
                                             </div>
                                             <div className="bg-gray-900/50 rounded-lg border border-gray-500/5 relative group">
@@ -590,7 +590,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 className="bg-[#050505] border border-orange-800/50 shadow-[0_0_50px_rgba(139,92,246,0.15)] rounded-2xl w-full max-w-md flex flex-col overflow-hidden"
                             >
                                 <div className="p-4 border-b border-gray-500/10 flex items-center justify-between bg-gradient-to-r from-black via-orange-900/20 to-black">
-                                    <h3 className="font-mono text-sm tracking-widest text-orange-700 font-bold flex items-center gap-2 uppercase">
+                                    <h3 className="font-mono text-sm tracking-widest text-orange-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold flex items-center gap-2 uppercase">
                                         <Search size={16} /> REPUTATION ANALYSIS
                                     </h3>
                                     <button onClick={() => setRepModal(null)} className="text-gray-900 hover:text-black transition-colors p-1">
@@ -600,7 +600,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 <div className="p-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <h4 className="font-cinzel text-xl text-black font-bold">{repModal.name}</h4>
-                                        <div className={`font-mono text-sm tracking-widest uppercase font-bold px-3 py-1 rounded shadow-md border ${repModal.reputation_score >= 80 ? 'bg-green-900/30 text-green-400 border-green-500/50' : repModal.reputation_score >= 50 ? 'bg-fuchsia-900/30 text-fuchsia-400 border-fuchsia-500/50' : 'bg-red-900/30 text-red-500 border-red-500/50'}`}>
+                                        <div className={`font-mono text-sm tracking-widest uppercase font-bold px-3 py-1 rounded shadow-md border ${repModal.reputation_score >= 80 ? 'bg-green-900/30 text-green-400 border-green-500/50' : repModal.reputation_score >= 50 ? 'bg-fuchsia-900/30 text-fuchsia-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-fuchsia-500/50' : 'bg-red-900/30 text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-red-500/50'}`}>
                                             SCORE: {repModal.reputation_score}
                                         </div>
                                     </div>
@@ -613,7 +613,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 <div className="p-4 border-t border-gray-500/10 bg-black/80">
                                     <button
                                         onClick={() => setRepModal(null)}
-                                        className="w-full bg-orange-900/20 text-orange-700 border border-orange-800/30 hover:bg-orange-800 hover:text-black font-bold font-mono text-xs tracking-widest py-3 rounded transition-all uppercase"
+                                        className="w-full bg-orange-900/20 text-orange-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-orange-800/30 hover:bg-orange-800 hover:text-black font-bold font-mono text-xs tracking-widest py-3 rounded transition-all uppercase"
                                     >
                                         Acknowledge
                                     </button>

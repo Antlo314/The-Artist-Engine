@@ -81,11 +81,11 @@ export default function SplitSheetGenerator() {
         <div className="space-y-6">
             <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
                 <div>
-                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-                        <FileSignature className="text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
+                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                        <FileSignature className="text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
                         SPLIT SHEET CACHE v2.0
                     </h2>
-                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
+                    <p className="font-mono text-xs text-purple-300/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
                         Interactive Publishing Mathematics & Legal Rendering
                     </p>
                 </div>
@@ -97,23 +97,23 @@ export default function SplitSheetGenerator() {
                 <div className="xl:col-span-7 space-y-4 lg:space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar pr-2 pb-10">
 
                     <div className="glass-card p-4 lg:p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md space-y-4">
-                        <h3 className="font-mono text-xs text-purple-400 tracking-widest uppercase border-b border-purple-900/40 pb-2 mb-2 lg:mb-4 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">Master Metadata</h3>
+                        <h3 className="font-mono text-xs text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase border-b border-purple-900/40 pb-2 mb-2 lg:mb-4 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">Master Metadata</h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block font-mono text-[10px] text-gray-400 tracking-widest uppercase mb-1">Track Title</label>
-                                <input type="text" value={songTitle} onChange={(e) => setSongTitle(e.target.value)} className="w-full bg-black/60 border border-purple-900/40 p-3 rounded text-purple-300 font-cinzel text-lg focus:border-purple-500/50 outline-none transition-colors shadow-inner" />
+                                <input type="text" value={songTitle} onChange={(e) => setSongTitle(e.target.value)} className="w-full bg-black/60 border border-purple-900/40 p-3 rounded text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-cinzel text-lg focus:border-purple-500/50 outline-none transition-colors shadow-inner" />
                             </div>
                             <div>
                                 <label className="block font-mono text-[10px] text-gray-400 tracking-widest uppercase mb-1">Date of Creation</label>
-                                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-black/60 border border-purple-900/40 p-3 rounded text-purple-300 font-mono text-sm focus:border-purple-500/50 outline-none transition-colors shadow-inner [color-scheme:dark]" />
+                                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-black/60 border border-purple-900/40 p-3 rounded text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-mono text-sm focus:border-purple-500/50 outline-none transition-colors shadow-inner [color-scheme:dark]" />
                             </div>
                         </div>
                     </div>
 
                     <div className="glass-card p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md space-y-4">
                         <div className="flex justify-between items-end border-b border-purple-900/40 pb-2 mb-4">
-                            <h3 className="font-mono text-xs text-purple-400 tracking-widest uppercase drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">The Math (Ownership Grid)</h3>
-                            <div className={`font-mono text-xs font-bold ${totalSplit === 100 ? 'text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)] border border-emerald-500/50 bg-emerald-900/20' : 'text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.3)] border border-red-500/50 bg-red-900/20'} p-1 px-3 rounded backdrop-blur-sm`}>
+                            <h3 className="font-mono text-xs text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">The Math (Ownership Grid)</h3>
+                            <div className={`font-mono text-xs font-bold ${totalSplit === 100 ? 'text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)] border border-emerald-500/50 bg-emerald-900/20' : 'text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] shadow-[0_0_10px_rgba(239,68,68,0.3)] border border-red-500/50 bg-red-900/20'} p-1 px-3 rounded backdrop-blur-sm`}>
                                 TOTAL PIE: {totalSplit}% {totalSplit !== 100 && '(MUST EQUAL 100%)'}
                             </div>
                         </div>
@@ -129,20 +129,20 @@ export default function SplitSheetGenerator() {
 
                                     <div className="grid grid-cols-12 gap-3 mb-3">
                                         <div className="col-span-4">
-                                            <input type="text" placeholder="Legal Name" value={writer.name} onChange={(e) => updateWriter(idx, 'name', e.target.value)} className="w-full bg-transparent border-b border-purple-900/30 p-1 text-sm font-inter text-purple-300 focus:border-purple-500 outline-none placeholder-purple-900/50" />
+                                            <input type="text" placeholder="Legal Name" value={writer.name} onChange={(e) => updateWriter(idx, 'name', e.target.value)} className="w-full bg-transparent border-b border-purple-900/30 p-1 text-sm font-inter text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] focus:border-purple-500 outline-none placeholder-purple-900/50" />
                                         </div>
                                         <div className="col-span-3">
-                                            <select value={writer.role} onChange={(e) => updateWriter(idx, 'role', e.target.value)} className={`w-full bg-transparent border-b border-purple-900/30 p-1 text-xs font-mono focus:border-purple-500 outline-none appearance-none ${writer.role === 'Feature' ? 'text-orange-400 font-bold drop-shadow-[0_0_5px_rgba(249,115,22,0.8)]' : 'text-purple-300'}`}>
-                                                <option className="bg-gray-900 text-purple-300">Writer</option>
-                                                <option className="bg-gray-900 text-purple-300">Producer</option>
-                                                <option className="bg-gray-900 text-orange-400 font-bold">Feature</option>
+                                            <select value={writer.role} onChange={(e) => updateWriter(idx, 'role', e.target.value)} className={`w-full bg-transparent border-b border-purple-900/30 p-1 text-xs font-mono focus:border-purple-500 outline-none appearance-none ${writer.role === 'Feature' ? 'text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold drop-shadow-[0_0_5px_rgba(249,115,22,0.8)]' : 'text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'}`}>
+                                                <option className="bg-gray-900 text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">Writer</option>
+                                                <option className="bg-gray-900 text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">Producer</option>
+                                                <option className="bg-gray-900 text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold">Feature</option>
                                             </select>
                                         </div>
                                         <div className="col-span-2">
-                                            <input type="text" placeholder="PRO" value={writer.pro} onChange={(e) => updateWriter(idx, 'pro', e.target.value)} className="w-full bg-transparent border-b border-purple-900/30 p-1 text-xs font-mono text-purple-400/60 focus:border-purple-500 outline-none uppercase placeholder-purple-900/50" />
+                                            <input type="text" placeholder="PRO" value={writer.pro} onChange={(e) => updateWriter(idx, 'pro', e.target.value)} className="w-full bg-transparent border-b border-purple-900/30 p-1 text-xs font-mono text-purple-400/60 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] focus:border-purple-500 outline-none uppercase placeholder-purple-900/50" />
                                         </div>
                                         <div className="col-span-3 flex items-center gap-1">
-                                            <input type="number" min="0" max="100" value={writer.split} onChange={(e) => updateWriter(idx, 'split', Number(e.target.value))} className="w-full bg-purple-900/20 border border-purple-700/50 p-2 rounded text-lg font-cinzel text-purple-300 font-bold focus:border-purple-500 outline-none text-center shadow-inner" />
+                                            <input type="number" min="0" max="100" value={writer.split} onChange={(e) => updateWriter(idx, 'split', Number(e.target.value))} className="w-full bg-purple-900/20 border border-purple-700/50 p-2 rounded text-lg font-cinzel text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold focus:border-purple-500 outline-none text-center shadow-inner" />
                                         </div>
                                     </div>
 
@@ -156,16 +156,16 @@ export default function SplitSheetGenerator() {
                                                 <motion.div animate={{ x: writer.hasPublisher ? 16 : 0 }} className="w-3 h-3 bg-white rounded-full shadow" />
                                             </button>
                                             <span className="font-mono text-[9px] text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                                                <Building2 size={10} className={writer.hasPublisher ? 'text-purple-400' : ''} /> Admin Deal
+                                                <Building2 size={10} className={writer.hasPublisher ? 'text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]' : ''} /> Admin Deal
                                             </span>
                                         </div>
 
                                         {writer.hasPublisher ? (
                                             <div className="col-span-8 flex items-center gap-3">
-                                                <input type="text" placeholder="Publisher Entity (e.g. Sony/ATV)" value={writer.publisherName} onChange={(e) => updateWriter(idx, 'publisherName', e.target.value)} className="flex-1 bg-black/60 border border-purple-900/40 p-1.5 rounded text-xs font-mono text-purple-300 focus:border-purple-500 outline-none shadow-inner placeholder-purple-900/50" />
+                                                <input type="text" placeholder="Publisher Entity (e.g. Sony/ATV)" value={writer.publisherName} onChange={(e) => updateWriter(idx, 'publisherName', e.target.value)} className="flex-1 bg-black/60 border border-purple-900/40 p-1.5 rounded text-xs font-mono text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] focus:border-purple-500 outline-none shadow-inner placeholder-purple-900/50" />
                                                 <div className="font-mono text-[9px] text-gray-400 flex flex-col items-end">
                                                     <span>Writer: <span className="text-emerald-400 font-bold">{writer.split / 2}%</span></span>
-                                                    <span>Pub: <span className="text-red-400 font-bold">{writer.split / 2}%</span></span>
+                                                    <span>Pub: <span className="text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold">{writer.split / 2}%</span></span>
                                                 </div>
                                             </div>
                                         ) : (
@@ -184,7 +184,7 @@ export default function SplitSheetGenerator() {
                             ))}
                         </div>
 
-                        <button onClick={addWriter} className="w-full border border-dashed border-purple-500/50 bg-purple-900/20 rounded-xl py-4 flex items-center justify-center gap-2 font-mono text-xs text-purple-400 hover:text-purple-300 hover:border-purple-400 hover:bg-purple-900/40 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all shadow-sm">
+                        <button onClick={addWriter} className="w-full border border-dashed border-purple-500/50 bg-purple-900/20 rounded-xl py-4 flex items-center justify-center gap-2 font-mono text-xs text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] hover:text-purple-300 hover:border-purple-400 hover:bg-purple-900/40 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all shadow-sm">
                             <Plus size={14} /> ADD COLLABORATOR TO AGREEMENT
                         </button>
                     </div>
@@ -208,7 +208,7 @@ export default function SplitSheetGenerator() {
                     <div className="flex-1 bg-[#fdfdfd] text-zinc-800 p-8 font-serif text-[11px] md:text-xs leading-relaxed overflow-y-auto rounded-b-xl border border-t-0 border-zinc-700 shadow-2xl relative">
                         {totalSplit !== 100 && (
                             <div className="absolute inset-0 bg-red-500/5 flex items-center justify-center pointer-events-none z-0">
-                                <div className="text-4xl md:text-6xl font-black text-red-500/10 rotate-[-45deg] tracking-widest font-mono">INVALID SPLIT</div>
+                                <div className="text-4xl md:text-6xl font-black text-red-500/10 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] rotate-[-45deg] tracking-widest font-mono">INVALID SPLIT</div>
                             </div>
                         )}
                         <pre className="whitespace-pre-wrap font-serif relative z-10 selection:bg-cyan-200">

@@ -75,11 +75,11 @@ export default function RecoupmentSandbox() {
         <div className="space-y-6">
             <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
                 <div>
-                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-                        <Activity className="text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
+                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                        <Activity className="text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
                         RECOUPMENT SIMULATOR v2.0
                     </h2>
-                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
+                    <p className="font-mono text-xs text-purple-300/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
                         The horrifying reality matrix of major label contracts and hidden debt.
                     </p>
                 </div>
@@ -112,21 +112,21 @@ export default function RecoupmentSandbox() {
 
                     {/* Hidden Debt */}
                     <div className="glass-card p-6 rounded-2xl border border-red-500/50 bg-red-900/20 shadow-[0_0_20px_rgba(239,68,68,0.15)] backdrop-blur-md">
-                        <h3 className="font-mono text-xs text-red-500 tracking-widest uppercase mb-4 border-b border-red-500/50 pb-2 flex items-center gap-2 drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]">
-                            <AlertTriangle size={14} className="text-red-500" /> 100% Recoupable Debt
+                        <h3 className="font-mono text-xs text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase mb-4 border-b border-red-500/50 pb-2 flex items-center gap-2 drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]">
+                            <AlertTriangle size={14} className="text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" /> 100% Recoupable Debt
                         </h3>
                         <div className="space-y-4">
                             <div>
                                 <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
                                     <span>Marketing Budget (Loan)</span>
-                                    <span className="text-red-400 font-bold drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]">${marketingBudget.toLocaleString()}</span>
+                                    <span className="text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]">${marketingBudget.toLocaleString()}</span>
                                 </label>
                                 <input type="range" min="0" max="1000000" step="10000" value={marketingBudget} onChange={(e) => setMarketingBudget(Number(e.target.value))} className="w-full accent-red-500 bg-gray-800" />
                             </div>
                             <div>
                                 <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
                                     <span>Music Video Budget (Loan)</span>
-                                    <span className="text-red-400 font-bold drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]">${videoBudget.toLocaleString()}</span>
+                                    <span className="text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]">${videoBudget.toLocaleString()}</span>
                                 </label>
                                 <input type="range" min="0" max="500000" step="5000" value={videoBudget} onChange={(e) => setVideoBudget(Number(e.target.value))} className="w-full accent-red-500 bg-gray-800" />
                             </div>
@@ -135,19 +135,19 @@ export default function RecoupmentSandbox() {
 
                     {/* 360 Cross-Collateralization */}
                     <div className="glass-card p-6 rounded-2xl border border-purple-500/50 bg-purple-900/20 shadow-[0_0_20px_rgba(168,85,247,0.15)] backdrop-blur-md">
-                        <h3 className="font-mono text-xs text-purple-400 tracking-widest uppercase mb-4 border-b border-purple-500/50 pb-2 drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">360 Deal (Cross-Collateralization)</h3>
+                        <h3 className="font-mono text-xs text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase mb-4 border-b border-purple-500/50 pb-2 drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">360 Deal (Cross-Collateralization)</h3>
                         <div className="space-y-4">
                             <div>
                                 <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
                                     <span>Independent Tour/Merch Income</span>
-                                    <span className="text-purple-400 font-bold drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">${tourMerchIncome.toLocaleString()}</span>
+                                    <span className="text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">${tourMerchIncome.toLocaleString()}</span>
                                 </label>
                                 <input type="range" min="0" max="2000000" step="25000" value={tourMerchIncome} onChange={(e) => setTourMerchIncome(Number(e.target.value))} className="w-full accent-purple-500 bg-gray-800" />
                             </div>
                             <div>
                                 <label className="flex justify-between font-mono text-xs text-gray-300 mb-1">
                                     <span>Label's 360 Cut (%)</span>
-                                    <span className="text-purple-400 font-bold drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">{threeSixtyCut}%</span>
+                                    <span className="text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">{threeSixtyCut}%</span>
                                 </label>
                                 <input type="range" min="0" max="50" step="5" value={threeSixtyCut} onChange={(e) => setThreeSixtyCut(Number(e.target.value))} className="w-full accent-purple-500 bg-gray-800" />
                             </div>
@@ -164,7 +164,7 @@ export default function RecoupmentSandbox() {
                         <div className="absolute inset-0 bg-red-500/5 z-0" />
                         <div className="relative z-10 space-y-2">
                             <p className="font-mono text-xs text-gray-700 tracking-widest uppercase">Total Debt To Recoup</p>
-                            <h2 className="font-mono text-2xl lg:text-3xl text-red-600 font-bold mb-4 lg:mb-6">${totalDebt.toLocaleString()}</h2>
+                            <h2 className="font-mono text-2xl lg:text-3xl text-red-600 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold mb-4 lg:mb-6">${totalDebt.toLocaleString()}</h2>
 
                             <div className="h-px w-full bg-gradient-to-r from-red-500/30 to-transparent my-4 lg:my-6" />
 
@@ -173,11 +173,11 @@ export default function RecoupmentSandbox() {
                                 key={streamsNeeded}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="font-cinzel text-3xl sm:text-5xl md:text-7xl font-bold text-red-900 drop-shadow-sm tracking-wider"
+                                className="font-cinzel text-3xl sm:text-5xl md:text-7xl font-bold text-red-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-sm tracking-wider"
                             >
                                 {formatNumber(streamsNeeded)}
                             </motion.h1>
-                            <p className="font-inter text-sm text-red-700 font-bold mt-2">
+                            <p className="font-inter text-sm text-red-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold mt-2">
                                 At a {royaltyRate}% share, you earn exactly $0 on record sales until you hit this number.
                             </p>
                         </div>
@@ -185,7 +185,7 @@ export default function RecoupmentSandbox() {
 
                     {/* The Reality Bar Breakdown */}
                     <div className="glass-card p-6 rounded-2xl border border-purple-900/10 bg-white/40 shadow-sm">
-                        <h3 className="font-cinzel text-xl text-purple-900 tracking-widest border-b border-purple-900/10 pb-4 mb-6">THE REALITY MATRIX</h3>
+                        <h3 className="font-cinzel text-xl text-purple-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest border-b border-purple-900/10 pb-4 mb-6">THE REALITY MATRIX</h3>
 
                         {/* Stacked Progress Bar */}
                         <div className="h-10 w-full bg-gray-200 rounded-full flex overflow-hidden shadow-inner mb-6">
@@ -216,18 +216,18 @@ export default function RecoupmentSandbox() {
                                 <p className="font-mono text-xl text-emerald-300 font-bold drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]">${formatNumber(labelGross)}</p>
                             </div>
                             <div className="bg-red-900/10 border border-red-500/30 p-4 rounded-xl shadow-[inset_0_0_15px_rgba(239,68,68,0.05)]">
-                                <p className="font-mono text-[10px] text-red-500 tracking-widest uppercase mb-1 drop-shadow-sm">360 Deal Theft</p>
-                                <p className="font-mono text-xl text-red-400 font-bold drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">-${formatNumber(crossCollateralizationLoss)}</p>
+                                <p className="font-mono text-[10px] text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase mb-1 drop-shadow-sm">360 Deal Theft</p>
+                                <p className="font-mono text-xl text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">-${formatNumber(crossCollateralizationLoss)}</p>
                             </div>
                             <div className="bg-cyan-900/10 border border-cyan-500/30 p-4 rounded-xl relative overflow-hidden group shadow-[inset_0_0_15px_rgba(6,182,212,0.05)]">
                                 <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <p className="font-mono text-[10px] text-cyan-400 tracking-widest uppercase mb-1 drop-shadow-sm">Artist Takes Home</p>
-                                <p className="font-mono text-xl text-cyan-300 font-bold drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]">${formatNumber(artistNet)}</p>
+                                <p className="font-mono text-[10px] text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase mb-1 drop-shadow-sm">Artist Takes Home</p>
+                                <p className="font-mono text-xl text-cyan-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]">${formatNumber(artistNet)}</p>
                             </div>
                         </div>
 
                         <div className="mt-6 p-4 bg-black/60 border border-purple-900/30 shadow-inner rounded-lg text-sm font-inter text-gray-300 leading-relaxed">
-                            <strong>Summary:</strong> The label generated <span className="text-emerald-400 font-bold">${formatNumber(labelGross)}</span> from your music to pay off your <span className="text-red-400 font-bold">${totalDebt.toLocaleString()}</span> total debt. Furthermore, because of your {threeSixtyCut}% 360-Deal, they siphoned <span className="text-red-400 font-bold">${crossCollateralizationLoss.toLocaleString()}</span> of the income you made independently on the road. You took home the initial cash advance plus whatever was left of your tour money, netting <span className="text-cyan-400 font-bold">${formatNumber(artistNet)}</span> while the label walked away with millions.
+                            <strong>Summary:</strong> The label generated <span className="text-emerald-400 font-bold">${formatNumber(labelGross)}</span> from your music to pay off your <span className="text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold">${totalDebt.toLocaleString()}</span> total debt. Furthermore, because of your {threeSixtyCut}% 360-Deal, they siphoned <span className="text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold">${crossCollateralizationLoss.toLocaleString()}</span> of the income you made independently on the road. You took home the initial cash advance plus whatever was left of your tour money, netting <span className="text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold">${formatNumber(artistNet)}</span> while the label walked away with millions.
                         </div>
                     </div>
 
