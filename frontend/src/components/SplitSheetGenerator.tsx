@@ -79,13 +79,13 @@ export default function SplitSheetGenerator() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-purple-900/40 pb-4">
+            <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
                 <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-                        <FileSignature className="text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                        <FileSignature className="text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
                         SPLIT SHEET CACHE v2.0
                     </h2>
-                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md">
+                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
                         Interactive Publishing Mathematics & Legal Rendering
                     </p>
                 </div>
@@ -94,10 +94,10 @@ export default function SplitSheetGenerator() {
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
 
                 {/* Left Column: Interactive Form */}
-                <div className="xl:col-span-7 space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar pr-2 pb-10">
+                <div className="xl:col-span-7 space-y-4 lg:space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar pr-2 pb-10">
 
-                    <div className="glass-card p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md space-y-4">
-                        <h3 className="font-mono text-xs text-purple-400 tracking-widest uppercase border-b border-purple-900/40 pb-2 mb-4 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">Master Metadata</h3>
+                    <div className="glass-card p-4 lg:p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md space-y-4">
+                        <h3 className="font-mono text-xs text-purple-400 tracking-widest uppercase border-b border-purple-900/40 pb-2 mb-2 lg:mb-4 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">Master Metadata</h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block font-mono text-[10px] text-gray-400 tracking-widest uppercase mb-1">Track Title</label>

@@ -148,13 +148,13 @@ export default function ZionSentinel() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-purple-900/40 pb-4">
+            <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
                 <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-                        <Scale className="text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                        <Scale className="text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
                         ZION SHARK PROTOCOL
                     </h2>
-                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md">
+                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
                         Automated Legal Analysis & Strategic Offer Negotiations
                     </p>
                 </div>
@@ -195,9 +195,9 @@ export default function ZionSentinel() {
                         onDrop={handleDrop}
                     >
                         {file ? (
-                            <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black/40 min-h-[400px]">
+                            <div className="flex-1 flex flex-col items-center justify-center p-4 lg:p-8 bg-black/40 min-h-[250px] lg:min-h-[400px]">
                                 <FileText size={48} className="text-purple-400 mb-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]" />
-                                <span className="font-mono text-sm text-purple-300 drop-shadow-md">{file.name}</span>
+                                <span className="font-mono text-xs lg:text-sm text-purple-300 drop-shadow-md text-center break-all px-4">{file.name}</span>
                                 <span className="font-mono text-[10px] text-purple-400/60 mt-2">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                                 <button
                                     onClick={() => setFile(null)}
@@ -209,15 +209,15 @@ export default function ZionSentinel() {
                         ) : (
                             <>
                                 <textarea
-                                    className="flex-1 bg-transparent p-6 text-sm font-mono text-gray-300 focus:outline-none resize-none placeholder-gray-600 min-h-[400px] z-10 relative custom-scrollbar leading-relaxed"
+                                    className="flex-1 bg-transparent p-4 lg:p-6 text-xs lg:text-sm font-mono text-gray-300 focus:outline-none resize-none placeholder-gray-600 min-h-[250px] lg:min-h-[400px] z-10 relative custom-scrollbar leading-relaxed"
                                     placeholder={`PASTE OR DRAG ${scanType === 'contract' ? 'CONTRACT TEXT (.pdf, .docx, .txt)' : 'VENUE OFFER'} HERE FOR FORENSIC REVIEW...`}
                                     value={contractText}
                                     onChange={e => setContractText(e.target.value)}
                                 />
                                 {contractText.length === 0 && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-40">
-                                        <UploadCloud size={64} className="mb-4 text-purple-500 drop-shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
-                                        <span className="font-cinzel text-xl tracking-widest text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.7)] text-glow">DRAG & DROP MODULE</span>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-40 px-4 text-center">
+                                        <UploadCloud size={48} className="mb-2 lg:mb-4 lg:w-16 lg:h-16 text-purple-500 drop-shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
+                                        <span className="font-cinzel text-sm sm:text-base lg:text-xl tracking-widest text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.7)] text-glow">DRAG & DROP MODULE</span>
                                     </div>
                                 )}
                             </>

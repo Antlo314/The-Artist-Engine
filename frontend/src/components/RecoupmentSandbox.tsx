@@ -73,13 +73,13 @@ export default function RecoupmentSandbox() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-purple-900/40 pb-4">
+            <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
                 <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-                        <Activity className="text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
+                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                        <Activity className="text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
                         RECOUPMENT SIMULATOR v2.0
                     </h2>
-                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md">
+                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
                         The horrifying reality matrix of major label contracts and hidden debt.
                     </p>
                 </div>
@@ -164,16 +164,16 @@ export default function RecoupmentSandbox() {
                         <div className="absolute inset-0 bg-red-500/5 z-0" />
                         <div className="relative z-10 space-y-2">
                             <p className="font-mono text-xs text-gray-700 tracking-widest uppercase">Total Debt To Recoup</p>
-                            <h2 className="font-mono text-3xl text-red-600 font-bold mb-6">${totalDebt.toLocaleString()}</h2>
+                            <h2 className="font-mono text-2xl lg:text-3xl text-red-600 font-bold mb-4 lg:mb-6">${totalDebt.toLocaleString()}</h2>
 
-                            <div className="h-px w-full bg-gradient-to-r from-red-500/30 to-transparent my-6" />
+                            <div className="h-px w-full bg-gradient-to-r from-red-500/30 to-transparent my-4 lg:my-6" />
 
-                            <p className="font-mono text-xs text-gray-700 tracking-widest uppercase">Streams Required to Break Even</p>
+                            <p className="font-mono text-[10px] sm:text-xs text-gray-700 tracking-widest uppercase">Streams Required to Break Even</p>
                             <motion.h1
                                 key={streamsNeeded}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="font-cinzel text-5xl md:text-7xl font-bold text-red-900 drop-shadow-sm tracking-wider"
+                                className="font-cinzel text-3xl sm:text-5xl md:text-7xl font-bold text-red-900 drop-shadow-sm tracking-wider"
                             >
                                 {formatNumber(streamsNeeded)}
                             </motion.h1>

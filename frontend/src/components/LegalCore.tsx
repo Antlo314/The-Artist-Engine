@@ -17,7 +17,7 @@ export default function LegalCore() {
     ];
 
     return (
-        <div className="h-full flex flex-col p-8 lg:p-12 overflow-hidden relative group">
+        <div className="h-full flex flex-col p-4 lg:p-12 overflow-hidden relative group">
             {/* Legal Protocol Vault Video Background */}
             <video
                 autoPlay
@@ -31,12 +31,12 @@ export default function LegalCore() {
 
             <div className="z-10 relative flex flex-col h-full space-y-8">
                 {/* Header */}
-                <div className="flex flex-col border-b border-purple-900/30 pb-6">
-                    <h1 className="font-cinzel text-4xl lg:text-5xl font-bold text-purple-400 tracking-[0.2em] uppercase flex items-center gap-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]">
-                        <Shield className="text-purple-400" size={36} />
+                <div className="flex flex-col border-b border-purple-900/30 pb-4 lg:pb-6">
+                    <h1 className="font-cinzel text-2xl sm:text-3xl lg:text-5xl font-bold text-purple-400 tracking-[0.2em] uppercase flex items-center gap-2 lg:gap-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]">
+                        <Shield className="text-purple-400 w-6 h-6 lg:w-9 lg:h-9 shrink-0" />
                         LEGAL WAR ROOM
                     </h1>
-                    <div className="mt-2 flex items-center gap-3">
+                    <div className="mt-2 hidden sm:flex items-center gap-3">
                         <div className="h-px w-12 bg-purple-500/50" />
                         <p className="font-mono text-[10px] lg:text-xs text-purple-300/80 tracking-[0.3em] uppercase drop-shadow-md">
                             Autonomous Legal Defense & Contract Nullification
@@ -44,10 +44,10 @@ export default function LegalCore() {
                     </div>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-0">
-                    {/* Vertical Navigation Tabs with Mobile Scroll Fade */}
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 flex-1 min-h-0">
+                    {/* Navigation Tabs - Grid on Mobile, Vertical on Desktop */}
                     <div className="relative z-10 shrink-0">
-                        <div className="flex lg:flex-col gap-2 bg-black/40 backdrop-blur-xl border border-purple-900/40 p-4 lg:pr-6 lg:rounded-l-2xl shadow-xl overflow-x-auto lg:overflow-x-visible lg:w-72 custom-scrollbar">
+                        <div className="grid grid-cols-2 lg:flex lg:flex-col gap-2 bg-black/40 backdrop-blur-xl border border-purple-900/40 p-2 lg:p-4 lg:pr-6 rounded-xl lg:rounded-l-2xl shadow-xl w-full lg:w-72">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
                                 const isActive = activeTab === tab.id;
@@ -55,17 +55,15 @@ export default function LegalCore() {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`relative px-4 lg:px-6 py-4 font-mono text-xs tracking-widest uppercase transition-all flex items-center gap-3 whitespace-nowrap lg:whitespace-normal text-left lg:rounded-l-lg lg:rounded-tr-none lg:border-r-2
-                                        ${isActive ? 'text-purple-300 bg-purple-900/30 border-purple-400 shadow-[inset_4px_0_15px_rgba(168,85,247,0.3)] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/60 hover:text-purple-300 hover:bg-black/60 border-transparent rounded-lg lg:rounded-l-lg lg:rounded-r-none'}`}
+                                        className={`relative px-2 py-3 lg:px-6 lg:py-4 font-mono text-[9px] sm:text-xs tracking-widest uppercase transition-all flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2 text-center lg:text-left rounded-lg lg:rounded-l-lg lg:rounded-tr-none lg:border-r-2
+                                        ${isActive ? 'text-purple-300 bg-purple-900/30 border-purple-400 shadow-[inset_4px_0_15px_rgba(168,85,247,0.3)] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/60 hover:text-purple-300 hover:bg-black/60 border-transparent'}`}
                                     >
-                                        <Icon size={16} className={`${isActive ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/40'}`} />
-                                        {tab.label}
+                                        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-4 lg:h-4 shrink-0 ${isActive ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-400/40'}`} />
+                                        <span>{tab.label}</span>
                                     </button>
                                 );
                             })}
                         </div>
-                        {/* Fade indicator for horizontal scroll on mobile */}
-                        <div className="lg:hidden absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-black/90 to-transparent pointer-events-none rounded-r" />
                     </div>
 
                     {/* Content Area */}

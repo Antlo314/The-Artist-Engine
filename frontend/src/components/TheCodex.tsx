@@ -207,13 +207,13 @@ export default function TheCodex() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-purple-900/40 pb-4">
+            <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
                 <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-                        <BookOpen className="text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                        <BookOpen className="text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
                         THE CODEX
                     </h2>
-                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md">
+                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
                         Entertainment Law Dictionary & Predatory Terminology Translations
                     </p>
                 </div>
