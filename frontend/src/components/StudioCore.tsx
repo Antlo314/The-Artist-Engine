@@ -357,7 +357,7 @@ export default function StudioCore() {
         setBlindTestWinner(vote);
     };
 
-    const Knob = ({ label, hint, value, onChange }: any) => (
+    const Knob = ({ label, hint, value }: any) => (
         <div className="flex flex-col items-center gap-3">
             <div className="relative w-16 h-16 rounded-full bg-black border-2 border-cyan-900/40 shadow-[inset_0_0_10px_rgba(0,0,0,0.8)] flex items-center justify-center group">
                 <div

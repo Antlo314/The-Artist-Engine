@@ -260,7 +260,7 @@ export default function FeaturesPage() {
                         className="group relative overflow-hidden rounded-full bg-ember-600 hover:bg-ember-500 transition-colors px-10 py-5 halo-ember"
                     >
                         <span className="relative flex items-center justify-center gap-3 font-display font-medium tracking-wide text-white text-lg">
-                            Enter the Engine
+                            Log in / Sign up
                             <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform" />
                         </span>
                     </button>

@@ -21,15 +21,29 @@ export function setStoredToken(token: string | null) {
     }
 }
 
+function formatApiDetail(payload: any, status: number): string {
+    if (typeof payload === 'string') return payload;
+    if (payload?.message && typeof payload.message === 'string') return payload.message;
+    if (payload?.detail) {
+        if (typeof payload.detail === 'string') return payload.detail;
+        if (typeof payload.detail?.message === 'string') return payload.detail.message;
+        if (Array.isArray(payload.detail)) {
+            return payload.detail.map((d: any) => d.msg || JSON.stringify(d)).join('; ');
+        }
+    }
+    if (payload?.error && typeof payload.error === 'string') return payload.error;
+    try {
+        return JSON.stringify(payload);
+    } catch {
+        return `HTTP ${status}`;
+    }
+}
+
 export class ApiError extends Error {
     status: number;
     payload: any;
     constructor(status: number, payload: any) {
-        const msg =
-            typeof payload === 'string'
-                ? payload
-                : payload?.message || payload?.detail?.message || payload?.detail || `HTTP ${status}`;
-        super(typeof msg === 'string' ? msg : JSON.stringify(msg));
+        super(formatApiDetail(payload, status));
         this.status = status;
         this.payload = payload;
     }

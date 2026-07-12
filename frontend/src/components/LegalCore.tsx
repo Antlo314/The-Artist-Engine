@@ -10,13 +10,6 @@ const LEGAL_ACCENT = '#a78bfa';
 
 type LegalTab = 'zion' | 'codex' | 'recoupment' | 'splits';
 
-const TABS: { value: LegalTab; label: string }[] = [
-    { value: 'zion', label: 'Contract Scanner' },
-    { value: 'codex', label: 'Term Codex' },
-    { value: 'recoupment', label: 'Recoupment Calculator' },
-    { value: 'splits', label: 'Split Sheets' },
-];
-
 export default function LegalCore() {
     const [activeTab, setActiveTab] = useState<LegalTab>('zion');
 

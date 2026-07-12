@@ -115,12 +115,12 @@ function EngineCoreInner() {
         const saved = localStorage.getItem('sovereign_identity');
         if (saved) return JSON.parse(saved);
         return {
-            artistAlias: 'ECHOVELOCITY',
-            agentName: 'Alex Chen',
+            artistAlias: '',
+            agentName: '',
             agentEmail: '',
             agentPhone: '',
             agentSocial: '',
-            treasuryBalance: '42500.00',
+            treasuryBalance: '0',
         };
     });
 
@@ -175,7 +175,7 @@ function EngineCoreInner() {
                                 <img src={avatar} alt="" className="w-full h-full object-cover" />
                             ) : (
                                 <span className="flex h-full w-full items-center justify-center font-display text-[10px] text-ink-200">
-                                    {(profile.artistAlias || 'U').substring(0, 2).toUpperCase()}
+                                    {(profile.artistAlias || profile.agentName || 'AE').substring(0, 2).toUpperCase()}
                                 </span>
                             )}
                         </button>
@@ -278,13 +278,13 @@ function EngineCoreInner() {
                             <img src={avatar} alt="" className="w-full h-full object-cover" />
                         ) : (
                             <span className="font-display text-xs text-ink-200">
-                                {profile.artistAlias.substring(0, 2).toUpperCase()}
+                                {(profile.artistAlias || profile.agentName || 'AE').substring(0, 2).toUpperCase()}
                             </span>
                         )}
                     </div>
                     <div className="min-w-0">
-                        <div className="text-sm font-medium text-ink-50 truncate">{profile.artistAlias}</div>
-                        <div className="font-mono text-[9px] text-ink-400 tracking-wide truncate">{profile.agentName}</div>
+                        <div className="text-sm font-medium text-ink-50 truncate">{profile.artistAlias || 'Your artist'}</div>
+                        <div className="font-mono text-[9px] text-ink-400 tracking-wide truncate">{profile.agentName || 'Manager'}</div>
                     </div>
                 </button>
             </nav>

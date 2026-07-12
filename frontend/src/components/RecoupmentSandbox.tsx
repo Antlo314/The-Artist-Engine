@@ -9,7 +9,7 @@ export default function RecoupmentSandbox() {
     // Standard Deal Terms
     const [advance, setAdvance] = useState<number>(100000);
     const [royaltyRate, setRoyaltyRate] = useState<number>(15);
-    const [streamPayout, setStreamPayout] = useState<number>(0.00318);
+    const [streamPayout] = useState<number>(0.00318);
 
     // V2.0: Hidden Debt Engine (100% Recoupable)
     const [marketingBudget, setMarketingBudget] = useState<number>(50000);

@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Music2, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Instagram, Twitter, Facebook, Globe, Download } from 'lucide-react';
+import { Target, MapPin, Activity, DollarSign, BrainCircuit, Search, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Instagram, Twitter, Facebook, Globe, Download } from 'lucide-react';
 import LoadingProgressBar from './LoadingProgressBar';
 import { useEngine } from '../lib/engineState';
 import { apiFetch } from '../lib/api';
@@ -59,7 +59,6 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
     // UI State
     const [isScouting, setIsScouting] = useState(false);
-    const [scanPhase, setScanPhase] = useState(0);
     const [gigs, setGigs] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
 
@@ -76,17 +75,6 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
     // Reputation Modal State
     const [repModal, setRepModal] = useState<any | null>(null);
-
-    React.useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (isScouting) {
-            setScanPhase(0);
-            interval = setInterval(() => {
-                setScanPhase(prev => (prev < 3 ? prev + 1 : 0));
-            }, 2500);
-        }
-        return () => clearInterval(interval);
-    }, [isScouting]);
 
     const handleScout = async () => {
         setIsScouting(true);
@@ -401,24 +389,6 @@ export default function GigRadar({ profile }: GigRadarProps) {
                         </motion.div>
                     )}
 
-                    {(() => {
-                        let bestIdx = -1;
-                        if (!isScouting && gigs.length > 0) {
-                            let maxScore = -1;
-                            gigs.forEach((g, i) => {
-                                const rep = parseInt(g.reputation_score) || 0;
-                                const activeBonus = g.active_search_signal ? 20 : 0;
-                                const total = rep + activeBonus;
-                                if (total > maxScore) {
-                                    maxScore = total;
-                                    bestIdx = i;
-                                }
-                            });
-                        }
-                        return null; // Will just compute bestIdx
-                    })()}
-
-                    {/* Scanning Phase replaced with LoadingProgressBar */}
                     {isScouting && (
                         <div className="col-span-full w-full max-w-lg mx-auto py-16 px-4">
                             <LoadingProgressBar

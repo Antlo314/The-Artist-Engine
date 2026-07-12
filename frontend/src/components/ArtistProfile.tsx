@@ -1,15 +1,17 @@
 import { useState, useRef } from 'react';
 import { Upload, Save, CheckCircle } from 'lucide-react';
 import { PageHeader, Panel, Field, Btn } from './ui/Shell';
+import { useAuth } from '../lib/auth';
 
 interface ArtistProfileProps {
     profile: any;
     setProfile: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const inputCls = 'bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-ink-50 placeholder:text-ink-700 text-sm focus:border-yellow-500/50 focus:outline-none transition-colors w-full';
+const inputCls = 'bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-ink-50 placeholder:text-ink-700 text-sm focus:border-yellow-500/50 focus:outline-none transition-colors w-full min-h-[44px]';
 
 export default function ArtistProfile({ profile, setProfile }: ArtistProfileProps) {
+    const { email, displayName, me, signOut } = useAuth();
     const [avatarPreview, setAvatarPreview] = useState<string | null>(localStorage.getItem('sovereign_avatar'));
     const [isSaved, setIsSaved] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,10 +39,25 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
             <PageHeader
                 view="profile"
                 accent="#eab308"
-                module="Sovereign Identity"
+                module="IDENTITY"
                 title="Profile"
-                desc="Your artist identity — used to personalize pitches and outreach."
+                desc="Artist identity used to personalize pitches and outreach."
             />
+
+            {(email || me) && (
+                <Panel title="Account" sub="Signed-in user" accent="#eab308">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="min-w-0">
+                            <p className="text-sm text-ink-50 truncate">{displayName || me?.user?.display_name || 'Member'}</p>
+                            <p className="font-mono text-xs text-ink-400 truncate mt-0.5">{email || me?.user?.email}</p>
+                            <p className="font-mono text-[10px] tracking-widest uppercase text-ember-400 mt-2">
+                                {me?.user?.badge || (me?.user?.role === 'admin' ? 'Admin' : 'Member')}
+                            </p>
+                        </div>
+                        <Btn variant="ghost" size="sm" onClick={() => signOut()}>Sign out</Btn>
+                    </div>
+                </Panel>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 

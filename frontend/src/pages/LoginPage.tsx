@@ -6,7 +6,7 @@ import { ApiError } from '../lib/api';
 
 export default function LoginPage() {
     const { ready, isSignedIn, canUseEngine, login, register } = useAuth();
-    const [mode, setMode] = useState<'login' | 'register'>('register');
+    const [mode, setMode] = useState<'login' | 'register'>('login');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -71,13 +71,13 @@ export default function LoginPage() {
                     className="w-full max-w-md glass-obsidian border border-white/10 rounded-2xl p-8"
                 >
                     <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 mb-3">
-                        Founding access
+                        The Artist Engine
                     </p>
                     <h1 className="font-display text-3xl font-semibold tracking-tight mb-2">
-                        {mode === 'register' ? 'Create your access' : 'Welcome back'}
+                        {mode === 'register' ? 'Create your account' : 'Sign in'}
                     </h1>
                     <p className="text-sm text-ink-200 leading-relaxed mb-6">
-                        Name + email + password. We save your account on the engine so you stay signed in.
+                        Enter with name, email, and password. Your session is saved so you stay signed in.
                     </p>
 
                     <div className="flex gap-2 mb-6">
