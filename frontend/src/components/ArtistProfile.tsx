@@ -323,20 +323,23 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                         )}
                     </Panel>
 
-                    <Panel title="Coming soon" accent="#eab308">
-                        <ul className="space-y-4">
-                            <li className="flex gap-3">
-                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-yellow-500 shrink-0" />
-                                <span className="text-sm text-ink-200 leading-relaxed">
-                                    Outcome tracking — follow each pitch from sent to booked to paid.
-                                </span>
-                            </li>
-                            <li className="flex gap-3">
-                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-yellow-500 shrink-0" />
-                                <span className="text-sm text-ink-200 leading-relaxed">
-                                    Artist payments — get paid out directly through the Engine.
-                                </span>
-                            </li>
+                    <Panel title="Coming soon (not free yet)" accent="#8a8a93">
+                        <p className="text-xs text-ink-400 mb-3 leading-relaxed">
+                            Investor honesty: these need paid partners or compliance. They are not demo-faked.
+                        </p>
+                        <ul className="space-y-3">
+                            {[
+                                'Outcome tracking across email inbox + CRM automations',
+                                'Bank / instant artist payouts',
+                                'Streaming & social analytics suites (paid data)',
+                                'E-sign + versioned contract vault',
+                                'PRO registration automation + DSP one-click distro',
+                            ].map((t) => (
+                                <li key={t} className="flex gap-3">
+                                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-ink-400 shrink-0" />
+                                    <span className="text-sm text-ink-400 leading-relaxed">{t}</span>
+                                </li>
+                            ))}
                         </ul>
                     </Panel>
                 </div>

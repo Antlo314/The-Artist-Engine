@@ -72,6 +72,7 @@ async def fetch_ticketmaster_venues(
     radius: str = "50",
     timeframe: str = "",
     size: int = 50,
+    country_code: str | None = None,
 ):
     """
     Query the Ticketmaster Discovery API for upcoming music events in `city`
@@ -85,15 +86,21 @@ async def fetch_ticketmaster_venues(
     if not api_key:
         return []
 
+    try:
+        from free_data import infer_country
+        cc = infer_country(city, country_code)
+    except Exception:
+        cc = (country_code or "US").upper()
+
     base_params = {
         "apikey": api_key,
-        "city": city,
+        "city": re.sub(r",\s*(US|USA|UK|CA|GB).*$", "", city, flags=re.I).strip() or city,
         "segmentName": "Music",
         "size": str(size),
         "sort": "date,asc",
         "radius": _radius_miles(radius),
         "unit": "miles",
-        "countryCode": "US",
+        "countryCode": cc,
     }
 
     # Real date window from the timeframe picker (Ticketmaster start/endDateTime).

@@ -8,6 +8,7 @@ import { useEngine, relTime, type Lead, type LeadStage } from '../lib/engineStat
 import { PageHeader, Btn } from './ui/Shell';
 import { apiJson, getStoredToken } from '../lib/api';
 import { downloadCsv, downloadJson } from '../lib/exportUtils';
+import FreeOps from './FreeOps';
 
 interface DashboardProps {
     onNavigate: (view: string) => void;
@@ -340,6 +341,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                     )}
                 </motion.div>
             </motion.div>
+
+            {/* Investor free-max tools + coming-soon hints */}
+            <FreeOps />
         </div>
     );
 }

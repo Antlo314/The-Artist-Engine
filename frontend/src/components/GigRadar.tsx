@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, MapPin, Activity, DollarSign, BrainCircuit, Search, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Instagram, Twitter, Facebook, Globe, Download } from 'lucide-react';
@@ -8,6 +8,7 @@ import { apiFetch } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { PageHeader, Panel, Field, Btn, EmptyState, StepHint, Segmented, inputCls } from './ui/Shell';
 import { openMailto, downloadEml, cachePitch } from '../lib/exportUtils';
+import { apiJson } from '../lib/api';
 
 interface GigRadarProps {
     profile: any;
@@ -66,6 +67,13 @@ export default function GigRadar({ profile }: GigRadarProps) {
     // Results toolbar state
     const [sortMode, setSortMode] = useState<SortMode>('best');
     const [verifiedOnly, setVerifiedOnly] = useState(false);
+    const [presets, setPresets] = useState<Record<string, any>>({});
+
+    useEffect(() => {
+        apiJson('/api/free/presets')
+            .then((d) => setPresets(d.presets || {}))
+            .catch(() => setPresets({}));
+    }, []);
 
     // Pitch Modal State
     const [pitchModal, setPitchModal] = useState<any | null>(null);
@@ -286,15 +294,37 @@ export default function GigRadar({ profile }: GigRadarProps) {
             </div>
 
             <Panel title="Search" accent="var(--color-radar)">
+                {Object.keys(presets).length > 0 && (
+                    <div className="mb-4 flex flex-wrap gap-2">
+                        <span className="font-mono text-[9px] tracking-widest uppercase text-ink-400 self-center mr-1">
+                            Free presets
+                        </span>
+                        {Object.entries(presets).map(([id, p]: [string, any]) => (
+                            <button
+                                key={id}
+                                type="button"
+                                onClick={() => {
+                                    if (p.genre) setGenre(p.genre);
+                                    if (p.tier) setTier(p.tier);
+                                    if (p.radius) setRadius(p.radius);
+                                    if (p.timeframe) setTimeframe(p.timeframe);
+                                }}
+                                className="font-mono text-[10px] tracking-wide px-2.5 py-1 rounded-full border border-white/10 text-ink-200 hover:border-orange-500/40 hover:text-orange-400 transition-colors"
+                            >
+                                {p.label || id}
+                            </button>
+                        ))}
+                    </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-                    <Field label="City">
+                    <Field label="City (global)">
                         <div className="relative">
                             <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-700 pointer-events-none" />
                             <input
                                 type="text"
                                 value={city}
                                 onChange={(e) => setCity(e.target.value)}
-                                placeholder="Atlanta or 30301"
+                                placeholder="Atlanta · Toronto · London UK"
                                 className={`${inputCls()} pl-9 min-h-[44px]`}
                             />
                         </div>

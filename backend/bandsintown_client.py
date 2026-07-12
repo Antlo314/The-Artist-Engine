@@ -122,19 +122,31 @@ async def venues_near_city(city: str, genre_hint: str = "", sample_artists: Opti
 
 def _seed_artists(genre: str) -> list[str]:
     g = (genre or "").lower()
+    try:
+        from free_data import GENRE_PRESETS
+        for preset in GENRE_PRESETS.values():
+            label = (preset.get("label") or "").lower()
+            pg = (preset.get("genre") or "").lower()
+            if pg in g or any(w in g for w in label.replace("/", " ").split() if len(w) > 2):
+                return list(preset.get("seed_artists") or [])
+    except Exception:
+        pass
     table = {
-        "hip hop": ["J. Cole", "Kendrick Lamar", "Doja Cat", "Tyler, The Creator", "Lil Baby", "Megan Thee Stallion"],
-        "rap": ["J. Cole", "Kendrick Lamar", "Travis Scott", "Drake", "21 Savage", "SZA"],
-        "r&b": ["SZA", "Summer Walker", "Brent Faiyaz", "H.E.R.", "Giveon", "Daniel Caesar"],
-        "rock": ["Foo Fighters", "The Killers", "Paramore", "Queens of the Stone Age", "Phoebe Bridgers", "Turnstile"],
-        "indie": ["Phoebe Bridgers", "Boygenius", "The 1975", "Vampire Weekend", "Tame Impala", "Clairo"],
-        "electronic": ["Flume", "Disclosure", "Odesza", "Kaytranada", "Fred again..", "Porter Robinson"],
+        "hip hop": ["J. Cole", "Kendrick Lamar", "Doja Cat", "Tyler, The Creator", "Lil Baby", "Megan Thee Stallion", "SZA", "21 Savage"],
+        "rap": ["J. Cole", "Kendrick Lamar", "Travis Scott", "Drake", "21 Savage", "SZA", "Doja Cat", "Lil Baby"],
+        "r&b": ["SZA", "Summer Walker", "Brent Faiyaz", "H.E.R.", "Giveon", "Daniel Caesar", "Frank Ocean", "Solange"],
+        "rock": ["Foo Fighters", "The Killers", "Paramore", "Queens of the Stone Age", "Phoebe Bridgers", "Turnstile", "IDLES"],
+        "indie": ["Phoebe Bridgers", "Boygenius", "The 1975", "Vampire Weekend", "Tame Impala", "Clairo", "Japanese Breakfast"],
+        "electronic": ["Flume", "Disclosure", "Odesza", "Kaytranada", "Fred again..", "Porter Robinson", "Four Tet"],
         "country": ["Zach Bryan", "Luke Combs", "Kacey Musgraves", "Chris Stapleton", "Megan Moroney", "Lainey Wilson"],
         "pop": ["Billie Eilish", "Olivia Rodrigo", "Dua Lipa", "The Weeknd", "Sabrina Carpenter", "Chappell Roan"],
-        "jazz": ["Kamasi Washington", "Robert Glasper", "Norah Jones", "Esperanza Spalding"],
-        "metal": ["Metallica", "Gojira", "Spiritbox", "Sleep Token", "Tool"],
+        "jazz": ["Kamasi Washington", "Robert Glasper", "Norah Jones", "Esperanza Spalding", "Cory Henry"],
+        "metal": ["Metallica", "Gojira", "Spiritbox", "Sleep Token", "Tool", "Knocked Loose"],
+        "latin": ["Bad Bunny", "Rosalía", "Peso Pluma", "Karol G", "Rauw Alejandro"],
+        "afrobeats": ["Burna Boy", "Wizkid", "Tems", "Asake", "Rema"],
+        "amapiano": ["Tyla", "Uncle Waffles", "Kabza De Small"],
     }
     for key, artists in table.items():
         if key in g:
             return artists
-    return ["Billie Eilish", "The Weeknd", "Foo Fighters", "SZA", "Tyler, The Creator", "Paramore"]
+    return ["Billie Eilish", "The Weeknd", "Foo Fighters", "SZA", "Tyler, The Creator", "Paramore", "Doja Cat", "Odesza"]

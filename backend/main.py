@@ -47,6 +47,15 @@ from crm import (
     create_reset_token,
     reset_password_with_code,
 )
+from free_data import (
+    free_stack_manifest,
+    GENRE_PRESETS,
+    RELEASE_CHECKLIST,
+    tour_route,
+    discogs_search,
+    nominatim_geocode,
+    infer_country,
+)
 from founding_auth import (
     AppUser,
     auth_configured,
@@ -429,6 +438,7 @@ class ScoutRequest(BaseModel):
     tier: str
     radius: str
     timeframe: str
+    country: Optional[str] = None  # ISO-2; auto-inferred from city when omitted
 
 class NegotiateRequest(BaseModel):
     venue_offer: str
@@ -458,6 +468,7 @@ class SearchMemoryRequest(BaseModel):
 
 @app.get("/api/system-status")
 async def system_status():
+    stack = free_stack_manifest()
     return {
         "status": "OMEGA-TIER ACTIVE",
         "engine": "The Source Engine v3.0 — thesourceengine.com",
@@ -465,6 +476,17 @@ async def system_status():
         "auth_required": auth_required(),
         "auth_configured": auth_configured(),
         "founding_limits": DAILY_LIMITS,
+        "free_data": {
+            "ticketmaster": ticketmaster_available(),
+            "bandsintown": bandsintown_available(),
+            "musicbrainz": True,
+            "cover_art_archive": True,
+            "openstreetmap": True,
+            "discogs": bool(os.getenv("DISCOGS_TOKEN") or os.getenv("DISCOGS_KEY")),
+            "legal_linter": True,
+            "crm_sqlite": True,
+        },
+        "investor_stack": stack,
         "log": "\n".join(system_startup_log)
     }
 
@@ -688,9 +710,11 @@ async def scout_gigs(request: ScoutRequest, user: AppUser = Depends(require_foun
         try:
             real_venues = await fetch_ticketmaster_venues(
                 city=request.city, genre=request.genre,
-                radius=request.radius, timeframe=request.timeframe
+                radius=request.radius, timeframe=request.timeframe,
+                country_code=request.country or infer_country(request.city),
             )
             source_tag = "ticketmaster_live"
+            logs.append(f"[GIG RADAR] Country window: {infer_country(request.city, request.country)}")
         except Exception as tm_err:
             logs.append(f"[GIG RADAR] Ticketmaster path error ({str(tm_err)}).")
             real_venues = []
@@ -1462,9 +1486,116 @@ async def epk(q: str, user: AppUser = Depends(require_founding_user)):
     """Free EPK metadata pack: MusicBrainz + Cover Art Archive URLs."""
     try:
         pack = await epk_bundle(q)
+        # Optional free Discogs layer
+        try:
+            d = await discogs_search(q, limit=5)
+            pack["discogs"] = d
+        except Exception:
+            pack["discogs"] = {"results": []}
         return {"status": "success", **pack, "disclaimer": "Metadata for promotional use; verify rights before commercial reuse of images."}
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"EPK pack failed: {e}")
+
+
+@app.get("/api/free/stack")
+async def free_stack():
+    """Public investor inventory — free live vs coming soon (no auth)."""
+    return {"status": "success", **free_stack_manifest()}
+
+
+@app.get("/api/free/presets")
+async def free_presets(user: AppUser = Depends(require_founding_user)):
+    return {"status": "success", "presets": GENRE_PRESETS}
+
+
+@app.get("/api/free/release-checklist")
+async def free_checklist(user: AppUser = Depends(require_founding_user)):
+    return {"status": "success", "items": RELEASE_CHECKLIST}
+
+
+class TourBody(BaseModel):
+    cities: list[str]
+
+
+@app.post("/api/free/tour-route")
+async def free_tour(body: TourBody, user: AppUser = Depends(require_founding_user)):
+    try:
+        route = await tour_route(body.cities or [])
+        return {"status": "success", **route}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+
+@app.get("/api/free/geocode")
+async def free_geocode(q: str, user: AppUser = Depends(require_founding_user)):
+    hit = await nominatim_geocode(q)
+    if not hit:
+        return {"status": "success", "result": None}
+    return {"status": "success", "result": hit}
+
+
+@app.get("/api/free/discogs")
+async def free_discogs(q: str, user: AppUser = Depends(require_founding_user)):
+    return {"status": "success", **(await discogs_search(q))}
+
+
+class OfferCompareBody(BaseModel):
+    offer_a: str
+    offer_b: str
+
+
+@app.post("/api/free/offer-compare")
+async def free_offer_compare(body: OfferCompareBody, user: AppUser = Depends(require_founding_user)):
+    """Free dual-offer linter compare + optional short AI table (if Gemini on)."""
+    la = lint_text(body.offer_a or "")
+    lb = lint_text(body.offer_b or "")
+    out = {
+        "status": "success",
+        "disclaimer": LEGAL_DISCLAIMER,
+        "offer_a": {"linter": la, "integrity_hint": la.get("integrity_hint")},
+        "offer_b": {"linter": lb, "integrity_hint": lb.get("integrity_hint")},
+        "winner_hint": None,
+    }
+    a_s, b_s = la.get("integrity_hint") or 0, lb.get("integrity_hint") or 0
+    if a_s > b_s + 5:
+        out["winner_hint"] = "Offer A scores cleaner on rule-based flags (not legal advice)."
+    elif b_s > a_s + 5:
+        out["winner_hint"] = "Offer B scores cleaner on rule-based flags (not legal advice)."
+    else:
+        out["winner_hint"] = "Similar rule risk — compare money terms and exclusivity carefully."
+
+    # Optional free-tier AI side-by-side if key present
+    if get_api_key():
+        try:
+            client = get_genai_client()
+            prompt = f"""Compare two venue/artist offers for an independent artist. Be brief.
+OFFER A:
+{(body.offer_a or '')[:2500]}
+
+OFFER B:
+{(body.offer_b or '')[:2500]}
+
+Return JSON: {{
+  "money_a": "one line",
+  "money_b": "one line",
+  "risks_a": ["..."],
+  "risks_b": ["..."],
+  "prefer": "A" | "B" | "mixed",
+  "reason": "2 sentences"
+}}"""
+            resp = await _generate_fast(
+                client,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=0.2,
+                    response_mime_type="application/json",
+                    max_output_tokens=700,
+                ),
+            )
+            out["ai_compare"] = json.loads(resp.text)
+        except Exception as e:
+            out["ai_compare_error"] = str(e)[:160]
+    return out
 
 
 @app.get("/api/crm/state")

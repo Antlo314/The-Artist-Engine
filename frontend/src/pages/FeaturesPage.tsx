@@ -202,6 +202,57 @@ export default function FeaturesPage() {
                     })}
                 </div>
 
+                {/* ===== Free stack vs coming soon (investor honesty) ===== */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="mt-28 md:mt-40 grid md:grid-cols-2 gap-6"
+                >
+                    <div className="glass-obsidian rounded-2xl p-6 md:p-8">
+                        <p className="font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-3">Live free now</p>
+                        <h3 className="font-display text-2xl md:text-3xl text-ink-50 mb-4">Maxed open stack</h3>
+                        <ul className="space-y-2 text-sm text-ink-200">
+                            {[
+                                'Matchering + meters + stem HPSS',
+                                'Ticketmaster + Bandsintown venue intel',
+                                'MusicBrainz / Cover Art EPK',
+                                'OpenStreetMap tour routing',
+                                'Contract linter + AI scan',
+                                'CRM + CSV/JSON + mailto pitches',
+                                'Auth, quotas, light/dark, PWA',
+                            ].map((t) => (
+                                <li key={t} className="flex gap-2">
+                                    <Check size={14} className="text-ember-500 shrink-0 mt-0.5" />
+                                    {t}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="glass-obsidian rounded-2xl p-6 md:p-8 border border-white/5">
+                        <p className="font-mono text-[10px] tracking-[0.35em] text-ink-400 uppercase mb-3">Roadmap</p>
+                        <h3 className="font-display text-2xl md:text-3xl text-ink-50 mb-4">Coming later</h3>
+                        <p className="text-sm text-ink-400 mb-4 leading-relaxed">
+                            Not free today — we show them as future rails so investors see the full OS, not fake demos.
+                        </p>
+                        <ul className="space-y-2 text-sm text-ink-400">
+                            {[
+                                'Streaming/social analytics suites (Chartmetric-class)',
+                                'E-sign + versioned contracts',
+                                'Bank / instant artist payouts',
+                                'Tracked multi-channel send + inbox',
+                                'Always-on neural stem GPU farm',
+                                'PRO registration + DSP distribution partners',
+                            ].map((t) => (
+                                <li key={t} className="flex gap-2">
+                                    <span className="font-mono text-[9px] uppercase tracking-widest text-ink-500 shrink-0 mt-0.5">Soon</span>
+                                    {t}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </motion.div>
+
                 {/* ===== Comparison ===== */}
                 <motion.div
                     initial={{ opacity: 0, y: 50 }}
