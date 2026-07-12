@@ -205,12 +205,17 @@ const DANGER_STYLES: Record<string, { bar: string; badge: string }> = {
 };
 
 export default function TheCodex() {
-    const [searchTerm, setSearchTerm] = useState('');
+    const [query, setQuery] = useState('');
 
-    const filteredEntries = codexEntries.filter(entry =>
-        entry.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.translation.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredEntries = codexEntries.filter(entry => {
+        const q = query.trim().toLowerCase();
+        if (!q) return true;
+        return (
+            entry.term.toLowerCase().includes(q) ||
+            entry.translation.toLowerCase().includes(q) ||
+            entry.meaning.toLowerCase().includes(q)
+        );
+    });
 
     return (
         <div className="space-y-6">
@@ -224,15 +229,22 @@ export default function TheCodex() {
                 </p>
             </div>
 
-            <div className="glass-obsidian rounded-xl border border-white/10 p-4 flex items-center gap-4">
-                <Search className="text-ink-400" size={20} />
-                <input
-                    type="text"
-                    placeholder="Search legal jargon... (e.g. Recoupment, Gross Revenue)"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent text-ink-50 font-mono text-sm focus:outline-none placeholder:text-ink-700"
-                />
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                    <Search className="text-ink-400 shrink-0" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Search legal jargon... (e.g. Recoupment, Gross Revenue)"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        className="bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-ink-50 placeholder:text-ink-700 text-sm focus:outline-none focus:border-violet-400/60 transition-colors w-full"
+                    />
+                </div>
+                <div className="flex justify-end">
+                    <span className="font-mono text-[10px] text-ink-400 tracking-widest uppercase">
+                        {filteredEntries.length} of {codexEntries.length} terms
+                    </span>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto pb-8 custom-scrollbar">

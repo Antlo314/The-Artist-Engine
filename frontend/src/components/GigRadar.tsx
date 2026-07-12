@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Music2, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Instagram, Twitter, Facebook, Globe } from 'lucide-react';
+import { Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Music2, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Instagram, Twitter, Facebook, Globe, Download } from 'lucide-react';
 import LoadingProgressBar from './LoadingProgressBar';
 import { useEngine } from '../lib/engineState';
 import { PageHeader, Panel, Field, Btn, EmptyState, StepHint, Segmented, inputCls } from './ui/Shell';
@@ -16,11 +16,40 @@ const OUTREACH_OPTIONS: { value: 'email' | 'call_script' | 'dm'; label: string }
     { value: 'dm', label: 'DM' },
 ];
 
+type SortMode = 'best' | 'reputation' | 'gross' | 'capacity';
+
+const SORT_OPTIONS: { value: SortMode; label: string }[] = [
+    { value: 'best', label: 'Best odds' },
+    { value: 'reputation', label: 'Reputation' },
+    { value: 'gross', label: 'Gross $' },
+    { value: 'capacity', label: 'Capacity' },
+];
+
+const CSV_COLUMNS: { key: string; label: string }[] = [
+    { key: 'name', label: 'name' },
+    { key: 'city', label: 'city' },
+    { key: 'contact', label: 'contact' },
+    { key: 'contact_persona', label: 'contact_persona' },
+    { key: 'payout_model', label: 'payout_model' },
+    { key: 'lead_time', label: 'lead_time' },
+    { key: 'reputation_score', label: 'reputation_score' },
+    { key: 'capacity', label: 'capacity' },
+    { key: 'avg_ticket_price_usd', label: 'avg_ticket_price_usd' },
+    { key: 'gross_potential_usd', label: 'gross_potential_usd' },
+    { key: 'website_url', label: 'website_url' },
+    { key: 'social_media_url', label: 'social_media_url' },
+];
+
+const csvEscape = (val: any) => {
+    const s = val === null || val === undefined ? '' : String(val);
+    return `"${s.replace(/"/g, '""')}"`;
+};
+
 export default function GigRadar({ profile }: GigRadarProps) {
     const { record } = useEngine();
     // Search State
-    const [city, setCity] = useState('Chicago');
-    const [genre, setGenre] = useState('Deep House');
+    const [city, setCity] = useState(profile?.homeCity || 'Chicago');
+    const [genre, setGenre] = useState(profile?.primaryGenre || 'Deep House');
     const [tier, setTier] = useState('Mid-Size Touring (250-1000 cap)');
     const [radius, setRadius] = useState('50 miles');
     const [timeframe, setTimeframe] = useState('Fall 2026');
@@ -30,6 +59,10 @@ export default function GigRadar({ profile }: GigRadarProps) {
     const [scanPhase, setScanPhase] = useState(0);
     const [gigs, setGigs] = useState<any[]>([]);
     const [error, setError] = useState<string | null>(null);
+
+    // Results toolbar state
+    const [sortMode, setSortMode] = useState<SortMode>('best');
+    const [verifiedOnly, setVerifiedOnly] = useState(false);
 
     // Pitch Modal State
     const [pitchModal, setPitchModal] = useState<any | null>(null);
@@ -150,6 +183,72 @@ export default function GigRadar({ profile }: GigRadarProps) {
         return <Globe size={14} />;
     };
 
+    // The "alpha target" (best-odds venue) is always computed off the full,
+    // unfiltered gigs list so the "Best odds" badge stays consistent no
+    // matter how the results are currently sorted/filtered for display.
+    const alphaIndex = useMemo(() => {
+        let maxScore = -1;
+        let idx = -1;
+        gigs.forEach((g, i) => {
+            const rep = parseInt(g.reputation_score) || 0;
+            const activeBonus = g.active_search_signal ? 20 : 0;
+            const total = rep + activeBonus;
+            if (total > maxScore) {
+                maxScore = total;
+                idx = i;
+            }
+        });
+        return idx;
+    }, [gigs]);
+
+    // Derived (sorted + filtered) list for rendering/export. Never mutates `gigs`.
+    const displayedGigs = useMemo(() => {
+        const num = (v: any) => {
+            const n = Number(v);
+            return isNaN(n) ? 0 : n;
+        };
+
+        let list = gigs.map((gig, originalIndex) => ({ gig, originalIndex }));
+
+        if (verifiedOnly) {
+            list = list.filter(({ gig }) => !!gig.verified_live);
+        }
+
+        if (sortMode === 'reputation') {
+            list = [...list].sort((a, b) => num(b.gig.reputation_score) - num(a.gig.reputation_score));
+        } else if (sortMode === 'gross') {
+            list = [...list].sort((a, b) => num(b.gig.gross_potential_usd) - num(a.gig.gross_potential_usd));
+        } else if (sortMode === 'capacity') {
+            list = [...list].sort((a, b) => num(b.gig.capacity) - num(a.gig.capacity));
+        } else {
+            // Best odds (default): alpha target first, then by reputation desc.
+            list = [...list].sort((a, b) => {
+                if (a.originalIndex === alphaIndex) return -1;
+                if (b.originalIndex === alphaIndex) return 1;
+                return num(b.gig.reputation_score) - num(a.gig.reputation_score);
+            });
+        }
+
+        return list;
+    }, [gigs, sortMode, verifiedOnly, alphaIndex]);
+
+    const handleExportCsv = () => {
+        const header = CSV_COLUMNS.map((c) => csvEscape(c.label)).join(',');
+        const rows = displayedGigs.map(({ gig }) =>
+            CSV_COLUMNS.map((c) => csvEscape(gig[c.key])).join(',')
+        );
+        const csv = [header, ...rows].join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `gig-radar-${(city || 'export').trim().replace(/\s+/g, '_')}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="space-y-8">
             <PageHeader
@@ -245,6 +344,29 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 </div>
             )}
 
+            {/* Results toolbar */}
+            {gigs.length > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Segmented
+                            options={SORT_OPTIONS}
+                            value={sortMode}
+                            onChange={setSortMode}
+                            accent="#fb923c"
+                        />
+                        <button
+                            onClick={() => setVerifiedOnly((v) => !v)}
+                            className={`px-4 py-1.5 rounded-full font-mono text-[11px] tracking-widest uppercase transition-colors border ${verifiedOnly ? 'bg-orange-500/15 text-orange-400 border-orange-500/40' : 'border-white/10 text-ink-400 hover:text-ink-50 hover:border-white/25'}`}
+                        >
+                            Verified only
+                        </button>
+                    </div>
+                    <Btn variant="ghost" size="sm" onClick={handleExportCsv}>
+                        <Download size={14} /> Export CSV
+                    </Btn>
+                </div>
+            )}
+
             {/* Results */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
                 <AnimatePresence>
@@ -294,30 +416,19 @@ export default function GigRadar({ profile }: GigRadarProps) {
                     {(() => {
                         if (isScouting || gigs.length === 0) return null;
 
-                        // Sort targets: Alpha Target first, then by reputation score
-                        const sortedGigs = [...gigs].map((gig, originalIndex) => {
-                            const rep = parseInt(gig.reputation_score) || 0;
-                            const activeBonus = gig.active_search_signal ? 20 : 0;
-                            return { gig, originalIndex, totalScore: rep + activeBonus, repScore: rep };
-                        });
+                        if (displayedGigs.length === 0) {
+                            return (
+                                <div className="col-span-full">
+                                    <EmptyState
+                                        icon={<Search size={40} />}
+                                        title="No verified venues"
+                                        hint="Turn off 'Verified only' to see all scanned venues."
+                                    />
+                                </div>
+                            );
+                        }
 
-                        // Find the alpha target
-                        let maxScore = -1;
-                        let alphaIndex = -1;
-                        sortedGigs.forEach((g) => {
-                            if (g.totalScore > maxScore) {
-                                maxScore = g.totalScore;
-                                alphaIndex = g.originalIndex;
-                            }
-                        });
-
-                        sortedGigs.sort((a, b) => {
-                            if (a.originalIndex === alphaIndex) return -1;
-                            if (b.originalIndex === alphaIndex) return 1;
-                            return b.repScore - a.repScore;
-                        });
-
-                        return sortedGigs.map(({ gig, originalIndex }, idx) => {
+                        return displayedGigs.map(({ gig, originalIndex }, idx) => {
                             const isAlpha = originalIndex === alphaIndex;
 
                             return (

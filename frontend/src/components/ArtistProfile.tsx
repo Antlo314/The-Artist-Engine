@@ -125,6 +125,27 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                         className={inputCls}
                                     />
                                 </Field>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <Field label="Home city">
+                                        <input
+                                            type="text"
+                                            value={profile.homeCity || ''}
+                                            onChange={(e) => setProfile({ ...profile, homeCity: e.target.value })}
+                                            placeholder="Chicago"
+                                            className={inputCls}
+                                        />
+                                    </Field>
+                                    <Field label="Primary genre">
+                                        <input
+                                            type="text"
+                                            value={profile.primaryGenre || ''}
+                                            onChange={(e) => setProfile({ ...profile, primaryGenre: e.target.value })}
+                                            placeholder="Deep House"
+                                            className={inputCls}
+                                        />
+                                    </Field>
+                                </div>
+                                <span className="text-[11px] text-ink-700">Pre-fills your Find Gigs search.</span>
                             </div>
                         </div>
 

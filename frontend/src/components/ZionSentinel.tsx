@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Scale, FileText, Activity, TrendingUp, ShieldAlert, CheckCircle2, UploadCloud, X } from 'lucide-react';
+import { Scale, FileText, Activity, TrendingUp, ShieldAlert, CheckCircle2, UploadCloud, X, Copy, Download } from 'lucide-react';
 import { codexEntries } from './TheCodex';
 import LoadingProgressBar from './LoadingProgressBar';
 import { useEngine } from '../lib/engineState';
@@ -21,6 +21,7 @@ export default function ZionSentinel() {
     const [isDragging, setIsDragging] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
     const [analysis, setAnalysis] = useState<any>(null);
+    const [rebuttalCopied, setRebuttalCopied] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDrop = (e: React.DragEvent) => {
@@ -70,6 +71,67 @@ export default function ZionSentinel() {
         } finally {
             setIsScanning(false);
         }
+    };
+
+    const handleCopyRebuttal = () => {
+        if (!analysis?.shark_rebuttal) return;
+        navigator.clipboard.writeText(analysis.shark_rebuttal);
+        setRebuttalCopied(true);
+        setTimeout(() => setRebuttalCopied(false), 2000);
+    };
+
+    const handleDownloadAnalysis = () => {
+        if (!analysis) return;
+
+        const lines: string[] = [];
+        lines.push('ZION SENTINEL — CONTRACT ANALYSIS');
+        lines.push('='.repeat(40));
+        lines.push('');
+
+        if (analysis.parties) {
+            lines.push('PARTIES');
+            lines.push(analysis.parties);
+            lines.push('');
+        }
+        if (analysis.obligations) {
+            lines.push('OBLIGATIONS');
+            lines.push(analysis.obligations);
+            lines.push('');
+        }
+        if (typeof analysis.integrity_score !== 'undefined') {
+            lines.push(`INTEGRITY SCORE: ${analysis.integrity_score}`);
+            lines.push('');
+        }
+        if (Array.isArray(analysis.red_flags) && analysis.red_flags.length > 0) {
+            lines.push(`RED FLAGS (${analysis.red_flags.length})`);
+            lines.push('-'.repeat(40));
+            analysis.red_flags.forEach((flag: any, idx: number) => {
+                lines.push(`${idx + 1}. Clause: ${flag.clause || 'N/A'}`);
+                lines.push(`   Risk: ${flag.risk || 'N/A'}`);
+                lines.push(`   Fix: ${flag.fix || 'N/A'}`);
+                lines.push('');
+            });
+        }
+        if (analysis.summary) {
+            lines.push('STRATEGIC SUMMARY');
+            lines.push(analysis.summary);
+            lines.push('');
+        }
+        if (analysis.shark_rebuttal) {
+            lines.push('SOVEREIGN REBUTTAL');
+            lines.push(analysis.shark_rebuttal);
+            lines.push('');
+        }
+
+        const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'contract-analysis.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     const ScoreGauge = ({ score }: { score: number }) => {
@@ -264,6 +326,13 @@ export default function ZionSentinel() {
                             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
                             className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar"
                         >
+                            {/* Toolbar */}
+                            <div className="flex justify-end">
+                                <Btn variant="ghost" size="sm" onClick={handleDownloadAnalysis}>
+                                    <Download size={12} /> Download analysis (.txt)
+                                </Btn>
+                            </div>
+
                             {/* Top Row: Score & Summary */}
                             <div className="grid grid-cols-3 gap-4">
                                 <ScoreGauge score={analysis.integrity_score || 50} />
@@ -307,21 +376,14 @@ export default function ZionSentinel() {
                                 title="Sovereign Rebuttal"
                                 accent={ACCENT}
                                 actions={
-                                    <button
-                                        onClick={(e) => {
-                                            navigator.clipboard.writeText(analysis.shark_rebuttal);
-                                            const btn = e.currentTarget;
-                                            btn.innerText = 'Copied!';
-                                            btn.classList.add('text-emerald-400', 'border-emerald-500/50');
-                                            setTimeout(() => {
-                                                btn.innerText = 'Copy';
-                                                btn.classList.remove('text-emerald-400', 'border-emerald-500/50');
-                                            }, 2000);
-                                        }}
-                                        className="font-mono text-[10px] border border-white/10 px-3 py-1 rounded text-ink-400 hover:text-ink-50 transition-colors"
+                                    <Btn
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={handleCopyRebuttal}
+                                        className={rebuttalCopied ? '!border-emerald-500/50 !text-emerald-400' : ''}
                                     >
-                                        Copy
-                                    </button>
+                                        <Copy size={12} /> {rebuttalCopied ? 'Copied!' : 'Copy rebuttal'}
+                                    </Btn>
                                 }
                             >
                                 <div className="text-sm font-inter text-ink-200 leading-relaxed whitespace-pre-wrap bg-ink-900 p-4 rounded-lg border border-white/10">
