@@ -63,6 +63,9 @@ def get_api_key() -> Optional[str]:
 # Central model config — override with GEMINI_MODEL in .env if Google retires
 # this one (they retired gemini-2.5-flash for new API projects).
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
+# Fast model for latency-sensitive structured tasks (venue enrichment).
+# flash-lite is ~10x faster than flash on structured JSON. Override if quality dips.
+GEMINI_FAST_MODEL = os.getenv("GEMINI_FAST_MODEL", "gemini-flash-lite-latest")
 
 def get_genai_client():
     api_key = get_api_key()
@@ -224,11 +227,13 @@ async def scout_gigs(request: ScoutRequest):
                 city=request.city, genre=request.genre,
                 radius=request.radius, timeframe=request.timeframe
             )
+            # Cap enriched venues to keep the AI step fast (fewer output tokens).
+            real_venues = real_venues[:15]
             if real_venues:
                 logs.append(f"[GIG RADAR] {len(real_venues)} verified live venues intercepted. Enriching with strategic AI...")
                 client = get_genai_client()
                 enrich_resp = await client.aio.models.generate_content(
-                    model=GEMINI_MODEL,
+                    model=GEMINI_FAST_MODEL,
                     contents=_enrich_prompt(request, real_venues),
                     config=types.GenerateContentConfig(
                         temperature=0.5,
