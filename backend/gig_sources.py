@@ -29,6 +29,43 @@ def _radius_miles(radius: str, default: str = "50") -> str:
     return m.group(0) if m else default
 
 
+def _iso(dt) -> str:
+    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _date_window(timeframe: str):
+    """Map a free-text timeframe to a (startDateTime, endDateTime) UTC window
+    for the Ticketmaster API. Returns (None, None) when no window applies."""
+    from datetime import datetime, timezone, timedelta
+    tf = (timeframe or "").strip().lower()
+    now = datetime.now(timezone.utc)
+    if not tf or "active" in tf or "now" in tf:
+        # Default active window: next 60 days.
+        return _iso(now), _iso(now + timedelta(days=60))
+    # Season / quarter keywords -> explicit windows.
+    seasons = {
+        "spring": (3, 1, 5, 31), "summer": (6, 1, 8, 31),
+        "fall": (9, 1, 11, 30), "autumn": (9, 1, 11, 30), "winter": (12, 1, 2, 28),
+    }
+    year_match = re.search(r"(20\d{2})", tf)
+    for name, (sm, sd, em, ed) in seasons.items():
+        if name in tf:
+            yr = int(year_match.group(1)) if year_match else now.year
+            ey = yr + 1 if sm == 12 else yr  # winter spills into next year
+            return (_iso(datetime(yr, sm, sd, tzinfo=timezone.utc)),
+                    _iso(datetime(ey, em, ed, 23, 59, 59, tzinfo=timezone.utc)))
+    qmatch = re.search(r"q([1-4])", tf)
+    if qmatch:
+        q = int(qmatch.group(1))
+        yr = int(year_match.group(1)) if year_match else now.year
+        sm = (q - 1) * 3 + 1
+        em = sm + 2
+        last_day = 31 if em in (1, 3, 5, 7, 8, 10, 12) else 30 if em != 2 else 28
+        return (_iso(datetime(yr, sm, 1, tzinfo=timezone.utc)),
+                _iso(datetime(yr, em, last_day, 23, 59, 59, tzinfo=timezone.utc)))
+    return None, None
+
+
 async def fetch_ticketmaster_venues(
     city: str,
     genre: str,
@@ -58,6 +95,12 @@ async def fetch_ticketmaster_venues(
         "unit": "miles",
         "countryCode": "US",
     }
+
+    # Real date window from the timeframe picker (Ticketmaster start/endDateTime).
+    start, end = _date_window(timeframe)
+    if start and end:
+        base_params["startDateTime"] = start
+        base_params["endDateTime"] = end
 
     async def _query(extra: dict):
         try:
