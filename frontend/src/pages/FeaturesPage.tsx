@@ -130,7 +130,7 @@ export default function FeaturesPage() {
                         The sovereign<br />playbook.
                     </h1>
                     <p className="max-w-2xl text-ink-200 font-light leading-relaxed text-base md:text-lg">
-                        The Artist Engine is an autonomous agency replacement — booking intelligence,
+                        The Source Engine is an autonomous agency replacement — booking intelligence,
                         negotiation, legal defense, and mastering in one system. No manager, no retainer,
                         no percentage. You keep the masters and the money.
                     </p>
@@ -222,7 +222,7 @@ export default function FeaturesPage() {
                         <div className="hidden md:grid grid-cols-[1.2fr_2fr_2fr] border-b hairline">
                             <div className="p-5 font-mono text-[10px] tracking-[0.3em] uppercase text-ink-400">Capability</div>
                             <div className="p-5 font-mono text-[10px] tracking-[0.3em] uppercase text-ink-400 border-l hairline">Traditional agency</div>
-                            <div className="p-5 font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 border-l hairline">The Artist Engine</div>
+                            <div className="p-5 font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 border-l hairline">The Source Engine</div>
                         </div>
                         {COMPARISON.map((row, i) => (
                             <div
@@ -271,11 +271,14 @@ export default function FeaturesPage() {
             <footer className="relative z-10 border-t hairline py-8">
                 <div className="max-w-7xl mx-auto px-6 md:px-10 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <img src="/site/favicon.png" alt="Logo" className="w-6 h-6 object-contain" />
-                        <span className="font-display font-medium tracking-wide text-ink-200">THE ARTIST ENGINE</span>
+                        <img src="/site/logo.png" alt="The Source Engine" className="w-7 h-7 rounded-md object-cover" />
+                        <div>
+                            <span className="font-display font-medium tracking-wide text-ink-200 block">THE SOURCE ENGINE</span>
+                            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-400">www.thesourceengine.com</span>
+                        </div>
                     </div>
                     <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ink-400">
-                        © 2026 · Sovereign Protocol · All rights reserved
+                        © 2026 · The Source Engine · All rights reserved
                     </p>
                 </div>
             </footer>

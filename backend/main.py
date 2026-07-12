@@ -56,7 +56,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 app = FastAPI(
-    title="The Artist Engine API - Sovereign Protocol",
+    title="The Source Engine API",
     description="OMEGA-Tier Autonomous Music Industry Backend",
     version="3.0.0"
 )
@@ -361,7 +361,7 @@ system_startup_log = []
 
 @app.on_event("startup")
 async def startup_event():
-    system_startup_log.append("[SYSTEM] THE ARTIST ENGINE - SOVEREIGN PROTOCOL INIT")
+    system_startup_log.append("[SYSTEM] THE SOURCE ENGINE — thesourceengine.com INIT")
     system_startup_log.append("[SYSTEM] Booting OMEGA-Tier Backend Architecture...")
 
     # Validate FFmpeg for Audio Master Core
@@ -431,7 +431,7 @@ class SearchMemoryRequest(BaseModel):
 async def system_status():
     return {
         "status": "OMEGA-TIER ACTIVE",
-        "engine": "The Artist Engine v3.0 - Sovereign Protocol",
+        "engine": "The Source Engine v3.0 — thesourceengine.com",
         "key_verified": bool(get_api_key()),
         "auth_required": auth_required(),
         "auth_configured": auth_configured(),

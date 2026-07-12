@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../lib/auth';
 import { ApiError } from '../lib/api';
 import ThemeToggle from '../components/ThemeToggle';
+import BrandMark from '../components/BrandMark';
 
 export default function LoginPage() {
     const { ready, isSignedIn, canUseEngine, login, register } = useAuth();
@@ -54,11 +55,8 @@ export default function LoginPage() {
             <div className="absolute inset-0 pointer-events-none grain bg-[radial-gradient(ellipse_at_top,_#12070a_0%,_#08080a_45%,_#060607_100%)]" />
 
             <header className="relative z-10 flex items-center justify-between px-6 py-5">
-                <Link to="/" className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded bg-ink-800 border border-white/10 overflow-hidden">
-                        <img src="/site/favicon.png" alt="" className="w-full h-full object-cover" />
-                    </div>
-                    <span className="font-display tracking-widest text-sm">THE ARTIST ENGINE</span>
+                <Link to="/" className="inline-flex">
+                    <BrandMark size="md" variant="full" />
                 </Link>
                 <div className="flex items-center gap-2">
                     <ThemeToggle />
@@ -75,7 +73,7 @@ export default function LoginPage() {
                     className="w-full max-w-md glass-obsidian border border-white/10 rounded-2xl p-8"
                 >
                     <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 mb-3">
-                        The Artist Engine
+                        thesourceengine.com
                     </p>
                     <h1 className="font-display text-3xl font-semibold tracking-tight mb-2">
                         {mode === 'register' ? 'Create your account' : 'Sign in'}

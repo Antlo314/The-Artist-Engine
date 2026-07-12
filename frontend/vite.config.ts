@@ -16,20 +16,21 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
       manifest: {
-        name: 'The Artist Engine.OS',
-        short_name: 'Engine.OS',
-        description: 'The autonomous operational framework for sovereign creators.',
-        theme_color: '#000000',
-        background_color: '#000000',
+        name: 'The Source Engine',
+        short_name: 'Source',
+        description: 'The source engine for sovereign artists — master, scout, negotiate, protect.',
+        theme_color: '#060607',
+        background_color: '#060607',
         display: 'standalone',
+        start_url: '/',
         icons: [
           {
-            src: '/site/favicon.png', // We'll leverage the existing favicon
+            src: '/site/icon-192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/site/favicon.png',
+            src: '/site/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

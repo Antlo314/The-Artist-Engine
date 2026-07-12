@@ -11,7 +11,7 @@ function RouteFallback() {
     return (
         <div className="min-h-screen w-full bg-ink-950 flex items-center justify-center">
             <div className="font-mono text-[11px] tracking-[0.3em] uppercase text-ink-400 animate-pulse">
-                Loading Engine…
+                Loading Source…
             </div>
         </div>
     );

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Download, LogIn } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
+import BrandMark from './BrandMark';
 
 export default function MarketingNav() {
     const navigate = useNavigate();
@@ -30,17 +31,11 @@ export default function MarketingNav() {
 
     return (
         <nav className="theme-nav fixed top-0 w-full z-50 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between border-b backdrop-blur-lg">
-            <div
-                className="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-0"
+            <BrandMark
+                size="md"
+                variant="compact"
                 onClick={() => navigate('/')}
-            >
-                <div className="w-8 h-8 rounded bg-white shadow-sm flex items-center justify-center p-1 shrink-0 border border-black/5">
-                    <img src="/site/favicon.png" alt="Logo" className="w-full h-full object-contain" />
-                </div>
-                <span className="font-display font-semibold tracking-widest text-sm sm:text-base truncate text-ink-50">
-                    ENGINE.OS
-                </span>
-            </div>
+            />
 
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <button

@@ -9,6 +9,7 @@ const LegalCore = lazy(() => import('../components/LegalCore'));
 const ArtistProfile = lazy(() => import('../components/ArtistProfile'));
 import FoundingBadge from '../components/FoundingBadge';
 import ThemeToggle from '../components/ThemeToggle';
+import BrandMark from '../components/BrandMark';
 import { EngineProvider } from '../lib/engineState';
 
 type ViewId = 'dashboard' | 'radar' | 'studio' | 'legal' | 'profile';
@@ -156,12 +157,10 @@ function EngineCoreInner() {
                 >
                     <div className="h-14 flex items-center justify-between px-4 gap-2">
                         <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="h-8 w-8 rounded-lg bg-ink-800 border border-white/10 overflow-hidden shrink-0">
-                                <img src="/site/favicon.png" alt="" className="w-full h-full object-cover" />
-                            </div>
+                            <BrandMark size="sm" showWordmark={false} />
                             <div className="min-w-0">
-                                <div className="font-display text-sm font-semibold tracking-widest text-ink-50 leading-none">
-                                    ENGINE.OS
+                                <div className="font-display text-sm font-semibold tracking-[0.14em] text-ink-50 leading-none">
+                                    SOURCE<span className="text-ember-500">.</span>ENGINE
                                 </div>
                                 <div className="text-xs text-ink-400 mt-0.5 truncate">{current.label}</div>
                             </div>
@@ -178,7 +177,7 @@ function EngineCoreInner() {
                                     <img src={avatar} alt="" className="w-full h-full object-cover" />
                                 ) : (
                                     <span className="flex h-full w-full items-center justify-center font-display text-[10px] text-ink-200">
-                                        {(profile.artistAlias || profile.agentName || 'AE').substring(0, 2).toUpperCase()}
+                                        {(profile.artistAlias || profile.agentName || 'SE').substring(0, 2).toUpperCase()}
                                     </span>
                                 )}
                             </button>
@@ -236,15 +235,11 @@ function EngineCoreInner() {
 
             <nav className="relative z-40 h-full w-64 glass-obsidian border-r border-white/10 flex flex-col shrink-0">
                 <div className="p-6 border-b border-white/10">
-                    <button type="button" className="flex items-center gap-3" onClick={() => setActiveView('dashboard')}>
-                        <div className="h-8 w-8 rounded bg-ink-800 border border-white/10 overflow-hidden">
-                            <img src="/site/favicon.png" alt="Logo" className="w-full h-full object-cover" />
-                        </div>
-                        <div className="text-left">
-                            <h1 className="font-display text-lg font-semibold text-ink-50 tracking-widest leading-none">THE ARTIST</h1>
-                            <span className="font-mono text-[10px] text-ink-400 tracking-[0.3em]">ENGINE.OS</span>
-                        </div>
-                    </button>
+                    <BrandMark
+                        size="md"
+                        variant="stacked"
+                        onClick={() => setActiveView('dashboard')}
+                    />
                 </div>
 
                 <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">

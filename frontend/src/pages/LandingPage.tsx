@@ -7,7 +7,7 @@ const VinylScene = lazy(() => import('../components/three/VinylScene'));
 import { useSmoothScroll, gsap, ScrollTrigger } from '../lib/useSmoothScroll';
 
 /* ============================================================
-   THE ARTIST ENGINE — Landing v2 "SOVEREIGN CINEMA"
+   THE SOURCE ENGINE — Landing · thesourceengine.com
    Dark cinematic hero (procedural 3D vinyl) + scroll story.
 ============================================================ */
 
@@ -151,17 +151,17 @@ export default function LandingPage() {
                     <div className="hero-fade mb-5 md:mb-8 flex items-center gap-3">
                         <span className="inline-flex h-2 w-2 rounded-full bg-ember-500 animate-pulse" />
                         <span className="font-mono text-[10px] tracking-[0.25em] md:tracking-[0.35em] text-ink-400 uppercase">
-                            Sovereign Protocol · Live
+                            thesourceengine.com · Live
                         </span>
                     </div>
 
                     {/* line-height + padding fix: overflow-hidden + tight cinema tracking was clipping "artists" */}
                     <h1 className="font-display font-semibold tracking-[-0.03em] text-ink-50 max-w-5xl text-[clamp(2.35rem,8.5vw,8rem)] leading-[1.05] md:leading-[1.02]">
                         <span className="block overflow-visible pb-[0.12em]">
-                            <span className="hero-word inline-block">The&nbsp;operating</span>
+                            <span className="hero-word inline-block">The&nbsp;source</span>
                         </span>
                         <span className="block overflow-visible pb-[0.12em]">
-                            <span className="hero-word inline-block">system&nbsp;for</span>
+                            <span className="hero-word inline-block">engine&nbsp;for</span>
                         </span>
                         <span className="block overflow-visible pb-[0.18em]">
                             <span className="hero-word inline-block text-transparent bg-clip-text bg-gradient-to-br from-ember-400 via-ember-500 to-ember-600">
@@ -177,7 +177,7 @@ export default function LandingPage() {
 
                     <p className="hero-fade mt-6 md:mt-8 max-w-xl text-ink-200 text-[15px] md:text-lg font-light leading-relaxed">
                         Master your records. Find real rooms. Counter every offer.
-                        Kill predatory contracts. One engine — no middlemen.
+                        Kill predatory contracts. One source — no middlemen.
                     </p>
 
                     <div className="hero-fade mt-8 md:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -334,7 +334,7 @@ export default function LandingPage() {
                         No label. No leash.
                     </p>
                     <h2 className="finale-reveal text-cinema text-5xl md:text-7xl mb-10">
-                        Run your empire<br />from one engine.
+                        Run your empire<br />from the source.
                     </h2>
                     <div className="finale-reveal flex flex-col sm:flex-row justify-center gap-4">
                         <button
@@ -354,11 +354,14 @@ export default function LandingPage() {
             <footer className="border-t hairline py-8">
                 <div className="max-w-7xl mx-auto px-6 md:px-10 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <img src="/site/favicon.png" alt="Logo" className="w-6 h-6 object-contain" />
-                        <span className="font-display font-medium tracking-wide text-ink-200">THE ARTIST ENGINE</span>
+                        <img src="/site/logo.png" alt="The Source Engine" className="w-7 h-7 rounded-md object-cover" />
+                        <div>
+                            <span className="font-display font-medium tracking-wide text-ink-200 block">THE SOURCE ENGINE</span>
+                            <span className="font-mono text-[9px] tracking-[0.2em] uppercase text-ink-400">www.thesourceengine.com</span>
+                        </div>
                     </div>
                     <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ink-400">
-                        © 2026 · Sovereign Protocol · All rights reserved
+                        © 2026 · The Source Engine · All rights reserved
                     </p>
                 </div>
             </footer>
