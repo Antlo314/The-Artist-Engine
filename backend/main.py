@@ -270,19 +270,20 @@ def _oracle_dsp_analyze(path: str) -> dict:
     else:
         corr = 1.0  # mono source
 
-    def clamp_knob(v):
-        return int(max(0, min(100, round(v))))
+    def clamp_knob(v, lo=20, hi=80):
+        # Keep suggestions in a musical range — extreme 0/100 reads as a bug in demo.
+        return int(max(lo, min(hi, round(v))))
 
     # Knob heuristics (50 neutral):
     # thin sub → boost; muddy low-mid → cut sub slightly / leave; weak air → boost
-    sub = 50 + (0.18 - p_sub) * 180          # target ~18% sub share
+    sub = 50 + (0.18 - p_sub) * 120          # target ~18% sub share
     if p_lowmid > 0.35:
-        sub -= 8  # mud: don't pile more low end
-    air = 50 + (0.12 - p_air) * 200          # target ~12% air
+        sub -= 6  # mud: don't pile more low end
+    air = 50 + (0.12 - p_air) * 140          # target ~12% air
     # Low crest (squashed) → add snap; very spiky → ease snap
-    snap = 50 + (12.0 - crest_db) * 2.5
+    snap = 50 + (12.0 - crest_db) * 1.8
     # High L/R correlation (narrow) → widen; already wide → ease
-    width = 50 + (corr - 0.35) * -55         # corr 1.0 → ~14 widen; corr 0 → narrow a bit
+    width = 50 + (0.55 - corr) * 40          # corr 1.0 → ~32; corr 0.2 → ~66
 
     knobs = {
         "sub": clamp_knob(sub),
@@ -972,42 +973,56 @@ async def oracle_analysis(
 
         oracle = dsp_oracle
 
-        # ---- Layer 2: optional Gemini multimodal polish (single attempt) ----
-        # Skip AI polish when ORACLE_AI=0 (useful for demos / quota protection).
+        # ---- Layer 2: optional Gemini polish (budgeted so demos stay fast) ----
+        # Default ON but hard-capped; set ORACLE_AI=0 to skip entirely.
         use_ai = os.getenv("ORACLE_AI", "1").strip() not in ("0", "false", "False", "no")
+        ai_budget = float(os.getenv("ORACLE_AI_TIMEOUT_SEC", "6"))
         if use_ai and get_api_key():
             try:
                 client = get_genai_client()
-                print("[ORACLE ENGINE] Optional Gemini polish…")
-                uploaded_file = client.files.upload(file=temp_path)
-                system_instruction = (
-                    "You are The Oracle, a multi-platinum mastering engineer. "
-                    "Respond with one valid JSON object only. No markdown."
-                )
-                prompt = f'''
+                print(f"[ORACLE ENGINE] Optional Gemini polish (budget {ai_budget:.0f}s)…")
+
+                async def _ai_polish():
+                    nonlocal uploaded_file
+                    uploaded_file = client.files.upload(file=temp_path)
+                    system_instruction = (
+                        "You are The Oracle, a multi-platinum mastering engineer. "
+                        "Respond with one valid JSON object only. No markdown."
+                    )
+                    prompt = f'''
 Listen to this unmastered track. Return ONLY JSON:
 {{"analysis":"2 technical sentences","knobs":{{"sub":0-100,"air":0-100,"snap":0-100,"width":0-100}}}}
-50=neutral. Keep analysis under 60 words.
+50=neutral. Keep analysis under 60 words. Knob values must stay between 20 and 80.
 DSP baseline knobs (you may refine): {json.dumps(dsp_oracle.get("knobs", {}))}
 '''
-                response = await _generate_fast(
-                    client,
-                    contents=[uploaded_file, prompt],
-                    config=types.GenerateContentConfig(
-                        system_instruction=system_instruction,
-                        temperature=0.15,
-                        response_mime_type="application/json",
-                        max_output_tokens=400,
-                    ),
-                    prefer_fast=False,
-                )
-                raw = _response_text(response)
-                print(f"[ORACLE ENGINE] AI raw head: {raw[:160]!r}")
-                polished = _normalize_oracle_payload(_extract_json_object(raw))
-                polished["source"] = "gemini+dsp"
-                polished["dsp_knobs"] = dsp_oracle.get("knobs")
-                oracle = polished
+                    # Prefer flash-lite first for latency; fall back to full model.
+                    response = await _generate_fast(
+                        client,
+                        contents=[uploaded_file, prompt],
+                        config=types.GenerateContentConfig(
+                            system_instruction=system_instruction,
+                            temperature=0.15,
+                            response_mime_type="application/json",
+                            max_output_tokens=300,
+                        ),
+                        prefer_fast=True,
+                    )
+                    raw = _response_text(response)
+                    print(f"[ORACLE ENGINE] AI raw head: {raw[:160]!r}")
+                    polished = _normalize_oracle_payload(_extract_json_object(raw))
+                    # Re-clamp after AI so extreme values never ship.
+                    for k, v in list(polished["knobs"].items()):
+                        polished["knobs"][k] = int(max(20, min(80, int(v))))
+                    polished["source"] = "gemini+dsp"
+                    polished["dsp_knobs"] = dsp_oracle.get("knobs")
+                    return polished
+
+                oracle = await asyncio.wait_for(_ai_polish(), timeout=ai_budget)
                 print("[ORACLE ENGINE] AI polish accepted.")
+            except asyncio.TimeoutError:
+                print(f"[ORACLE ENGINE] AI polish timed out after {ai_budget:.0f}s — DSP knobs kept.")
+                oracle = dsp_oracle
+                oracle["ai_error"] = f"timeout>{ai_budget:.0f}s"
             except Exception as ai_err:
                 # Keep DSP result — this is the reliability win.
                 print(f"[ORACLE ENGINE] AI polish skipped: {ai_err}")
