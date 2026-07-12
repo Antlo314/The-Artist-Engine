@@ -8,6 +8,7 @@ const GigRadar = lazy(() => import('../components/GigRadar'));
 const StudioCore = lazy(() => import('../components/StudioCore'));
 const LegalCore = lazy(() => import('../components/LegalCore'));
 const ArtistProfile = lazy(() => import('../components/ArtistProfile'));
+import FoundingBadge from '../components/FoundingBadge';
 import { EngineProvider } from '../lib/engineState';
 
 const NAV = [
@@ -168,23 +169,26 @@ function EngineCoreInner() {
             {/* ===== Main ===== */}
             <main className="flex-1 overflow-hidden flex flex-col relative z-10 md:pt-0 pt-14">
                 {/* Desktop top bar */}
-                <header className="hidden md:flex h-14 glass-obsidian border-b border-white/10 items-center justify-between px-8 shrink-0">
-                    <div className="font-mono text-[11px] text-ink-400 tracking-widest">
+                <header className="hidden md:flex h-14 glass-obsidian border-b border-white/10 items-center justify-between px-6 lg:px-8 shrink-0 gap-4">
+                    <div className="font-mono text-[11px] text-ink-400 tracking-widest shrink-0">
                         <span className="text-ink-700">Engine</span> <span className="text-ink-700">/</span> {current.label}
                     </div>
-                    <button
-                        onClick={() => setActiveView('profile')}
-                        className="flex items-center gap-2.5 rounded-full pl-1 pr-3 py-1 hover:bg-white/5 transition-colors"
-                    >
-                        <div className="h-7 w-7 rounded-full bg-ink-800 border border-white/10 flex items-center justify-center overflow-hidden">
-                            {avatar ? (
-                                <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="font-display text-[10px] text-ink-200">{profile.artistAlias.substring(0, 2).toUpperCase()}</span>
-                            )}
-                        </div>
-                        <span className="text-xs text-ink-200 font-medium">{profile.artistAlias}</span>
-                    </button>
+                    <div className="flex items-center gap-4 min-w-0">
+                        <FoundingBadge />
+                        <button
+                            onClick={() => setActiveView('profile')}
+                            className="flex items-center gap-2.5 rounded-full pl-1 pr-3 py-1 hover:bg-white/5 transition-colors shrink-0"
+                        >
+                            <div className="h-7 w-7 rounded-full bg-ink-800 border border-white/10 flex items-center justify-center overflow-hidden">
+                                {avatar ? (
+                                    <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="font-display text-[10px] text-ink-200">{profile.artistAlias.substring(0, 2).toUpperCase()}</span>
+                                )}
+                            </div>
+                            <span className="text-xs text-ink-200 font-medium">{profile.artistAlias}</span>
+                        </button>
+                    </div>
                 </header>
 
                 {/* View container */}

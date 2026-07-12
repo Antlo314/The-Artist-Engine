@@ -174,7 +174,7 @@ export default function LandingPage() {
 
                     <div className="hero-fade mt-10 flex flex-col sm:flex-row gap-4">
                         <button
-                            onClick={() => navigate('/engine')}
+                            onClick={() => navigate('/login')}
                             className="group relative overflow-hidden rounded-full bg-ember-600 hover:bg-ember-500 transition-colors px-8 py-4 halo-ember"
                         >
                             <span className="relative flex items-center justify-center gap-3 font-display font-medium tracking-wide text-white">
@@ -320,7 +320,7 @@ export default function LandingPage() {
                     </h2>
                     <div className="finale-reveal flex flex-col sm:flex-row justify-center gap-4">
                         <button
-                            onClick={() => navigate('/engine')}
+                            onClick={() => navigate('/login')}
                             className="group relative overflow-hidden rounded-full bg-ember-600 hover:bg-ember-500 transition-colors px-10 py-5 halo-ember"
                         >
                             <span className="relative flex items-center justify-center gap-3 font-display font-medium tracking-wide text-white text-lg">

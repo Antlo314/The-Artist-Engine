@@ -62,10 +62,10 @@ export default function MarketingNav() {
                     Architecture
                 </button>
                 <button 
-                    onClick={() => navigate('/engine')}
+                    onClick={() => navigate('/login')}
                     className="font-mono text-xs tracking-widest text-white hover:text-red-500 transition-colors uppercase flex items-center gap-2"
                 >
-                    <MonitorPlay size={14} /> <span className="hidden sm:inline">Launch App</span>
+                    <MonitorPlay size={14} /> <span className="hidden sm:inline">Founding Login</span>
                 </button>
 
                 {/* Optional Install Button if PWA event is ready */}

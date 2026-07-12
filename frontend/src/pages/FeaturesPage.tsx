@@ -256,7 +256,7 @@ export default function FeaturesPage() {
                         Fire your middlemen.
                     </h2>
                     <button
-                        onClick={() => navigate('/engine')}
+                        onClick={() => navigate('/login')}
                         className="group relative overflow-hidden rounded-full bg-ember-600 hover:bg-ember-500 transition-colors px-10 py-5 halo-ember"
                     >
                         <span className="relative flex items-center justify-center gap-3 font-display font-medium tracking-wide text-white text-lg">

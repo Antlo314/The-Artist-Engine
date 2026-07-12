@@ -1,10 +1,11 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './lib/auth';
 
-// Route-level code splitting: landing no longer downloads Studio/WaveSurfer/etc.
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
 const EngineCore = lazy(() => import('./pages/EngineCore'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 
 function RouteFallback() {
     return (
@@ -16,16 +17,41 @@ function RouteFallback() {
     );
 }
 
+/** Gate /engine behind Google founding auth when Supabase is configured. */
+function RequireFounding({ children }: { children: React.ReactNode }) {
+    const { ready, authEnabled, session, canUseEngine, waitlisted } = useAuth();
+
+    if (!ready) return <RouteFallback />;
+
+    // Local / unconfigured deploy stays open
+    if (!authEnabled) return <>{children}</>;
+
+    if (!session) return <Navigate to="/login" replace />;
+    if (waitlisted || !canUseEngine) return <Navigate to="/login" replace />;
+
+    return <>{children}</>;
+}
+
 export default function App() {
     return (
-        <Router>
-            <Suspense fallback={<RouteFallback />}>
-                <Routes>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/features" element={<FeaturesPage />} />
-                    <Route path="/engine" element={<EngineCore />} />
-                </Routes>
-            </Suspense>
-        </Router>
+        <AuthProvider>
+            <Router>
+                <Suspense fallback={<RouteFallback />}>
+                    <Routes>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/features" element={<FeaturesPage />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route
+                            path="/engine"
+                            element={
+                                <RequireFounding>
+                                    <EngineCore />
+                                </RequireFounding>
+                            }
+                        />
+                    </Routes>
+                </Suspense>
+            </Router>
+        </AuthProvider>
     );
 }

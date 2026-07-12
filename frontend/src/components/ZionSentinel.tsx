@@ -4,6 +4,8 @@ import { Scale, FileText, Activity, TrendingUp, ShieldAlert, CheckCircle2, Uploa
 import { codexEntries } from './TheCodex';
 import LoadingProgressBar from './LoadingProgressBar';
 import { useEngine } from '../lib/engineState';
+import { apiFetch } from '../lib/api';
+import { useAuth } from '../lib/auth';
 import { Panel, Btn, Segmented, EmptyState } from './ui/Shell';
 
 const ACCENT = '#a78bfa';
@@ -15,6 +17,7 @@ const SCAN_TYPE_OPTIONS: { value: 'contract' | 'offer'; label: string }[] = [
 
 export default function ZionSentinel() {
     const { record } = useEngine();
+    const { refreshMe } = useAuth();
     const [contractText, setContractText] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [scanType, setScanType] = useState<'contract' | 'offer'>('contract');
@@ -49,25 +52,29 @@ export default function ZionSentinel() {
             if (contractText) formData.append('text', contractText);
             formData.append('scan_type', scanType);
 
-            const response = await fetch('/api/analyze-contract', {
+            const response = await apiFetch('/api/analyze-contract', {
                 method: 'POST',
                 body: formData
             });
-
-            if (!response.ok) throw new Error(`Status ${response.status}`);
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const detail = data?.detail;
+                throw new Error(
+                    typeof detail === 'object' ? detail.message || JSON.stringify(detail) : detail || `Status ${response.status}`
+                );
+            }
 
             if (data.status === 'success') {
                 setAnalysis(data.analysis);
-                // Record real telemetry: contracts scanned + threats flagged.
                 const flags = Array.isArray(data.analysis?.red_flags) ? data.analysis.red_flags.length : 0;
                 record.scan(flags, data.analysis?.integrity_score);
+                refreshMe();
             } else {
                 throw new Error(data.error || 'Legal Scan Failed');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert("Scan failed. Check console.");
+            alert(err?.message || 'Scan failed. Check console.');
         } finally {
             setIsScanning(false);
         }

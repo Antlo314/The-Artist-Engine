@@ -5,10 +5,13 @@ import WaveSurfer from 'wavesurfer.js';
 import Spectrogram from 'wavesurfer.js/dist/plugins/spectrogram.esm.js';
 import LoadingProgressBar from './LoadingProgressBar';
 import { useEngine } from '../lib/engineState';
+import { apiFetch } from '../lib/api';
+import { useAuth } from '../lib/auth';
 import { PageHeader, Panel, Btn, StepHint, Segmented } from './ui/Shell';
 
 export default function StudioCore() {
     const { record } = useEngine();
+    const { refreshMe } = useAuth();
     const [phase, setPhase] = useState<'dropzone' | 'processing' | 'tuning'>('dropzone');
     const [knobs, setKnobs] = useState({ sub: 50, air: 60, snap: 40, width: 70 });
     // New mastering options (v5): tone bands, mono-bass, loudness profile, blend.
@@ -195,22 +198,26 @@ export default function StudioCore() {
             const formData = new FormData();
             formData.append('target', targetFile);
 
-            const response = await fetch('/api/oracle', {
+            const response = await apiFetch('/api/oracle', {
                 method: 'POST',
                 body: formData
             });
-
-            if (!response.ok) throw new Error(`Status ${response.status}`);
-            const data = await response.json();
-
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const detail = data?.detail;
+                throw new Error(
+                    typeof detail === 'object' ? detail.message || JSON.stringify(detail) : detail || `Status ${response.status}`
+                );
+            }
             if (data.status === 'success') {
                 setOracleData(data.oracle);
+                refreshMe();
             } else {
                 throw new Error(data.error || 'Oracle Engine Failure');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert("Oracle Engine Failure.");
+            alert(err?.message || 'Oracle Engine Failure.');
         } finally {
             setIsOracleScanning(false);
         }
@@ -239,26 +246,31 @@ export default function StudioCore() {
             if (lufs !== null && lufs !== undefined) formData.append('lufs_target', lufs.toString());
             formData.append('output_format', outputFormat);
 
-            const response = await fetch('/api/master', {
+            const response = await apiFetch('/api/master', {
                 method: 'POST',
                 body: formData
             });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.detail || `Status ${response.status}`);
+                const detail = errorData.detail;
+                throw new Error(
+                    typeof detail === 'object'
+                        ? detail.message || JSON.stringify(detail)
+                        : detail || `Status ${response.status}`
+                );
             }
 
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             setMasterAudioUrl(url);
-            // Record real telemetry: increments Masters + logs to activity feed.
             record.master(targetFile?.name || 'master', outputFormat);
+            refreshMe();
             setPhase('tuning');
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
             setPhase('dropzone');
-            alert("Mastering Engine Failure. Check logs.");
+            alert(err?.message || 'Mastering Engine Failure. Check logs.');
         }
     };
 
@@ -279,19 +291,26 @@ export default function StudioCore() {
         try {
             const formData = new FormData();
             formData.append('target', targetFile);
-            const response = await fetch('/api/extract-stems', {
+            const response = await apiFetch('/api/extract-stems', {
                 method: 'POST',
                 body: formData
             });
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const detail = data?.detail;
+                throw new Error(
+                    typeof detail === 'object' ? detail.message || JSON.stringify(detail) : detail || `Status ${response.status}`
+                );
+            }
             if (data.status === 'success') {
                 setStemsData(data.stems);
+                refreshMe();
             } else {
                 throw new Error(data.detail || 'Stem Engine Failure');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert("Neural Stem Extraction Failed.");
+            alert(err?.message || 'Neural Stem Extraction Failed.');
         } finally {
             setIsExtractingStems(false);
         }

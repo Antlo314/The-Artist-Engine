@@ -9,8 +9,8 @@ import sys
 import io
 import PyPDF2
 from docx import Document
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, BackgroundTasks
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, BackgroundTasks, Depends
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydub import AudioSegment
 import traceback
@@ -21,9 +21,23 @@ from dotenv import load_dotenv
 
 # Load Environment Variables from local .env
 load_dotenv(dotenv_path=".env")
+# Also load repo-root .env when running from backend/
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 from agent_memory import AgentMemory
 from gig_sources import ticketmaster_available, fetch_ticketmaster_venues
+from founding_auth import (
+    AppUser,
+    auth_configured,
+    auth_required,
+    require_founding_user,
+    assert_quota,
+    record_usage,
+    get_usage_snapshot,
+    acquire_master_slot,
+    release_master_slot,
+    DAILY_LIMITS,
+)
 
 # Google GenAI Integration
 try:
@@ -358,6 +372,13 @@ async def startup_event():
     else:
         system_startup_log.append("[AI CORE] FATAL: Missing GEMINI_API_KEY. Modules disabled.")
 
+    if auth_configured() and auth_required():
+        system_startup_log.append("[AUTH] Founding Cohort gate ONLINE (Google via Supabase + daily quotas).")
+    elif auth_configured():
+        system_startup_log.append("[AUTH] Supabase configured but AUTH_REQUIRED=0 (open dev mode).")
+    else:
+        system_startup_log.append("[AUTH] Open mode — set SUPABASE_URL + SUPABASE_JWT_SECRET to enable founding gate.")
+
     system_startup_log.append("[STATUS] All Sovereign Pillars (ZION, WAR ROOM, STUDIO, SHARK) Active.")
 
 # ---------------------------------------------------------------------------
@@ -403,8 +424,36 @@ async def system_status():
         "status": "OMEGA-TIER ACTIVE",
         "engine": "The Artist Engine v3.0 - Sovereign Protocol",
         "key_verified": bool(get_api_key()),
+        "auth_required": auth_required(),
+        "auth_configured": auth_configured(),
+        "founding_limits": DAILY_LIMITS,
         "log": "\n".join(system_startup_log)
     }
+
+
+@app.get("/api/me")
+async def me(user: AppUser = Depends(require_founding_user)):
+    """Founding member profile + today's remaining fair-use quotas."""
+    snap = await get_usage_snapshot(user.id)
+    return {
+        "status": "success",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "display_name": user.display_name,
+            "avatar_url": user.avatar_url,
+            "role": user.role,
+            "status": user.status,
+            "badge": "Founding Member" if user.role in ("founding_member", "admin") else user.role,
+        },
+        **snap,
+    }
+
+
+@app.get("/api/usage")
+async def usage(user: AppUser = Depends(require_founding_user)):
+    snap = await get_usage_snapshot(user.id)
+    return {"status": "success", **snap}
 
 # ---------------------------------------------------------------------------
 # PILLAR 1.5: AGENT MEMORY (Cognee Graph DB — optional subsystem)
@@ -474,8 +523,9 @@ def _enrich_prompt(request: ScoutRequest, real_venues: list) -> str:
 
 
 @app.post("/api/scout")
-async def scout_gigs(request: ScoutRequest):
+async def scout_gigs(request: ScoutRequest, user: AppUser = Depends(require_founding_user)):
     logs = ["[GIG RADAR] Initiating Multi-Vector Intercept..."]
+    await assert_quota(user, "scout")
     api_key = get_api_key()
     if not api_key:
          return {"status": "error", "error": "GEMINI_API_KEY is not configured.", "log": "\n".join(logs)}
@@ -505,6 +555,7 @@ async def scout_gigs(request: ScoutRequest):
                 data = json.loads(enrich_resp.text)
                 if data.get("venues"):
                     logs.append(f"[GIG RADAR] {len(data['venues'])} live targets locked (Ticketmaster-verified + AI intel).")
+                    await record_usage(user.id, "scout", {"city": request.city, "source": "ticketmaster_live", "n": len(data["venues"])})
                     return {"status": "success", "gigs": data, "source": "ticketmaster_live", "log": "\n".join(logs)}
                 logs.append("[GIG RADAR] Enrichment returned empty; falling back to grounded search.")
             else:
@@ -593,6 +644,7 @@ async def scout_gigs(request: ScoutRequest):
             raise Exception("Zero viable intercepts detected.")
             
         logs.append(f"[GIG RADAR] Intercepted {len(data['venues'])} target vectors.")
+        await record_usage(user.id, "scout", {"city": request.city, "source": "grounded"})
         return {"status": "success", "gigs": data, "log": "\n".join(logs)}
         
     except Exception as fb_err:
@@ -617,6 +669,7 @@ async def scout_gigs(request: ScoutRequest):
             data = json.loads(fb_response.text)
             
             logs.append("[GIG RADAR] Fallback matrix applied successfully.")
+            await record_usage(user.id, "scout", {"city": request.city, "source": "fallback"})
             return {"status": "success", "gigs": data, "log": "\n".join(logs)}
         except Exception as final_err:
              logs.append(f"[GIG RADAR] Terminal Failure on Fallback: {str(final_err)}")
@@ -627,8 +680,9 @@ async def scout_gigs(request: ScoutRequest):
 # ---------------------------------------------------------------------------
 
 @app.post("/api/draft-pitch")
-async def draft_pitch(request: DraftPitchRequest):
+async def draft_pitch(request: DraftPitchRequest, user: AppUser = Depends(require_founding_user)):
     logs = ["[GIG RADAR] Generating Auto-Pitch..."]
+    await assert_quota(user, "pitch")
     client = get_genai_client()
     
     sign_off = f"Best,\\n{request.agent_name}\\nManager for {request.artist_name}"
@@ -686,6 +740,7 @@ async def draft_pitch(request: DraftPitchRequest):
             ),
         )
         logs.append("[GIG RADAR] Auto-Pitch crafted (fast path).")
+        await record_usage(user.id, "pitch", {"type": request.outreach_type, "venue": request.venue_name})
         return {"status": "success", "pitch": response.text.strip(), "log": "\\n".join(logs)}
     except Exception as e:
         logs.append(f"[GIG RADAR] Pitch Generation Error: {str(e)}")
@@ -699,9 +754,11 @@ async def draft_pitch(request: DraftPitchRequest):
 async def analyze_contract(
     text: str = Form(None),
     file: UploadFile = File(None),
-    scan_type: str = Form("contract")
+    scan_type: str = Form("contract"),
+    user: AppUser = Depends(require_founding_user),
 ):
     logs = [f"[ZION SHARK PROTOCOL] Initiating {scan_type.upper()} Scan..."]
+    await assert_quota(user, "contract")
     client = get_genai_client()
     
     contents = []
@@ -793,7 +850,7 @@ async def analyze_contract(
         
         data = json.loads(response.text)
         logs.append(f"[ZION SHARK PROTOCOL] {scan_type.capitalize()} Analysis Complete. Engine Scored.")
-        
+        await record_usage(user.id, "contract", {"scan_type": scan_type})
         return {"status": "success", "analysis": data, "log": "\n".join(logs)}
         
     except Exception as e:
@@ -827,9 +884,12 @@ async def master_audio(
     mono_bass: bool = Form(False),
     ref_influence: float = Form(100.0),
     lufs_target: Optional[float] = Form(None),
-    output_format: str = Form("wav")
+    output_format: str = Form("wav"),
+    user: AppUser = Depends(require_founding_user),
 ):
-    print(f"[AUDIO CORE] Ingesting mastering request. Target: {target.filename}")
+    print(f"[AUDIO CORE] Ingesting mastering request. Target: {target.filename} user={user.email}")
+    await assert_quota(user, "master")
+    acquire_master_slot(user.id)
 
     os.makedirs("temp", exist_ok=True)
     job_id = str(int(time.time()))
@@ -867,6 +927,7 @@ async def master_audio(
     except Exception as e:
         print("[CRITICAL] Stream Ingestion failed:")
         traceback.print_exc()
+        release_master_slot(user.id)
         raise HTTPException(status_code=500, detail=f"File Stream I/O failed: {str(e)}")
 
     # Output path from worker
@@ -894,45 +955,49 @@ async def master_audio(
             *flags,
         ], capture_output=True, text=True)
 
-    process = _run_worker(ref_arg)
-    print(process.stdout)
-
     fell_back = False
-    if process.returncode != 0:
-        print(process.stderr)
-        # Reference matching (matchering) is memory-heavy and can be killed on
-        # long songs. Rather than fail the whole request, retry once in Pure
-        # mode (DSP only, no matchering) so the artist still gets a master.
-        if use_ref:
-            print("[AUDIO CORE] Reference master failed — retrying in Pure mode (no matchering).")
-            process = _run_worker("NONE")
-            print(process.stdout)
-            fell_back = True
+    try:
+        process = _run_worker(ref_arg)
+        print(process.stdout)
         if process.returncode != 0:
             print(process.stderr)
-            raise HTTPException(status_code=500, detail="Mastering engine failed. Check terminal logs.")
+            # Reference matching (matchering) is memory-heavy and can be killed on
+            # long songs. Rather than fail the whole request, retry once in Pure
+            # mode (DSP only, no matchering) so the artist still gets a master.
+            if use_ref:
+                print("[AUDIO CORE] Reference master failed — retrying in Pure mode (no matchering).")
+                process = _run_worker("NONE")
+                print(process.stdout)
+                fell_back = True
+            if process.returncode != 0:
+                print(process.stderr)
+                raise HTTPException(status_code=500, detail="Mastering engine failed. Check terminal logs.")
 
-    # Format conversion
-    final_output_path = mastered_wav_path
-    if output_format.lower() in ["mp3", "flac"]:
-        final_output_path = f"temp/final_{job_id}.{output_format.lower()}"
-        AudioSegment.from_file(mastered_wav_path).export(final_output_path, format=output_format.lower())
+        # Format conversion
+        final_output_path = mastered_wav_path
+        if output_format.lower() in ["mp3", "flac"]:
+            final_output_path = f"temp/final_{job_id}.{output_format.lower()}"
+            AudioSegment.from_file(mastered_wav_path).export(final_output_path, format=output_format.lower())
 
-    # Cleanup task
-    files_to_cleanup = [wav_target_path, mastered_wav_path, final_output_path]
-    if use_ref:
-        files_to_cleanup.append(wav_ref_path)
-    background_tasks.add_task(cleanup_audio_files, files_to_cleanup)
-    
-    media_type = "audio/wav"
-    if output_format.lower() == "mp3": media_type = "audio/mpeg"
-    elif output_format.lower() == "flac": media_type = "audio/flac"
+        # Cleanup task
+        files_to_cleanup = [wav_target_path, mastered_wav_path, final_output_path]
+        if use_ref:
+            files_to_cleanup.append(wav_ref_path)
+        background_tasks.add_task(cleanup_audio_files, files_to_cleanup)
 
-    return FileResponse(
-        final_output_path, media_type=media_type,
-        filename=f"SOVEREIGN_MASTER.{output_format.lower()}",
-        headers={"X-Master-Mode": "pure-fallback" if fell_back else ("reference" if use_ref else "pure")},
-    )
+        media_type = "audio/wav"
+        if output_format.lower() == "mp3": media_type = "audio/mpeg"
+        elif output_format.lower() == "flac": media_type = "audio/flac"
+
+        mode = "pure-fallback" if fell_back else ("reference" if use_ref else "pure")
+        await record_usage(user.id, "master", {"mode": mode, "format": output_format})
+        return FileResponse(
+            final_output_path, media_type=media_type,
+            filename=f"SOVEREIGN_MASTER.{output_format.lower()}",
+            headers={"X-Master-Mode": mode},
+        )
+    finally:
+        release_master_slot(user.id)
 
 # ---------------------------------------------------------------------------
 # PILLAR 6: THE ORACLE ENGINE (Mix Analysis)
@@ -941,7 +1006,8 @@ async def master_audio(
 @app.post("/api/oracle")
 async def oracle_analysis(
     background_tasks: BackgroundTasks,
-    target: UploadFile = File(...)
+    target: UploadFile = File(...),
+    user: AppUser = Depends(require_founding_user),
 ):
     """Oracle: local DSP first (fast + reliable), optional Gemini polish.
 
@@ -950,6 +1016,7 @@ async def oracle_analysis(
     valid JSON; broken model output never 500s the request.
     """
     print(f"[ORACLE ENGINE] Intercepting unmastered payload for AI analysis: {target.filename}")
+    await assert_quota(user, "oracle")
     os.makedirs("temp", exist_ok=True)
     job_id = str(uuid.uuid4())
 
@@ -1032,11 +1099,17 @@ DSP baseline knobs (you may refine): {json.dumps(dsp_oracle.get("knobs", {}))}
             print("[ORACLE ENGINE] AI polish disabled or no key — DSP only.")
 
         print("[ORACLE ENGINE] Analysis complete.")
+        await record_usage(user.id, "oracle", {"source": oracle.get("source")})
         return {"status": "success", "oracle": oracle}
 
     except Exception as e:
         print(f"[ORACLE ENGINE] Fatal Error (soft-fail): {str(e)}")
         traceback.print_exc()
+        # Soft success still consumes a unit so abuse can't free-fire oracle uploads.
+        try:
+            await record_usage(user.id, "oracle", {"source": "safe_fallback"})
+        except Exception:
+            pass
         return {"status": "success", "oracle": _oracle_safe_fallback(str(e)[:120])}
     finally:
         if uploaded_file is not None and client is not None:
@@ -1052,9 +1125,11 @@ DSP baseline knobs (you may refine): {json.dumps(dsp_oracle.get("knobs", {}))}
 
 @app.post("/api/extract-stems")
 async def extract_stems(
-    target: UploadFile = File(...)
+    target: UploadFile = File(...),
+    user: AppUser = Depends(require_founding_user),
 ):
     print(f"[STEM ENGINE] Extracting neural stems from: {target.filename}")
+    await assert_quota(user, "stems")
     os.makedirs("temp", exist_ok=True)
     job_id = str(int(time.time()))
     
@@ -1097,7 +1172,7 @@ async def extract_stems(
             os.remove(temp_path)
             
         print("[STEM ENGINE] Stem separation complete. Extracted 4 multi-tracks.")
-            
+        await record_usage(user.id, "stems", {})
         return {
             "status": "success",
             "stems": {

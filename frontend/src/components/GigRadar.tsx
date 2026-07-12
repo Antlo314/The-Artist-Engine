@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Music2, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Instagram, Twitter, Facebook, Globe, Download } from 'lucide-react';
 import LoadingProgressBar from './LoadingProgressBar';
 import { useEngine } from '../lib/engineState';
+import { apiFetch } from '../lib/api';
+import { useAuth } from '../lib/auth';
 import { PageHeader, Panel, Field, Btn, EmptyState, StepHint, Segmented, inputCls } from './ui/Shell';
 
 interface GigRadarProps {
@@ -47,6 +49,7 @@ const csvEscape = (val: any) => {
 
 export default function GigRadar({ profile }: GigRadarProps) {
     const { record } = useEngine();
+    const { refreshMe } = useAuth();
     // Search State
     const [city, setCity] = useState(profile?.homeCity || 'Chicago');
     const [genre, setGenre] = useState(profile?.primaryGenre || 'Deep House');
@@ -90,24 +93,31 @@ export default function GigRadar({ profile }: GigRadarProps) {
         setError(null);
         setGigs([]);
         try {
-            const response = await fetch('/api/scout', {
+            const response = await apiFetch('/api/scout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ city, genre, tier, radius, timeframe })
             });
-            if (!response.ok) throw new Error(`Status ${response.status}`);
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const detail = data?.detail;
+                throw new Error(
+                    typeof detail === 'object'
+                        ? detail.message || JSON.stringify(detail)
+                        : detail || `Status ${response.status}`
+                );
+            }
             if (data.status === 'success') {
                 const results = data.gigs.venues ? data.gigs.venues : (Array.isArray(data.gigs) ? data.gigs : []);
                 setGigs(results);
-                // Record real telemetry: venues flow into the dashboard pipeline.
                 if (results.length) record.scout(city, genre, results);
+                refreshMe();
             } else {
                 throw new Error(data.error || 'API Error');
             }
         } catch (err: any) {
             console.error(err);
-            setError(`Intercept Failed: ${err.message}`);
+            setError(err.message || 'Scan failed');
         } finally {
             setIsScouting(false);
         }
@@ -123,7 +133,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
         const safeString = (val: any, fallback: string) => (val && typeof val === 'string' && val.trim().length > 0) ? val : fallback;
 
         try {
-            const response = await fetch('/api/draft-pitch', {
+            const response = await apiFetch('/api/draft-pitch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -140,12 +150,16 @@ export default function GigRadar({ profile }: GigRadarProps) {
                     outreach_type: type
                 })
             });
+            const data = await response.json().catch(() => ({}));
             if (!response.ok) {
-                throw new Error(`Status ${response.status}`);
+                const detail = data?.detail;
+                throw new Error(
+                    typeof detail === 'object' ? detail.message || JSON.stringify(detail) : detail || `Status ${response.status}`
+                );
             }
-            const data = await response.json();
             if (data.status === 'success') {
                 setGeneratedPitch(data.pitch);
+                refreshMe();
             } else {
                 throw new Error(data.error);
             }
