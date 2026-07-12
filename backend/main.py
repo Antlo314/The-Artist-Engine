@@ -106,6 +106,92 @@ async def _generate_fast(client, *, contents, config=None, prefer_fast=True):
             continue
     raise last_err if last_err else RuntimeError("Gemini generation failed with no error detail")
 
+
+def _response_text(response) -> str:
+    """Best-effort plain text from a google-genai response (handles empty .text)."""
+    text = getattr(response, "text", None)
+    if isinstance(text, str) and text.strip():
+        return text
+    # Fall through candidates/parts when .text is missing or blocked.
+    try:
+        parts = []
+        for cand in getattr(response, "candidates", None) or []:
+            content = getattr(cand, "content", None)
+            for part in getattr(content, "parts", None) or []:
+                t = getattr(part, "text", None)
+                if t:
+                    parts.append(t)
+        return "\n".join(parts)
+    except Exception:
+        return ""
+
+
+def _extract_json_object(raw: str):
+    """Parse JSON from model output that may include fences or trailing prose."""
+    if not raw or not str(raw).strip():
+        raise ValueError("empty model response")
+    s = str(raw).strip()
+    # Strip markdown fences ```json ... ```
+    if s.startswith("```"):
+        lines = s.split("\n")
+        lines = lines[1:]  # drop opening fence
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+        s = "\n".join(lines).strip()
+    try:
+        return json.loads(s)
+    except json.JSONDecodeError:
+        start = s.find("{")
+        end = s.rfind("}")
+        if start >= 0 and end > start:
+            return json.loads(s[start : end + 1])
+        raise
+
+
+def _normalize_oracle_payload(data: dict) -> dict:
+    """Force Oracle payload into the Studio UI shape: analysis + 0-100 knobs."""
+    if not isinstance(data, dict):
+        raise ValueError("oracle payload is not an object")
+    knobs_in = data.get("knobs") if isinstance(data.get("knobs"), dict) else {}
+    # Some models nest knobs at top level.
+    for key in ("sub", "air", "snap", "width"):
+        if key in data and key not in knobs_in:
+            knobs_in[key] = data[key]
+
+    def clamp(v, default=50):
+        try:
+            n = int(round(float(v)))
+        except (TypeError, ValueError):
+            n = default
+        return max(0, min(100, n))
+
+    analysis = data.get("analysis") or data.get("summary") or data.get("notes") or ""
+    if not isinstance(analysis, str) or not analysis.strip():
+        analysis = "Mix topology scanned. Knobs set from Oracle analysis."
+
+    return {
+        "analysis": analysis.strip(),
+        "knobs": {
+            "sub": clamp(knobs_in.get("sub", 55)),
+            "air": clamp(knobs_in.get("air", 60)),
+            "snap": clamp(knobs_in.get("snap", 50)),
+            "width": clamp(knobs_in.get("width", 55)),
+        },
+    }
+
+
+def _oracle_safe_fallback(reason: str) -> dict:
+    """Never leave the artist with a 500 — safe neutral-plus mastering knobs."""
+    return {
+        "analysis": (
+            "Oracle could not fully parse the AI mix report "
+            f"({reason}). Applied safe neutral-plus starting points — "
+            "tweak knobs if needed, then master."
+        ),
+        "knobs": {"sub": 55, "air": 62, "snap": 48, "width": 58},
+        "fallback": True,
+    }
+
 # ---------------------------------------------------------------------------
 # GLOBAL LOGGING AND STARTUP
 # ---------------------------------------------------------------------------
@@ -719,70 +805,90 @@ async def oracle_analysis(
     client = get_genai_client()
     os.makedirs("temp", exist_ok=True)
     job_id = str(uuid.uuid4())
-    
+
     ext = target.filename.split('.')[-1] if '.' in target.filename else 'wav'
     temp_path = f"temp/oracle_{job_id}.{ext}"
-    
+    uploaded_file = None
+
     try:
         with open(temp_path, "wb") as f:
             f.write(await target.read())
-            
+
         print("[ORACLE ENGINE] Uploading payload to Gemini Multi-Modal Core...")
         uploaded_file = client.files.upload(file=temp_path)
-        
-        system_instruction = '''
-        You are 'The Oracle', a multi-platinum, OMEGA-tier mastering engineer.
-        Listen to the provided raw mix topography.
-        Output MUST be strictly JSON.
-        '''
-        
-        prompt = '''
-        Listen to this unmastered target track. This is NOT a reference track. Provide a 2-3 sentence ruthless, highly technical acoustic analysis of the mix balance (lows, mids, highs, transients, phase coherence, and dynamic range).
-        CRITICAL: If the mix already sounds excellent or professionally balanced, DO NOT hallucinate or invent flaws. Acknowledge its strengths.
-        Otherwise, do not use generic phrases like "overall good" or "standard mix". Identify specific frequency masking, harshness, muddiness, or transient issues.
-        Then, dictate the exact parameters needed for our DSP engine to correct these specific acoustic weaknesses, or enhance the existing strengths.
-        Values must be integers from 0 to 100 (50 is neutral, 0 is max reduction, 100 is max addition).
-        
-        JSON Structure:
-        {
-            "analysis": "Your 3 sentence highly specific acoustic analysis identifying actual mix flaws and topography.",
-            "knobs": {
-                "sub": 65,
-                "air": 70,
-                "snap": 60,
-                "width": 55
-            }
-        }
-        '''
-        print("[ORACLE ENGINE] Extracting topology signatures via Gemini multimodal...")
-        # Prefer full model for audio understanding; fall back if quota-exhausted.
-        response = await _generate_fast(
-            client,
-            contents=[uploaded_file, prompt],
-            config=types.GenerateContentConfig(
-                system_instruction=system_instruction,
-                temperature=0.2,
-                response_mime_type="application/json",
-                max_output_tokens=512,
-            ),
-            prefer_fast=False,
+
+        system_instruction = (
+            "You are The Oracle, a multi-platinum mastering engineer. "
+            "Respond with a single valid JSON object only. No markdown, no prose outside JSON."
         )
-        
-        data = json.loads(response.text)
+
+        prompt = '''
+Listen to this unmastered target track (NOT a reference). Return ONLY this JSON shape:
+{
+  "analysis": "2-3 technical sentences on lows/mids/highs, transients, stereo, dynamics. No invented flaws if the mix is already solid.",
+  "knobs": { "sub": 0-100, "air": 0-100, "snap": 0-100, "width": 0-100 }
+}
+Rules: knobs are integers. 50 = neutral, <50 reduces, >50 boosts.
+'''
+        retry_prompt = '''
+Re-emit valid JSON only for this mix. No markdown fences. Exact keys:
+{"analysis":"...","knobs":{"sub":55,"air":60,"snap":50,"width":55}}
+'''
+
+        oracle = None
+        last_parse_err = None
+        # Attempt 1: preferred multimodal model. Attempt 2: stricter retry / other model pool.
+        for attempt, (prompt_text, temp, prefer_fast) in enumerate(
+            (
+                (prompt, 0.2, False),
+                (retry_prompt, 0.0, False),
+                (retry_prompt, 0.0, True),  # flash-lite last resort
+            ),
+            start=1,
+        ):
+            try:
+                print(f"[ORACLE ENGINE] Multimodal pass {attempt}...")
+                response = await _generate_fast(
+                    client,
+                    contents=[uploaded_file, prompt_text],
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_instruction,
+                        temperature=temp,
+                        response_mime_type="application/json",
+                        max_output_tokens=1024,
+                    ),
+                    prefer_fast=prefer_fast,
+                )
+                raw = _response_text(response)
+                print(f"[ORACLE ENGINE] Pass {attempt} raw head: {raw[:160]!r}")
+                parsed = _extract_json_object(raw)
+                oracle = _normalize_oracle_payload(parsed)
+                break
+            except Exception as attempt_err:
+                last_parse_err = attempt_err
+                print(f"[ORACLE ENGINE] Pass {attempt} failed: {attempt_err}")
+                continue
+
+        if oracle is None:
+            reason = str(last_parse_err)[:120] if last_parse_err else "empty response"
+            print(f"[ORACLE ENGINE] Using safe fallback after parse failures: {reason}")
+            oracle = _oracle_safe_fallback(reason)
+
         print("[ORACLE ENGINE] Analysis complete. Returning tactical data.")
-        
-        # Cleanup
-        try:
-            client.files.delete(name=uploaded_file.name)
-        except:
-            pass
-            
-        background_tasks.add_task(cleanup_audio_files, [temp_path])
-        return {"status": "success", "oracle": data}
-        
+        return {"status": "success", "oracle": oracle}
+
     except Exception as e:
-        print(f"[ORACLE ENGINE] Fatal Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        # Upload/network hard failure — still return usable knobs so Studio never 500s.
+        print(f"[ORACLE ENGINE] Fatal Error (soft-fail): {str(e)}")
+        traceback.print_exc()
+        return {"status": "success", "oracle": _oracle_safe_fallback(str(e)[:120])}
+    finally:
+        if uploaded_file is not None:
+            try:
+                client.files.delete(name=uploaded_file.name)
+            except Exception:
+                pass
+        background_tasks.add_task(cleanup_audio_files, [temp_path])
 
 # ---------------------------------------------------------------------------
 # PILLAR 7: OMEGA STEM EXTRACTION (Neural Separation)
