@@ -81,22 +81,20 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 speedHint="live"
             />
 
-            {/* Quick actions — primary on mobile */}
-            <div className="grid grid-cols-2 gap-2.5 md:hidden">
+            {/* Quick actions — always useful; emphasized on small screens */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                    { id: 'radar', label: 'Find Gigs', accent: '#fb923c' },
-                    { id: 'legal', label: 'Scan contract', accent: '#a78bfa' },
+                    { id: 'radar', label: 'Find Gigs', sub: 'Scan live venues · ~8s', accent: '#fb923c' },
+                    { id: 'legal', label: 'Scan a contract', sub: 'Flag predatory clauses · ~3s', accent: '#a78bfa' },
                 ].map((a) => (
                     <button
                         key={a.id}
                         type="button"
                         onClick={() => onNavigate(a.id)}
-                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-3.5 text-left active:scale-[0.98] transition-transform"
+                        className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-4 text-left active:scale-[0.99] transition-transform min-h-[72px]"
                     >
-                        <div className="font-medium text-sm text-ink-50">{a.label}</div>
-                        <div className="font-mono text-[9px] tracking-widest uppercase mt-1" style={{ color: a.accent }}>
-                            Open →
-                        </div>
+                        <div className="font-display text-base font-semibold text-ink-50">{a.label}</div>
+                        <div className="text-xs mt-1" style={{ color: a.accent }}>{a.sub}</div>
                     </button>
                 ))}
             </div>
