@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Radar, Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Music2, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Phone, Mail, MessageCircle, Instagram, Twitter, Facebook, Globe } from 'lucide-react';
+import { Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Music2, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Instagram, Twitter, Facebook, Globe } from 'lucide-react';
 import LoadingProgressBar from './LoadingProgressBar';
 import { useEngine } from '../lib/engineState';
+import { PageHeader, Panel, Field, Btn, EmptyState, StepHint, Segmented, inputCls } from './ui/Shell';
 
 interface GigRadarProps {
     profile: any;
 }
+
+const OUTREACH_OPTIONS: { value: 'email' | 'call_script' | 'dm'; label: string }[] = [
+    { value: 'email', label: 'Email' },
+    { value: 'call_script', label: 'Call script' },
+    { value: 'dm', label: 'DM' },
+];
 
 export default function GigRadar({ profile }: GigRadarProps) {
     const { record } = useEngine();
@@ -144,323 +151,303 @@ export default function GigRadar({ profile }: GigRadarProps) {
     };
 
     return (
-        <div className="space-y-8 relative">
+        <div className="space-y-8">
+            <PageHeader
+                view="radar"
+                accent="#fb923c"
+                module="GIG RADAR ARRAY · LIVE TICKETING GRID"
+                title="Find Gigs"
+                desc="Search live event data for venues actively booking your genre, with payout intel and a ready-to-send pitch."
+            />
 
-            <div className="flex flex-col lg:flex-row gap-8">
-                {/* Target Logic Side Panel */}
-                <div className="glass-obsidian glass-obsidian-hover w-full lg:w-1/3 xl:w-1/4 p-6 shape-chamfer-br relative overflow-hidden group border border-orange-800/30 shadow-[0_0_40px_rgba(249,115,22,0.05)] flex flex-col h-auto lg:h-fit lg:sticky lg:top-20 z-30 transition-transform duration-500 hover:scale-[1.01]">
-                    {/* Background Video Layer - Cleaned Up */}
-                    <video
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none z-0 mix-blend-color-burn"
-                    >
-                        <source src="/gig-radar.mp4" type="video/mp4" />
-                    </video>
-                    <div className="absolute inset-0 bg-black/40 z-0 pointer-events-none" />
+            <StepHint steps={['Set your search', 'Review verified venues', 'Send the pitch']} accent="#fb923c" />
 
-                    <div className="absolute right-[-50px] top-[-50px] opacity-10 pointer-events-none z-10 mix-blend-overlay">
-                        <Radar size={250} className="text-orange-400 rotate-45" />
-                    </div>
-
-                    <div className="flex flex-col gap-6 relative z-10">
-                        <div>
-                            <h2 className="font-display text-2xl font-bold text-orange-400 tracking-widest flex items-center gap-3 glitch-hover cursor-pointer w-fit">
-                                <Radar className="text-orange-400" size={24} />
-                                GIG RADAR
-                            </h2>
-                            <p className="font-mono text-[10px] text-orange-400/60 mt-2 tracking-widest uppercase">
-                                Multi-Vector Grounding<br />Autonomous Array
-                            </p>
+            <Panel title="Search" accent="#fb923c">
+                <div className="grid md:grid-cols-5 gap-4">
+                    <Field label="City">
+                        <div className="relative">
+                            <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-700 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                placeholder="Brooklyn, NY or 60601"
+                                className={`${inputCls()} pl-9`}
+                            />
                         </div>
+                    </Field>
 
-                        <div className="flex flex-col gap-4 glass-obsidian p-5 rounded-xl border border-white/10 backdrop-blur-md relative z-20">
-                            {/* City / Zip */}
-                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Target Point (City / Zip)</span>
-                                <div className="flex items-center">
-                                    <MapPin size={14} className="mr-2 opacity-70" />
-                                    <input placeholder="e.g., Brooklyn, NY or 60601" type="text" value={city} onChange={e => setCity(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white placeholder:text-ink-400" />
-                                </div>
-                            </div>
+                    <Field label="Genre">
+                        <select value={genre} onChange={(e) => setGenre(e.target.value)} className={inputCls()}>
+                            <option>House</option>
+                            <option>Deep House</option>
+                            <option>Techno</option>
+                            <option>Trance</option>
+                            <option>Drum & Bass</option>
+                            <option>Dubstep</option>
+                            <option>Trap</option>
+                            <option>Hip Hop</option>
+                            <option>R&B</option>
+                            <option>Pop</option>
+                            <option>Rock</option>
+                            <option>Metal</option>
+                            <option>Country</option>
+                            <option>Jazz</option>
+                            <option>Afrobeat</option>
+                            <option>Reggaeton</option>
+                            <option>Acoustic / Live Instrumentation</option>
+                        </select>
+                    </Field>
 
-                            {/* Radius */}
-                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors glass-well">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Blast Radius</span>
-                                <select title="Blast Radius" value={radius} onChange={e => setRadius(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
-                                    <option className="bg-black text-white border-none">Exact City</option>
-                                    <option className="bg-black text-white border-none">10 miles</option>
-                                    <option className="bg-black text-white border-none">50 miles</option>
-                                    <option className="bg-black text-white border-none">250 miles</option>
-                                </select>
-                            </div>
+                    <Field label="Venue tier">
+                        <select value={tier} onChange={(e) => setTier(e.target.value)} className={inputCls()}>
+                            <option>Grassroots / Mom & Pop (50-250 cap)</option>
+                            <option>Mid-Size Touring (250-1000 cap)</option>
+                            <option>Top-Tier Theater (1000-3000 cap)</option>
+                            <option>Arena / Stadium (3000+ cap)</option>
+                        </select>
+                    </Field>
 
-                            {/* Genre */}
-                            <div className="relative flex flex-col text-orange-400/70 bg-ink-900 rounded-lg px-3 py-3 sm:py-2 border border-white/10 focus-within:border-orange-800/50 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400/80 mb-1">Sonic Vector</span>
-                                <select value={genre} onChange={e => setGenre(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-ink-50 appearance-none cursor-pointer">
-                                    <option className="bg-black text-white border-none">House</option>
-                                    <option className="bg-black text-white border-none">Deep House</option>
-                                    <option className="bg-black text-white border-none">Techno</option>
-                                    <option className="bg-black text-white border-none">Trance</option>
-                                    <option className="bg-black text-white border-none">Drum & Bass</option>
-                                    <option className="bg-black text-white border-none">Dubstep</option>
-                                    <option className="bg-black text-white border-none">Trap</option>
-                                    <option className="bg-black text-white border-none">Hip Hop</option>
-                                    <option className="bg-black text-white border-none">R&B</option>
-                                    <option className="bg-black text-white border-none">Pop</option>
-                                    <option className="bg-black text-white border-none">Rock</option>
-                                    <option className="bg-black text-white border-none">Metal</option>
-                                    <option className="bg-black text-white border-none">Country</option>
-                                    <option className="bg-black text-white border-none">Jazz</option>
-                                    <option className="bg-black text-white border-none">Afrobeat</option>
-                                    <option className="bg-black text-white border-none">Reggaeton</option>
-                                    <option className="bg-black text-white border-none">Acoustic / Live Instrumentation</option>
-                                </select>
-                            </div>
+                    <Field label="Radius">
+                        <select value={radius} onChange={(e) => setRadius(e.target.value)} className={inputCls()}>
+                            <option>Exact City</option>
+                            <option>10 miles</option>
+                            <option>50 miles</option>
+                            <option>250 miles</option>
+                        </select>
+                    </Field>
 
-                            {/* Tier */}
-                            <div className="relative flex flex-col text-orange-400/70 bg-ink-900 rounded-lg px-3 py-3 sm:py-2 border border-white/10 focus-within:border-orange-800/50 focus-within:text-orange-400 transition-colors">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400/80 mb-1">Venue Tier</span>
-                                <select value={tier} onChange={e => setTier(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-ink-50 appearance-none cursor-pointer">
-                                    <option className="bg-black text-white border-none">Grassroots / Mom & Pop (50-250 cap)</option>
-                                    <option className="bg-black text-white border-none">Mid-Size Touring (250-1000 cap)</option>
-                                    <option className="bg-black text-white border-none">Top-Tier Theater (1000-3000 cap)</option>
-                                    <option className="bg-black text-white border-none">Arena / Stadium (3000+ cap)</option>
-                                </select>
-                            </div>
-
-                            {/* Timeframe */}
-                            <div className="relative flex flex-col text-orange-300 bg-black/40 rounded-lg px-3 py-3 sm:py-2 border border-orange-500/30 focus-within:border-orange-400 focus-within:text-orange-400 transition-colors glass-well">
-                                <span className="text-[10px] sm:text-[9px] uppercase tracking-widest text-orange-400 mb-1">Timeframe</span>
-                                <select title="Timeframe" value={timeframe} onChange={e => setTimeframe(e.target.value)} className="bg-transparent border-none outline-none text-[15px] sm:text-sm font-mono w-full text-white appearance-none cursor-pointer">
-                                    <option className="bg-black text-white border-none">Active Now</option>
-                                    <option className="bg-black text-white border-none">Summer 2026</option>
-                                    <option className="bg-black text-white border-none">Fall 2026</option>
-                                    <option className="bg-black text-white border-none">Q1 2027</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={handleScout}
-                            disabled={isScouting}
-                            className="w-full bg-orange-900/20 text-orange-400 font-bold border border-orange-500/50 hover:bg-orange-600 hover:text-black font-bold font-mono text-sm tracking-widest px-6 py-4 rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-wait uppercase shadow-[0_0_20px_rgba(249,115,22,0.2)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]"
-                        >
-                            {isScouting ? (
-                                <><Activity size={18} className="animate-spin" /> EXECUTING SWEEP...</>
-                            ) : (
-                                <><Target size={18} /> DEPLOY SCAN</>
-                            )}
-                        </button>
-
-                    </div>
+                    <Field label="Timeframe">
+                        <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)} className={inputCls()}>
+                            <option>Active Now</option>
+                            <option>Summer 2026</option>
+                            <option>Fall 2026</option>
+                            <option>Q1 2027</option>
+                        </select>
+                    </Field>
                 </div>
 
-                {error && (
-                    <div className="bg-red-900/20 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg font-mono text-xs tracking-widest flex items-center gap-3 mt-4 w-[calc(100%-2rem)] mx-4 md:w-auto md:mx-0">
-                        <ShieldAlert size={16} /> {error}
-                    </div>
-                )}
-
-                {/* Grid of Intercepted Leads */}
-                <div className="flex-1 grid grid-cols-1 xl:grid-cols-2 gap-6 pb-20 items-start">
-                    <AnimatePresence>
-                        {!isScouting && gigs.length === 0 && !error && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="col-span-full py-32 flex flex-col items-center justify-center text-ink-400 glass-obsidian glass-obsidian-hover rounded-2xl border-dashed border-white/10"
-                            >
-                                <Search size={48} className="text-orange-400/20 mb-4" />
-                                <p className="font-mono text-sm tracking-widest uppercase">Awaiting coordinates to deploy radar sweeps.</p>
-                            </motion.div>
+                <div className="mt-5 flex justify-end">
+                    <Btn variant="accent" accent="#fb923c" onClick={handleScout} disabled={isScouting}>
+                        {isScouting ? (
+                            <><Activity size={16} className="animate-spin" /> Scanning venues…</>
+                        ) : (
+                            <><Target size={16} /> Scan for venues</>
                         )}
+                    </Btn>
+                </div>
+            </Panel>
 
-                        {(() => {
-                            let bestIdx = -1;
-                            if (!isScouting && gigs.length > 0) {
-                                let maxScore = -1;
-                                gigs.forEach((g, i) => {
-                                    const rep = parseInt(g.reputation_score) || 0;
-                                    const activeBonus = g.active_search_signal ? 20 : 0;
-                                    const total = rep + activeBonus;
-                                    if (total > maxScore) {
-                                        maxScore = total;
-                                        bestIdx = i;
-                                    }
-                                });
-                            }
-                            return null; // Will just compute bestIdx
-                        })()}
+            {error && (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 text-sm">
+                    <ShieldAlert size={16} className="shrink-0" />
+                    Search failed — the engine may be waking up (free hosting naps after 15 min). Try again in a minute.
+                </div>
+            )}
 
-                        {/* Scanning Phase replaced with LoadingProgressBar */}
-                        {isScouting && (
-                            <div className="col-span-full w-full max-w-lg mx-auto py-20 px-4 z-20">
-                                <LoadingProgressBar
-                                    active={isScouting}
-                                    message="EXECUTING RADAR SWEEP"
-                                    subMessage="Intercepting booking calendars & cross-referencing payout models. Please allow 30-60s for the Engine to start on the free tier."
-                                    colorClass="orange"
-                                    estimatedDurationMs={40000}
-                                />
-                            </div>
-                        )}
-                        {(() => {
-                            if (isScouting || gigs.length === 0) return null;
+            {/* Results */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+                <AnimatePresence>
+                    {!isScouting && gigs.length === 0 && !error && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="col-span-full"
+                        >
+                            <EmptyState
+                                icon={<Search size={40} />}
+                                title="No venues yet"
+                                hint="Run a search above to find venues booking your genre."
+                            />
+                        </motion.div>
+                    )}
 
-                            // Sort targets: Alpha Target first, then by reputation score
-                            const sortedGigs = [...gigs].map((gig, originalIndex) => {
-                                const rep = parseInt(gig.reputation_score) || 0;
-                                const activeBonus = gig.active_search_signal ? 20 : 0;
-                                return { gig, originalIndex, totalScore: rep + activeBonus, repScore: rep };
-                            });
-
-                            // Find the alpha target
+                    {(() => {
+                        let bestIdx = -1;
+                        if (!isScouting && gigs.length > 0) {
                             let maxScore = -1;
-                            let alphaIndex = -1;
-                            sortedGigs.forEach((g) => {
-                                if (g.totalScore > maxScore) {
-                                    maxScore = g.totalScore;
-                                    alphaIndex = g.originalIndex;
+                            gigs.forEach((g, i) => {
+                                const rep = parseInt(g.reputation_score) || 0;
+                                const activeBonus = g.active_search_signal ? 20 : 0;
+                                const total = rep + activeBonus;
+                                if (total > maxScore) {
+                                    maxScore = total;
+                                    bestIdx = i;
                                 }
                             });
+                        }
+                        return null; // Will just compute bestIdx
+                    })()}
 
-                            sortedGigs.sort((a, b) => {
-                                if (a.originalIndex === alphaIndex) return -1;
-                                if (b.originalIndex === alphaIndex) return 1;
-                                return b.repScore - a.repScore;
-                            });
+                    {/* Scanning Phase replaced with LoadingProgressBar */}
+                    {isScouting && (
+                        <div className="col-span-full w-full max-w-lg mx-auto py-16 px-4">
+                            <LoadingProgressBar
+                                active={isScouting}
+                                message="Scanning for venues"
+                                subMessage="Checking booking calendars and payout data. This can take 30-60s on the free tier."
+                                colorClass="orange"
+                                estimatedDurationMs={40000}
+                            />
+                        </div>
+                    )}
+                    {(() => {
+                        if (isScouting || gigs.length === 0) return null;
 
-                            return sortedGigs.map(({ gig, originalIndex }, idx) => {
-                                const isAlpha = originalIndex === alphaIndex;
+                        // Sort targets: Alpha Target first, then by reputation score
+                        const sortedGigs = [...gigs].map((gig, originalIndex) => {
+                            const rep = parseInt(gig.reputation_score) || 0;
+                            const activeBonus = gig.active_search_signal ? 20 : 0;
+                            return { gig, originalIndex, totalScore: rep + activeBonus, repScore: rep };
+                        });
 
-                                return (
-                                    <motion.div
-                                        key={idx}
-                                        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        transition={{ delay: idx * 0.1, type: "spring", stiffness: 300, damping: 25 }}
-                                        whileHover={{ scale: 1.02, y: -4 }}
-                                        className={`glass-obsidian glass-obsidian-hover p-6 relative overflow-hidden group transition-all duration-300 backdrop-blur-md border shape-cyber-leaf ${gig.pipeline_status === 'PITCHED' ? 'border-orange-800/40 bg-black/80 opacity-80' : isAlpha ? 'bg-black/60 border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)] ring-1 ring-orange-500/50' : 'bg-black/40 hover:bg-black/60 hover:border-orange-500/50 border-orange-900/30'}`}
-                                    >
-                                        {/* BG Accents */}
-                                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-800/10 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                                        {isAlpha && <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.1),transparent_50%)] pointer-events-none" />}
+                        // Find the alpha target
+                        let maxScore = -1;
+                        let alphaIndex = -1;
+                        sortedGigs.forEach((g) => {
+                            if (g.totalScore > maxScore) {
+                                maxScore = g.totalScore;
+                                alphaIndex = g.originalIndex;
+                            }
+                        });
 
-                                        <div className="flex items-center justify-between mb-4 relative z-10">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-sm bg-orange-900/30 text-orange-400 border border-orange-500/30 ${gig.pipeline_status === 'INTERCEPTED' ? '' : 'opacity-80'}`}>
-                                                    [{gig.pipeline_status}]
-                                                </span>
-                                                {isAlpha && (
-                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-[0_0_15px_rgba(249,115,22,0.5)] bg-orange-600/20 text-orange-400 border border-orange-400 animate-pulse">
-                                                        [ALPHA TARGET]
+                        sortedGigs.sort((a, b) => {
+                            if (a.originalIndex === alphaIndex) return -1;
+                            if (b.originalIndex === alphaIndex) return 1;
+                            return b.repScore - a.repScore;
+                        });
+
+                        return sortedGigs.map(({ gig, originalIndex }, idx) => {
+                            const isAlpha = originalIndex === alphaIndex;
+
+                            return (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ delay: idx * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
+                                    whileHover={{ y: -2 }}
+                                    className={`glass-obsidian rounded-xl border p-5 md:p-6 flex flex-col gap-5 group transition-colors ${gig.pipeline_status === 'PITCHED' ? 'border-white/10 opacity-70' : isAlpha ? 'border-orange-500/40 ring-1 ring-orange-500/40' : 'border-white/10 hover:border-orange-500/30'}`}
+                                >
+                                    {/* Header */}
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <h3 className="font-display text-lg text-ink-50 truncate">{gig.name}</h3>
+                                                {gig.social_media_url && (
+                                                    <a href={gig.social_media_url} target="_blank" rel="noopener noreferrer" className="text-ink-400 hover:text-orange-400 transition-colors">
+                                                        {getSocialIcon(gig.social_media_url)}
+                                                    </a>
+                                                )}
+                                                {gig.website_url && (
+                                                    <a href={gig.website_url} target="_blank" rel="noopener noreferrer" className="text-ink-400 hover:text-orange-400 transition-colors">
+                                                        <Globe size={14} />
+                                                    </a>
+                                                )}
+                                            </div>
+                                            <p className="font-mono text-[10px] text-ink-400 uppercase tracking-widest mt-1 truncate">{gig.tier || tier}</p>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-2 shrink-0">
+                                            <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                                                {gig.pipeline_status === 'PITCHED' && (
+                                                    <span className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-white/5 text-ink-400 border border-white/10">
+                                                        Pitch sent
                                                     </span>
                                                 )}
-                                                {gig.active_search_signal && !isAlpha && (
-                                                    <span className="font-mono text-[10px] tracking-widest uppercase font-bold px-2 py-0.5 rounded shadow-sm bg-orange-900/50 text-orange-300 border border-orange-500/30 animate-pulse">
-                                                        [ACTIVE SEARCH]
+                                                {isAlpha && (
+                                                    <span className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 border border-orange-500/40">
+                                                        Best odds
+                                                    </span>
+                                                )}
+                                                {gig.active_search_signal && (
+                                                    <span className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-white/5 text-ink-200 border border-white/10">
+                                                        Live
                                                     </span>
                                                 )}
                                             </div>
                                             <button
                                                 onClick={() => setRepModal(gig)}
-                                                className={`font-mono text-xs tracking-widest uppercase flex items-center gap-1 font-bold shadow-sm bg-black/40 px-2 py-1 rounded cursor-pointer hover:scale-105 transition-transform border border-transparent hover:border-orange-500/50 ${getScoreColor(gig.reputation_score)}`}
+                                                className={`font-mono text-[11px] tracking-wide flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 hover:border-white/25 transition-colors ${getScoreColor(gig.reputation_score)}`}
                                             >
-                                                REP SCORE: {gig.reputation_score || 'N/A'} <Search size={10} className="ml-1 opacity-70" />
+                                                Rep {gig.reputation_score || 'N/A'} <Search size={10} className="opacity-60" />
                                             </button>
                                         </div>
+                                    </div>
 
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="font-display font-bold text-2xl text-orange-400 leading-tight relative z-10 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]">{gig.name}</h3>
-                                            <div className="flex gap-2 relative z-10">
-                                                {gig.social_media_url && (
-                                                    <a href={gig.social_media_url} target="_blank" rel="noopener noreferrer" className="text-orange-400 opacity-60 hover:opacity-100 hover:text-orange-300 transition-opacity drop-shadow-md">
-                                                        {getSocialIcon(gig.social_media_url)}
-                                                    </a>
-                                                )}
-                                                {gig.website_url && (
-                                                    <a href={gig.website_url} target="_blank" rel="noopener noreferrer" className="text-orange-400 opacity-60 hover:opacity-100 hover:text-orange-300 transition-opacity drop-shadow-md">
-                                                        <Globe size={14} />
-                                                    </a>
-                                                )}
-                                            </div>
+                                    {/* Meta grid */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-white/5 rounded-lg border border-white/10 p-3 flex flex-col gap-1">
+                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest flex items-center gap-1"><DollarSign size={10} /> Payout</span>
+                                            <span className="text-sm text-ink-50 truncate">{gig.payout_model || 'Unknown'}</span>
                                         </div>
-                                        <p className="font-mono text-xs text-orange-200/80 mb-4 drop-shadow-md truncate">{gig.tier || tier}</p>
-
-                                        <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
-                                            <div className="bg-white/5 p-3 rounded border border-white/10 flex flex-col gap-1">
-                                                <span className="font-mono text-[9px] text-orange-400/80 uppercase tracking-widest flex items-center gap-1"><DollarSign size={10} /> Payout Model</span>
-                                                <span className="font-inter text-sm text-ink-50 truncate">{gig.payout_model || 'Unknown'}</span>
-                                            </div>
-                                            <div className="bg-white/5 p-3 rounded border border-white/10 flex flex-col gap-1">
-                                                <span className="font-mono text-[9px] text-orange-400/80 uppercase tracking-widest flex items-center gap-1"><Calendar size={10} /> Lead Time</span>
-                                                <span className="font-inter text-sm text-ink-50 truncate">{gig.lead_time || 'N/A'}</span>
-                                            </div>
-                                            <div className="bg-white/5 p-3 rounded border border-white/10 flex flex-col gap-1">
-                                                <span className="font-mono text-[9px] text-orange-400/80 uppercase tracking-widest flex items-center justify-between w-full">
-                                                    <span className="flex items-center gap-1"><Activity size={10} /> Contact Persona</span>
-                                                    {gig.contact_source && <span className="text-orange-400 opacity-80">[{gig.contact_source}]</span>}
-                                                </span>
-                                                <span className="font-inter text-sm text-ink-50 truncate">{gig.contact_persona || gig.contact || 'Generic Intel'}</span>
-                                            </div>
-                                            <div className="bg-white/5 p-3 rounded border border-white/10 flex flex-col gap-1 col-span-2 md:col-span-1">
-                                                <span className="font-mono text-[9px] text-orange-400/80 uppercase tracking-widest flex items-center gap-1"><Users size={10} /> Similar Acts</span>
-                                                <span className="font-inter text-sm text-ink-50 line-clamp-1 group-hover:line-clamp-none transition-all">{gig.similar_acts ? (Array.isArray(gig.similar_acts) ? gig.similar_acts.join(', ') : gig.similar_acts) : 'None extracted'}</span>
-                                            </div>
+                                        <div className="bg-white/5 rounded-lg border border-white/10 p-3 flex flex-col gap-1">
+                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest flex items-center gap-1"><Calendar size={10} /> Lead time</span>
+                                            <span className="text-sm text-ink-50 truncate">{gig.lead_time || 'N/A'}</span>
                                         </div>
-
-                                        {/* Financial Telemetry */}
-                                        <div className="flex items-center justify-between bg-black/40 border border-orange-500/30 rounded-lg p-3 mb-6 relative z-10 w-full backdrop-blur-md">
-                                            <div className="flex flex-col text-center w-1/3 border-r border-orange-900/30">
-                                                <span className="font-mono text-[9px] text-orange-400/80 uppercase tracking-widest mb-1">Capacity</span>
-                                                <span className="font-display text-lg font-bold text-orange-300">{gig.capacity || 'N/A'}</span>
-                                            </div>
-                                            <div className="flex flex-col text-center w-1/3 border-r border-orange-900/30">
-                                                <span className="font-mono text-[9px] text-orange-400/80 uppercase tracking-widest mb-1">Avg Ticket</span>
-                                                <span className="font-display text-lg font-bold text-orange-300">{gig.avg_ticket_price_usd ? `$${gig.avg_ticket_price_usd}` : 'N/A'}</span>
-                                            </div>
-                                            <div className="flex flex-col text-center w-1/3 px-2">
-                                                <span className="font-mono text-[9px] text-orange-400 uppercase tracking-widest mb-1 drop-shadow-md">Gross Potential</span>
-                                                <span className="font-display text-xl font-bold text-orange-400 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : 'N/A'}</span>
-                                            </div>
+                                        <div className="bg-white/5 rounded-lg border border-white/10 p-3 flex flex-col gap-1">
+                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest flex items-center justify-between gap-1">
+                                                <span className="flex items-center gap-1"><Activity size={10} /> Contact</span>
+                                                {gig.contact_source && <span className="text-orange-400/80 normal-case truncate">{gig.contact_source}</span>}
+                                            </span>
+                                            <span className="text-sm text-ink-50 truncate">{gig.contact_persona || gig.contact || 'Not listed'}</span>
                                         </div>
+                                        <div className="bg-white/5 rounded-lg border border-white/10 p-3 flex flex-col gap-1">
+                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest flex items-center gap-1"><Users size={10} /> Similar acts</span>
+                                            <span className="text-sm text-ink-50 line-clamp-1 group-hover:line-clamp-none transition-all">{gig.similar_acts ? (Array.isArray(gig.similar_acts) ? gig.similar_acts.join(', ') : gig.similar_acts) : 'None extracted'}</span>
+                                        </div>
+                                    </div>
 
-                                        <div className="border-t border-white/10 pt-4 pb-16 relative z-10">
-                                            {gig.leverage_point && (
-                                                <div className="mb-4 bg-orange-950/30 border border-orange-500/20 rounded p-3">
-                                                    <div className="flex items-center gap-2 font-mono text-[10px] text-orange-400 mb-1 uppercase tracking-widest">
-                                                        <AlertTriangle size={12} /> Tactical Leverage Point
-                                                    </div>
-                                                    <p className="text-xs text-orange-200/80 font-inter italic leading-snug">"{gig.leverage_point}"</p>
+                                    {/* Financial strip */}
+                                    <div className="flex items-center justify-between bg-black/20 border border-white/10 rounded-lg p-3">
+                                        <div className="flex flex-col items-center text-center flex-1 border-r border-white/10">
+                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest mb-1">Capacity</span>
+                                            <span className="font-display text-base text-ink-50">{gig.capacity || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex flex-col items-center text-center flex-1 border-r border-white/10">
+                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest mb-1">Avg ticket</span>
+                                            <span className="font-display text-base text-ink-50">{gig.avg_ticket_price_usd ? `$${gig.avg_ticket_price_usd}` : 'N/A'}</span>
+                                        </div>
+                                        <div className="flex flex-col items-center text-center flex-1">
+                                            <span className="font-mono text-[9px] text-orange-400 uppercase tracking-widest mb-1">Gross potential</span>
+                                            <span className="font-display text-lg text-orange-400">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : 'N/A'}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Leverage + strategy */}
+                                    <div className="space-y-3 border-t border-white/10 pt-4">
+                                        {gig.leverage_point && (
+                                            <div className="border-l-2 border-orange-500/50 pl-3 py-0.5">
+                                                <div className="flex items-center gap-1.5 font-mono text-[10px] text-orange-400 uppercase tracking-widest mb-1">
+                                                    <AlertTriangle size={12} /> Leverage
                                                 </div>
-                                            )}
-                                            <div className="flex items-center gap-2 font-mono text-xs text-orange-400 mb-2 uppercase tracking-widest drop-shadow-sm">
-                                                <BrainCircuit size={12} /> Shark Negotiation Strategy
+                                                <p className="text-xs text-ink-200 italic leading-snug">"{gig.leverage_point}"</p>
                                             </div>
-                                            <p className="text-sm text-ink-200 font-inter leading-relaxed line-clamp-2 md:line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
+                                        )}
+                                        <div>
+                                            <div className="flex items-center gap-1.5 font-mono text-[10px] text-ink-400 uppercase tracking-widest mb-1.5">
+                                                <BrainCircuit size={12} /> Negotiation strategy
+                                            </div>
+                                            <p className="text-sm text-ink-200 leading-relaxed line-clamp-2 md:line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
                                                 {gig.strategy}
                                             </p>
                                         </div>
+                                    </div>
 
-                                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/80 to-transparent z-20 flex justify-center border-t border-orange-900/30">
-                                            <button
-                                                onClick={() => handleEngageShark(gig)}
-                                                disabled={gig.pipeline_status === 'PITCHED'}
-                                                className="w-full bg-orange-900/20 text-orange-400 font-bold border border-orange-500/50 hover:bg-orange-600 hover:text-black font-bold font-mono text-xs tracking-widest px-4 py-3 rounded flex items-center justify-center gap-2 transition-all disabled:opacity-30 disabled:cursor-not-allowed uppercase shadow-[0_0_15px_rgba(249,115,22,0.2)] hover:shadow-[0_0_25px_rgba(249,115,22,0.5)]"
-                                            >
-                                                {gig.pipeline_status === 'PITCHED' ? 'PITCH DEPLOYED' : <><Send size={14} /> ONE-CLICK ENGAGE</>}
-                                            </button>
-                                        </div>
-                                    </motion.div>
-                                );
-                            });
-                        })()}
-                    </AnimatePresence>
-                </div>
+                                    {/* Footer */}
+                                    <Btn
+                                        variant="accent"
+                                        accent="#fb923c"
+                                        onClick={() => handleEngageShark(gig)}
+                                        disabled={gig.pipeline_status === 'PITCHED'}
+                                        className="w-full"
+                                    >
+                                        {gig.pipeline_status === 'PITCHED' ? 'Pitch sent' : <><Send size={14} /> Draft pitch</>}
+                                    </Btn>
+                                </motion.div>
+                            );
+                        });
+                    })()}
+                </AnimatePresence>
             </div>
 
             {/* Auto-Pitch Terminal Modal */}
@@ -471,84 +458,63 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+                            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4"
                         >
                             <motion.div
                                 initial={{ scale: 0.95, y: 20 }}
                                 animate={{ scale: 1, y: 0 }}
                                 exit={{ scale: 0.95, y: 20 }}
-                                className="bg-[#050505] border border-orange-800/50 shadow-[0_0_50px_rgba(249,115,22,0.15)] rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
+                                className="glass-obsidian border border-white/10 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
                             >
                                 {/* Modal Header */}
-                                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/50">
-                                    <div>
-                                        <h3 className="font-display text-xl font-bold text-ink-50 flex items-center gap-2">
-                                            <AlertTriangle size={20} className="text-orange-400" />
-                                            AUTO-PITCH TERMINAL
-                                        </h3>
-                                        <p className="font-mono text-[10px] text-orange-400 tracking-widest uppercase mt-1">
-                                            TARGET: {pitchModal.name} // PERSONA: {pitchModal.contact_persona || 'N/A'}
+                                <div className="p-5 border-b border-white/10 flex items-center justify-between gap-4">
+                                    <div className="min-w-0">
+                                        <h3 className="font-display text-lg text-ink-50">Draft pitch</h3>
+                                        <p className="font-mono text-[10px] text-orange-400 tracking-widest uppercase mt-1 truncate">
+                                            {pitchModal.name} · {pitchModal.contact_persona || 'Booking contact'}
                                         </p>
                                     </div>
-                                    <button onClick={() => setPitchModal(null)} className="text-ink-400 hover:text-ink-50 transition-colors p-2">
-                                        <X size={24} />
+                                    <button onClick={() => setPitchModal(null)} className="text-ink-400 hover:text-ink-50 transition-colors p-2 shrink-0">
+                                        <X size={22} />
                                     </button>
                                 </div>
 
                                 {/* Modal Body */}
                                 <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
                                     {isDrafting ? (
-                                        <div className="py-20 w-full flex items-center justify-center">
+                                        <div className="py-16 w-full flex items-center justify-center">
                                             <LoadingProgressBar
                                                 active={isDrafting}
-                                                message={`SYNTHESIZING ${outreachType.toUpperCase()} OUTREACH`}
-                                                subMessage="Correlating Venue Tier with Psychological Triggers. Engine requires up to 30-40s."
+                                                message={`Writing your ${outreachType === 'call_script' ? 'call script' : outreachType === 'dm' ? 'DM' : 'email'}`}
+                                                subMessage="Matching the pitch to this venue's tier and contact. Can take up to 30-40s."
                                                 colorClass="orange"
                                                 estimatedDurationMs={20000}
                                             />
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            {/* Outreach Protocol Tabs */}
-                                            <div className="flex gap-2 border-b border-white/10 pb-4">
-                                                <button
-                                                    onClick={() => handleEngageShark(pitchModal, 'email')}
-                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'email' ? 'bg-orange-900/40 text-orange-400 border border-orange-800/50' : 'bg-white/5 text-ink-400 hover:text-gray-300'}`}
-                                                >
-                                                    <Mail size={12} /> Email Thread
-                                                </button>
-                                                <button
-                                                    onClick={() => handleEngageShark(pitchModal, 'call_script')}
-                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'call_script' ? 'bg-fuchsia-900/40 text-fuchsia-300 border border-fuchsia-500/50' : 'bg-white/5 text-ink-400 hover:text-gray-300'}`}
-                                                >
-                                                    <Phone size={12} /> Call Script
-                                                </button>
-                                                <button
-                                                    onClick={() => handleEngageShark(pitchModal, 'dm')}
-                                                    className={`px-3 py-1.5 rounded flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest transition-colors ${outreachType === 'dm' ? 'bg-sky-900/40 text-sky-300 border border-sky-500/50' : 'bg-white/5 text-ink-400 hover:text-gray-300'}`}
-                                                >
-                                                    <MessageCircle size={12} /> Direct Message
-                                                </button>
-                                            </div>
+                                            <Segmented
+                                                options={OUTREACH_OPTIONS}
+                                                value={outreachType}
+                                                onChange={(v) => handleEngageShark(pitchModal, v)}
+                                                accent="#fb923c"
+                                            />
 
-                                            <div className="bg-black/60 rounded border border-white/10 p-4">
-                                                <div className="font-mono text-[10px] text-ink-400 mb-2 uppercase tracking-widest">Routing To (Editable):</div>
+                                            <Field label="Sending to">
                                                 <input
                                                     type="text"
                                                     value={pitchRoutingTo}
                                                     onChange={(e) => setPitchRoutingTo(e.target.value)}
-                                                    placeholder="UNKNOWN - REQUIRES MANUAL ENTRY"
-                                                    className="font-mono text-sm text-orange-400 bg-transparent w-full outline-none border-b border-orange-800/30 focus:border-orange-700 transition-colors py-1"
+                                                    placeholder="Add an email, phone, or handle"
+                                                    className={inputCls()}
                                                 />
-                                            </div>
-                                            <div className="bg-ink-900/50 rounded-lg border border-white/10 relative group">
-                                                <div className="absolute top-0 right-0 px-3 py-1 bg-black/80 rounded-bl-lg border-l border-b border-white/10 font-mono text-[9px] text-ink-400 tracking-widest">
-                                                    EDITABLE BUFFER
-                                                </div>
+                                            </Field>
+
+                                            <div className="bg-ink-900/50 rounded-lg border border-white/10">
                                                 <textarea
                                                     value={generatedPitch}
                                                     onChange={(e) => setGeneratedPitch(e.target.value)}
-                                                    className="w-full h-80 bg-transparent text-ink-200 font-inter text-sm p-4 outline-none resize-none focus:ring-1 ring-orange-800/50 rounded-lg custom-scrollbar leading-relaxed"
+                                                    className="w-full h-72 bg-transparent text-ink-200 text-sm p-4 outline-none resize-none custom-scrollbar leading-relaxed"
                                                 />
                                             </div>
                                         </div>
@@ -557,22 +523,13 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
                                 {/* Modal Footer */}
                                 {!isDrafting && (
-                                    <div className="p-4 border-t border-white/10 bg-black/80 flex justify-end gap-3">
-                                        <button
-                                            onClick={() => setPitchModal(null)}
-                                            className="px-6 py-2 rounded font-mono text-xs tracking-widest text-ink-400 hover:text-ink-50 transition-colors uppercase"
-                                        >
-                                            Abort
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeployPitch(gigs.indexOf(pitchModal))}
-                                            className="bg-red-900/80 text-ink-50 border border-red-500/50 hover:bg-red-600 font-bold font-mono text-xs tracking-widest px-8 py-3 rounded flex items-center gap-2 transition-all uppercase shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.6)]"
-                                        >
-                                            <Send size={14} /> DEPLOY PITCH
-                                        </button>
+                                    <div className="p-4 border-t border-white/10 flex justify-end gap-3">
+                                        <Btn variant="ghost" onClick={() => setPitchModal(null)}>Cancel</Btn>
+                                        <Btn variant="accent" accent="#fb923c" onClick={() => handleDeployPitch(gigs.indexOf(pitchModal))}>
+                                            <Send size={14} /> Send pitch
+                                        </Btn>
                                     </div>
                                 )}
-
                             </motion.div>
                         </motion.div>
                     )}
@@ -588,42 +545,37 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
                         >
                             <motion.div
                                 initial={{ scale: 0.95, y: 20 }}
                                 animate={{ scale: 1, y: 0 }}
                                 exit={{ scale: 0.95, y: 20 }}
-                                className="bg-[#050505] border border-orange-800/50 shadow-[0_0_50px_rgba(249,115,22,0.15)] rounded-2xl w-full max-w-md flex flex-col overflow-hidden"
+                                className="glass-obsidian border border-white/10 rounded-2xl w-full max-w-md flex flex-col overflow-hidden"
                             >
-                                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-black via-orange-900/20 to-black">
-                                    <h3 className="font-mono text-sm tracking-widest text-orange-400 font-bold flex items-center gap-2 uppercase">
-                                        <Search size={16} /> REPUTATION ANALYSIS
+                                <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                                    <h3 className="font-mono text-xs tracking-widest text-orange-400 uppercase flex items-center gap-2">
+                                        <Search size={14} /> Reputation
                                     </h3>
                                     <button onClick={() => setRepModal(null)} className="text-ink-400 hover:text-ink-50 transition-colors p-1">
                                         <X size={18} />
                                     </button>
                                 </div>
                                 <div className="p-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h4 className="font-display text-xl text-ink-50 font-bold">{repModal.name}</h4>
-                                        <div className={`font-mono text-sm tracking-widest uppercase font-bold px-3 py-1 rounded shadow-md border ${repModal.reputation_score >= 80 ? 'bg-green-900/30 text-green-400 border-green-500/50' : repModal.reputation_score >= 50 ? 'bg-fuchsia-900/30 text-fuchsia-400 border-fuchsia-500/50' : 'bg-red-900/30 text-red-500 border-red-500/50'}`}>
-                                            SCORE: {repModal.reputation_score}
-                                        </div>
+                                    <div className="flex items-center justify-between gap-3 mb-4">
+                                        <h4 className="font-display text-lg text-ink-50 truncate">{repModal.name}</h4>
+                                        <span className={`font-mono text-xs uppercase px-3 py-1 rounded-full border shrink-0 ${repModal.reputation_score >= 80 ? 'bg-green-500/10 text-green-400 border-green-500/30' : repModal.reputation_score >= 50 ? 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'}`}>
+                                            Score: {repModal.reputation_score}
+                                        </span>
                                     </div>
-                                    <div className="bg-black/60 rounded-lg border border-white/10 p-5 mt-4">
-                                        <p className="font-inter text-sm text-ink-200 leading-relaxed">
-                                            {repModal.reputation_explanation || "Insufficient telemetry to generate a detailed reputation profile for this venue."}
+                                    <div className="bg-white/5 rounded-lg border border-white/10 p-4">
+                                        <p className="text-sm text-ink-200 leading-relaxed">
+                                            {repModal.reputation_explanation || 'No detailed reputation notes yet for this venue.'}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="p-4 border-t border-white/10 bg-black/80">
-                                    <button
-                                        onClick={() => setRepModal(null)}
-                                        className="w-full bg-orange-900/20 text-orange-400 font-bold border border-orange-800/30 hover:bg-orange-800 hover:text-black font-bold font-mono text-xs tracking-widest py-3 rounded transition-all uppercase"
-                                    >
-                                        Acknowledge
-                                    </button>
+                                <div className="p-4 border-t border-white/10">
+                                    <Btn variant="ghost" className="w-full" onClick={() => setRepModal(null)}>Got it</Btn>
                                 </div>
                             </motion.div>
                         </motion.div>
@@ -631,7 +583,6 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 </AnimatePresence>,
                 document.body
             )}
-
         </div>
     );
 }

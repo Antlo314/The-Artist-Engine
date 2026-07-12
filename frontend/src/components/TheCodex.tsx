@@ -197,6 +197,13 @@ export const codexEntries = [
     }
 ];
 
+const DANGER_STYLES: Record<string, { bar: string; badge: string }> = {
+    CRITICAL: { bar: 'bg-red-500', badge: 'text-red-400 border-red-500/50' },
+    HIGH: { bar: 'bg-purple-500', badge: 'text-purple-400 border-purple-500/50' },
+    WARNING: { bar: 'bg-orange-500', badge: 'text-orange-400 border-orange-500/50' },
+    SAFE: { bar: 'bg-emerald-500', badge: 'text-emerald-400 border-emerald-500/50' },
+};
+
 export default function TheCodex() {
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -207,68 +214,60 @@ export default function TheCodex() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
-                <div>
-                    <h2 className="font-display text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-                        <BookOpen className="text-amber-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
-                        THE CODEX
-                    </h2>
-                    <p className="font-mono text-xs text-purple-300/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
-                        Entertainment Law Dictionary & Predatory Terminology Translations
-                    </p>
-                </div>
+            <div>
+                <h2 className="font-display text-xl lg:text-2xl font-semibold text-ink-50 flex items-center gap-2 lg:gap-3">
+                    <BookOpen className="text-ink-400 w-5 h-5 lg:w-6 lg:h-6" />
+                    Term Codex
+                </h2>
+                <p className="font-mono text-[10px] text-ink-400 mt-1 tracking-[0.2em] uppercase">
+                    Entertainment law dictionary — predatory terminology, translated
+                </p>
             </div>
 
-            <div className="glass-obsidian-hover p-4 flex items-center gap-4 rounded-xl border border-purple-900/30 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md">
-                <Search className="text-amber-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" size={20} />
+            <div className="glass-obsidian rounded-xl border border-white/10 p-4 flex items-center gap-4">
+                <Search className="text-ink-400" size={20} />
                 <input
                     type="text"
-                    placeholder="Search predatory jargon... (e.g., 'Recoupment', 'Gross Revenue')"
+                    placeholder="Search legal jargon... (e.g. Recoupment, Gross Revenue)"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 bg-transparent text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-mono text-sm focus:outline-none placeholder-purple-400/40 text-glow"
+                    className="flex-1 bg-transparent text-ink-50 font-mono text-sm focus:outline-none placeholder:text-ink-700"
                 />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto pb-8 custom-scrollbar">
                 <AnimatePresence>
-                    {filteredEntries.map((entry, idx) => (
-                        <motion.div
-                            key={entry.term}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ delay: idx * 0.05 }}
-                            className="glass-obsidian-hover p-6 rounded-2xl border border-purple-900/30 bg-black/40 hover:bg-black/60 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all relative overflow-hidden group shadow-[inset_0_0_20px_rgba(168,85,247,0.05)] backdrop-blur-md"
-                        >
-                            <div className={`absolute top-0 left-0 w-1 h-full shadow-[0_0_10px_currentColor]
-                                ${entry.dangerLevel === 'CRITICAL' ? 'bg-red-500 text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]' :
-                                    entry.dangerLevel === 'HIGH' ? 'bg-purple-500 text-purple-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]' :
-                                        entry.dangerLevel === 'WARNING' ? 'bg-orange-500 text-orange-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]' :
-                                            'bg-emerald-500 text-emerald-500'}`}
-                            />
+                    {filteredEntries.map((entry, idx) => {
+                        const style = DANGER_STYLES[entry.dangerLevel] || DANGER_STYLES.SAFE;
+                        return (
+                            <motion.div
+                                key={entry.term}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="glass-obsidian rounded-xl border border-white/10 p-6 relative overflow-hidden"
+                            >
+                                <div className={`absolute top-0 left-0 w-1 h-full ${style.bar}`} />
 
-                            <div className="flex justify-between items-start mb-4">
-                                <h3 className="font-display text-xl text-purple-400 font-bold tracking-widest pl-3 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">{entry.term}</h3>
-                                <span className={`font-mono text-[10px] tracking-widest px-2 py-1 rounded bg-black/60 shadow-sm border backdrop-blur-md
-                                    ${entry.dangerLevel === 'CRITICAL' ? 'text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.3)]' :
-                                        entry.dangerLevel === 'HIGH' ? 'text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.3)]' :
-                                            entry.dangerLevel === 'WARNING' ? 'text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-orange-500/50 shadow-[0_0_10px_rgba(249,115,22,0.3)]' :
-                                                'text-emerald-400 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]'}`}>
-                                    {entry.dangerLevel}
-                                </span>
-                            </div>
+                                <div className="flex justify-between items-start mb-4 pl-3">
+                                    <h3 className="font-display text-lg text-ink-50 font-semibold tracking-wide">{entry.term}</h3>
+                                    <span className={`font-mono text-[10px] tracking-widest px-2 py-1 rounded border ${style.badge}`}>
+                                        {entry.dangerLevel}
+                                    </span>
+                                </div>
 
-                            <p className="font-inter text-sm text-gray-300 font-bold mb-2 pl-3 drop-shadow-md">"{entry.translation}"</p>
-                            <p className="font-mono text-xs text-gray-400 leading-relaxed pl-3 bg-purple-900/20 p-3 rounded-md border border-purple-900/30 shadow-inner">
-                                {entry.meaning}
-                            </p>
-                        </motion.div>
-                    ))}
+                                <p className="font-inter text-sm text-ink-200 mb-2 pl-3">"{entry.translation}"</p>
+                                <p className="font-mono text-xs text-ink-400 leading-relaxed pl-3 bg-white/[0.03] p-3 rounded-lg border border-white/10">
+                                    {entry.meaning}
+                                </p>
+                            </motion.div>
+                        );
+                    })}
                 </AnimatePresence>
                 {filteredEntries.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-purple-400/50 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-mono text-sm tracking-widest drop-shadow-sm">
-                        NO CODEX ENTRIES FOUND. YOU ARE IN UNCHARTED TERRITORY.
+                    <div className="col-span-full py-12 text-center text-ink-400 font-mono text-sm tracking-widest">
+                        No codex entries found. You are in uncharted territory.
                     </div>
                 )}
             </div>

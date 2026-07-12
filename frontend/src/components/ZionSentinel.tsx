@@ -1,9 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Scale, FileText, Activity, AlertOctagon, TrendingUp, ShieldAlert, CheckCircle2, UploadCloud, Sword, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Scale, FileText, Activity, TrendingUp, ShieldAlert, CheckCircle2, UploadCloud, X } from 'lucide-react';
 import { codexEntries } from './TheCodex';
 import LoadingProgressBar from './LoadingProgressBar';
 import { useEngine } from '../lib/engineState';
+import { Panel, Btn, Segmented, EmptyState } from './ui/Shell';
+
+const ACCENT = '#a78bfa';
+
+const SCAN_TYPE_OPTIONS: { value: 'contract' | 'offer'; label: string }[] = [
+    { value: 'contract', label: 'Contract' },
+    { value: 'offer', label: 'Offer' },
+];
 
 export default function ZionSentinel() {
     const { record } = useEngine();
@@ -58,7 +66,7 @@ export default function ZionSentinel() {
             }
         } catch (err) {
             console.error(err);
-            alert("Forensic scan failed. Check console.");
+            alert("Scan failed. Check console.");
         } finally {
             setIsScanning(false);
         }
@@ -68,7 +76,7 @@ export default function ZionSentinel() {
         const color = score > 75 ? 'emerald' : score > 40 ? 'yellow' : 'red';
         const strokeColor = score > 75 ? '#10b981' : score > 40 ? '#eab308' : '#ef4444';
         return (
-            <div className="relative flex flex-col items-center justify-center p-6 border border-white/10 rounded-2xl glass-obsidian shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]">
+            <div className="relative flex flex-col items-center justify-center p-6 glass-obsidian rounded-xl border border-white/10">
                 <svg viewBox="0 0 100 50" className="w-32 h-16 overflow-visible mb-4">
                     {/* Background Arc */}
                     <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#1f1f26" strokeWidth="12" strokeLinecap="round" />
@@ -85,7 +93,7 @@ export default function ZionSentinel() {
                         transition={{ duration: 1.5, ease: "easeOut" }}
                     />
                 </svg>
-                <div className="absolute top-12 font-mono text-3xl font-bold text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                <div className="absolute top-12 font-mono text-3xl font-bold text-ink-50">
                     {score}
                 </div>
                 <div className={`mt-2 font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded bg-${color}-900/30 text-${color}-400 border border-${color}-500/30`}>
@@ -153,46 +161,23 @@ export default function ZionSentinel() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-white/10 pb-2 lg:pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h2 className="font-display text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-                        <Scale className="text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
-                        ZION SHARK PROTOCOL
-                    </h2>
-                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
-                        Automated Legal Analysis & Strategic Offer Negotiations
-                    </p>
+                    <h2 className="font-display text-xl lg:text-2xl font-semibold text-ink-50">Contract Scanner</h2>
+                    <p className="font-mono text-[10px] text-ink-400 mt-1 tracking-[0.2em] uppercase">Automated legal analysis & strategic negotiation prep</p>
                 </div>
+                <Segmented
+                    options={SCAN_TYPE_OPTIONS}
+                    value={scanType}
+                    onChange={setScanType}
+                    accent={scanType === 'offer' ? '#ef4444' : ACCENT}
+                />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Document Ingest Box */}
-                <div className={`glass-obsidian glass-obsidian-hover rounded-2xl flex flex-col border transition-colors shadow-xl relative overflow-hidden group focus-within:border-purple-500/50 ${isDragging ? 'border-purple-500 bg-purple-900/10' : 'border-white/10'}`}>
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-800 to-transparent" />
-
-                    {/* Toggle Switch */}
-                    <div className="p-4 border-b border-white/10 glass-obsidian flex justify-between items-center gap-4">
-                        <div className="flex bg-ink-900 border border-white/10 rounded-lg p-1 w-full max-w-xs shadow-inner">
-                            <button
-                                onClick={() => setScanType('contract')}
-                                className={`flex-1 py-1.5 px-3 rounded text-[10px] font-mono tracking-widest uppercase transition-colors flex items-center justify-center gap-2 ${scanType === 'contract' ? 'bg-purple-900/40 text-purple-300 border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'text-purple-400/50 hover:text-purple-300 hover:bg-purple-900/20 text-glow'}`}
-                            >
-                                <Scale size={12} /> Contract Scan
-                            </button>
-                            <button
-                                onClick={() => setScanType('offer')}
-                                className={`flex-1 py-1.5 px-3 rounded text-[10px] font-mono tracking-widest uppercase transition-colors flex items-center justify-center gap-2 ${scanType === 'offer' ? 'bg-red-900/40 text-red-400 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'text-purple-400/50 hover:text-purple-300 hover:bg-purple-900/20 text-glow'}`}
-                            >
-                                <Sword size={12} /> Offer Negot.
-                            </button>
-                        </div>
-                        <span className="flex h-2 w-2 relative">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75 shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-                        </span>
-                    </div>
-
+                <div className={`glass-obsidian rounded-xl flex flex-col border transition-colors overflow-hidden ${isDragging ? 'border-purple-400/60' : 'border-white/10'}`}>
                     <div
                         className="flex-1 flex flex-col relative"
                         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -200,30 +185,27 @@ export default function ZionSentinel() {
                         onDrop={handleDrop}
                     >
                         {file ? (
-                            <div className="flex-1 flex flex-col items-center justify-center p-4 lg:p-8 glass-obsidian min-h-[250px] lg:min-h-[400px]">
-                                <FileText size={48} className="text-purple-400 mb-4 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]" />
-                                <span className="font-mono text-xs lg:text-sm text-purple-300 drop-shadow-md text-center break-all px-4">{file.name}</span>
-                                <span className="font-mono text-[10px] text-purple-400/60 mt-2">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                                <button
-                                    onClick={() => setFile(null)}
-                                    className="mt-6 text-xs font-mono text-red-400 border border-red-500/50 bg-red-900/20 px-4 py-2 rounded hover:bg-red-900/40 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
-                                >
-                                    <X size={14} /> REMOVE FILE
-                                </button>
+                            <div className="flex-1 flex flex-col items-center justify-center p-4 lg:p-8 min-h-[250px] lg:min-h-[380px]">
+                                <FileText size={40} className="text-ink-400 mb-4" />
+                                <span className="font-mono text-xs lg:text-sm text-ink-50 text-center break-all px-4">{file.name}</span>
+                                <span className="font-mono text-[10px] text-ink-400 mt-2">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                                <Btn variant="danger-ghost" size="sm" className="mt-6" onClick={() => setFile(null)}>
+                                    <X size={14} /> Remove file
+                                </Btn>
                             </div>
                         ) : (
                             <>
                                 <textarea
-                                    className="flex-1 bg-transparent p-4 lg:p-6 text-xs lg:text-sm font-mono text-ink-200 focus:outline-none resize-none placeholder:text-ink-400 min-h-[250px] lg:min-h-[400px] z-10 relative custom-scrollbar leading-relaxed"
-                                    placeholder={`PASTE OR DRAG ${scanType === 'contract' ? 'CONTRACT TEXT (.pdf, .docx, .txt)' : 'VENUE OFFER'} HERE FOR FORENSIC REVIEW...\\n\\n(MAX LIMIT: ~15 PAGES / 7,500 WORDS PER SCAN)`}
+                                    className="flex-1 bg-transparent p-4 lg:p-6 text-xs lg:text-sm font-mono text-ink-200 focus:outline-none resize-none placeholder:text-ink-700 min-h-[250px] lg:min-h-[380px] z-10 relative custom-scrollbar leading-relaxed"
+                                    placeholder={`Paste or drag your ${scanType === 'contract' ? 'contract text (.pdf, .docx, .txt)' : 'venue offer'} here for review...\n\n(Max ~15 pages / 7,500 words per scan)`}
                                     value={contractText}
                                     onChange={e => setContractText(e.target.value)}
                                 />
                                 {contractText.length === 0 && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-40 px-4 text-center">
-                                        <UploadCloud size={48} className="mb-2 lg:mb-4 lg:w-16 lg:h-16 text-purple-500 drop-shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
-                                        <span className="font-display text-sm sm:text-base lg:text-xl tracking-widest text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.7)] text-glow">DRAG & DROP MODULE</span>
-                                        <span className="font-mono text-[10px] text-purple-300/60 mt-2 tracking-widest drop-shadow-md">NEXUS LIMIT: ~15 PAGES OR 7,500 WORDS</span>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-50 px-4 text-center">
+                                        <UploadCloud size={40} className="mb-3 text-ink-700" />
+                                        <span className="font-display text-sm sm:text-base lg:text-lg text-ink-400">Drag & drop a document</span>
+                                        <span className="font-mono text-[10px] text-ink-700 mt-2 tracking-widest uppercase">or paste text — ~15 pages / 7,500 words max</span>
                                     </div>
                                 )}
                             </>
@@ -237,22 +219,19 @@ export default function ZionSentinel() {
                         />
                     </div>
 
-                    <div className="p-4 bg-ink-900 border-t border-white/10 flex flex-col md:flex-row gap-4 justify-between items-center backdrop-blur-md">
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="text-[10px] font-mono text-purple-400/80 hover:text-purple-300 transition-colors flex items-center gap-2 tracking-widest bg-purple-900/20 px-3 py-1.5 rounded border border-white/10 shadow-sm drop-shadow-md text-glow"
-                        >
-                            <UploadCloud size={12} /> BROWSE LOCAL FILES (.PDF, .DOCX)
-                        </button>
-                        <button
+                    <div className="p-4 border-t border-white/10 flex flex-col md:flex-row gap-3 justify-between items-center">
+                        <Btn variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>
+                            <UploadCloud size={12} /> Browse files (.pdf, .docx)
+                        </Btn>
+                        <Btn
+                            variant="accent"
+                            accent={scanType === 'offer' ? '#ef4444' : ACCENT}
                             onClick={handleScan}
                             disabled={(!contractText && !file) || isScanning}
-                            className={`px-8 py-3 rounded tracking-widest font-mono text-xs uppercase font-bold transition-all disabled:opacity-50 flex items-center gap-2 relative overflow-hidden shadow-[0_0_15px_rgba(168,85,247,0.3)] ${scanType === 'offer' ? 'bg-red-900/40 text-red-400 border border-red-500/50 hover:bg-red-600 hover:text-black hover:shadow-[0_0_30px_rgba(239,68,68,0.5)]' : 'bg-purple-900/30 text-purple-400 border border-purple-500/50 hover:bg-purple-600 hover:text-black hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]'}`}
                         >
-                            {isScanning && <div className={`absolute inset-0 ${scanType === 'offer' ? 'bg-red-300/30' : 'bg-purple-700/30'} w-fit pointer-events-none origin-left flex animate-pulse`} />}
-                            {isScanning ? <Activity size={16} className="animate-spin relative z-10" /> : <Scale size={16} />}
-                            <span className="relative z-10">{isScanning ? "EXECUTING PROTOCOL..." : "INITIATE SCAN"}</span>
-                        </button>
+                            {isScanning ? <Activity size={16} className="animate-spin" /> : <Scale size={16} />}
+                            {isScanning ? 'Scanning…' : 'Scan contract'}
+                        </Btn>
                     </div>
                 </div>
 
@@ -260,19 +239,19 @@ export default function ZionSentinel() {
                 <div className="flex flex-col h-full gap-4 relative">
 
                     {!analysis && !isScanning && (
-                        <div className="flex-1 glass-obsidian border-dashed border-white/10 rounded-2xl flex items-center justify-center p-8 text-center">
-                            <p className="font-mono text-sm text-purple-300/60 tracking-widest uppercase">
-                                Awaiting legal payload for structural breakdown.
-                            </p>
-                        </div>
+                        <EmptyState
+                            icon={<Scale size={32} />}
+                            title="No document scanned yet"
+                            hint="Drop a contract or offer on the left to get a forensic breakdown"
+                        />
                     )}
 
                     {isScanning && (
                         <div className="flex-1 flex flex-col items-center justify-center">
                             <LoadingProgressBar
                                 active={isScanning}
-                                message="DEPLOYING ZION ENGINES"
-                                subMessage="Hunting Predatory Signatures. Engine may take 30-40s to respond."
+                                message="SCANNING DOCUMENT"
+                                subMessage="Hunting predatory clauses. May take 30-40s to respond."
                                 colorClass="emerald"
                                 estimatedDurationMs={25000}
                             />
@@ -285,74 +264,70 @@ export default function ZionSentinel() {
                             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
                             className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar"
                         >
-                            {/* Top Row: Score & Parties */}
+                            {/* Top Row: Score & Summary */}
                             <div className="grid grid-cols-3 gap-4">
                                 <ScoreGauge score={analysis.integrity_score || 50} />
-                                <div className="col-span-2 glass-obsidian p-6 border-white/10 rounded-2xl flex flex-col justify-center relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.1),transparent_50%)] pointer-events-none" />
-                                    <h4 className="font-mono text-xs uppercase tracking-widest text-purple-400 mb-2 drop-shadow-md border-b border-white/10 pb-2 flex items-center gap-2">
+                                <Panel className="col-span-2 flex flex-col justify-center" accent={ACCENT}>
+                                    <h4 className="font-mono text-[10px] uppercase tracking-widest text-ink-400 mb-2 border-b border-white/10 pb-2 flex items-center gap-2">
                                         <TrendingUp size={12} /> Strategic Summary
                                     </h4>
-                                    <p className="text-xs font-inter text-ink-200 leading-relaxed z-10">
+                                    <p className="text-xs font-inter text-ink-200 leading-relaxed">
                                         {renderWithCodex(analysis.summary)}
                                     </p>
-                                </div>
+                                </Panel>
                             </div>
 
                             {/* Red Flags List */}
                             {analysis.red_flags && analysis.red_flags.length > 0 && (
-                                <div className="glass-obsidian rounded-2xl border border-red-500/30 overflow-hidden relative shadow-[0_0_20px_rgba(239,68,68,0.1)]">
-                                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                                        <AlertOctagon size={100} className="text-red-500" />
-                                    </div>
-                                    <div className="bg-red-900/20 p-4 border-b border-red-500/30 flex items-center justify-between">
-                                        <h3 className="font-display text-lg text-red-500 font-bold tracking-widest flex items-center gap-2 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">
-                                            <ShieldAlert className="text-red-500" /> THREATS DETECTED: {analysis.red_flags.length}
-                                        </h3>
-                                    </div>
-                                    <div className="p-4 space-y-4 bg-ink-900">
+                                <Panel
+                                    title={`Threats detected: ${analysis.red_flags.length}`}
+                                    accent="#ef4444"
+                                    actions={<ShieldAlert className="text-red-400" size={18} />}
+                                >
+                                    <div className="space-y-4 -m-1">
                                         {analysis.red_flags.map((flag: any, idx: number) => (
-                                            <div key={idx} className="bg-ink-800 border border-red-500/30 rounded p-4 relative group shadow-sm">
-                                                <div className="w-1 h-full bg-red-500 absolute left-0 top-0 overflow-hidden rounded-l shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
+                                            <div key={idx} className="glass-obsidian border border-white/10 border-l-4 border-l-red-500 rounded-lg p-4 relative">
                                                 <p className="text-xs font-mono text-ink-400 italic mb-2 border-l-2 border-red-500/50 pl-2">
                                                     "...{renderWithCodex(flag.clause)}..."
                                                 </p>
-                                                <p className="text-sm font-inter text-red-400 font-bold mb-1 relative z-10 drop-shadow-md">
-                                                    RISK: {renderWithCodex(flag.risk)}
+                                                <p className="text-sm font-inter text-red-400 font-semibold mb-1">
+                                                    Risk: {renderWithCodex(flag.risk)}
                                                 </p>
-                                                <p className="text-sm font-inter text-emerald-400 flex items-start gap-2 mt-3 bg-emerald-900/20 p-2 rounded border border-emerald-500/30 relative z-10 shadow-[inset_0_0_15px_rgba(16,185,129,0.1)]">
-                                                    <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]" /> <span><span className="font-mono text-[10px] text-emerald-300 tracking-widest uppercase block mb-1">Recommended Fix</span>{renderWithCodex(flag.fix)}</span>
+                                                <p className="text-sm font-inter text-emerald-400 flex items-start gap-2 mt-3 bg-emerald-900/20 p-2 rounded-lg border border-emerald-500/30">
+                                                    <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-400" /> <span><span className="font-mono text-[10px] text-emerald-300 tracking-widest uppercase block mb-1">Recommended Fix</span>{renderWithCodex(flag.fix)}</span>
                                                 </p>
                                             </div>
                                         ))}
                                     </div>
-                                </div>
+                                </Panel>
                             )}
 
                             {/* Legal Rebuttal */}
-                            <div className="glass-obsidian p-6 rounded-2xl border border-white/10 mt-4 relative shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]">
-                                <h4 className="font-display text-lg text-purple-400 tracking-widest border-b border-white/10 pb-2 mb-4 flex items-center justify-between drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">
-                                    SOVEREIGN REBUTTAL
+                            <Panel
+                                title="Sovereign Rebuttal"
+                                accent={ACCENT}
+                                actions={
                                     <button
                                         onClick={(e) => {
                                             navigator.clipboard.writeText(analysis.shark_rebuttal);
                                             const btn = e.currentTarget;
-                                            btn.innerText = 'COPIED!';
-                                            btn.classList.add('text-emerald-400', 'border-emerald-500/50', 'bg-emerald-900/20', 'shadow-[0_0_10px_rgba(16,185,129,0.5)]');
+                                            btn.innerText = 'Copied!';
+                                            btn.classList.add('text-emerald-400', 'border-emerald-500/50');
                                             setTimeout(() => {
-                                                btn.innerText = 'COPY';
-                                                btn.classList.remove('text-emerald-400', 'border-emerald-500/50', 'bg-emerald-900/20', 'shadow-[0_0_10px_rgba(16,185,129,0.5)]');
+                                                btn.innerText = 'Copy';
+                                                btn.classList.remove('text-emerald-400', 'border-emerald-500/50');
                                             }, 2000);
                                         }}
-                                        className="font-mono text-[10px] bg-purple-900/20 border border-white/10 px-3 py-1 rounded text-purple-400/80 hover:text-purple-300 transition-colors shadow-sm text-glow"
+                                        className="font-mono text-[10px] border border-white/10 px-3 py-1 rounded text-ink-400 hover:text-ink-50 transition-colors"
                                     >
-                                        COPY
+                                        Copy
                                     </button>
-                                </h4>
-                                <div className="text-sm font-inter text-ink-200 leading-relaxed whitespace-pre-wrap bg-ink-900 p-4 rounded border border-white/10 shadow-inner">
+                                }
+                            >
+                                <div className="text-sm font-inter text-ink-200 leading-relaxed whitespace-pre-wrap bg-ink-900 p-4 rounded-lg border border-white/10">
                                     {analysis.shark_rebuttal}
                                 </div>
-                            </div>
+                            </Panel>
                         </motion.div>
                     )}
                 </div>
