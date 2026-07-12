@@ -373,11 +373,11 @@ async def startup_event():
         system_startup_log.append("[AI CORE] FATAL: Missing GEMINI_API_KEY. Modules disabled.")
 
     if auth_configured() and auth_required():
-        system_startup_log.append("[AUTH] Founding Cohort gate ONLINE (Google via Supabase + daily quotas).")
+        system_startup_log.append("[AUTH] Clerk sign-in ONLINE (Google/email + daily fair-use quotas).")
     elif auth_configured():
-        system_startup_log.append("[AUTH] Supabase configured but AUTH_REQUIRED=0 (open dev mode).")
+        system_startup_log.append("[AUTH] Clerk keys present but AUTH_REQUIRED=0 (open dev mode).")
     else:
-        system_startup_log.append("[AUTH] Open mode — set SUPABASE_URL + SUPABASE_JWT_SECRET to enable founding gate.")
+        system_startup_log.append("[AUTH] Open mode — set CLERK_SECRET_KEY + CLERK_JWT_ISSUER to require sign-in.")
 
     system_startup_log.append("[STATUS] All Sovereign Pillars (ZION, WAR ROOM, STUDIO, SHARK) Active.")
 

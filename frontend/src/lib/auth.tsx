@@ -7,9 +7,14 @@ import {
     useState,
     type ReactNode,
 } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { getSupabase, isAuthEnabled } from './supabase';
-import { apiJson, ApiError } from './api';
+import {
+    ClerkProvider,
+    useAuth as useClerkAuth,
+    useUser,
+    SignedIn,
+    SignedOut,
+} from '@clerk/clerk-react';
+import { setTokenGetter, apiJson, ApiError } from './api';
 
 export type UsageBucket = { used: number; limit: number; remaining: number };
 
@@ -31,39 +36,54 @@ export type MePayload = {
 type AuthState = {
     ready: boolean;
     authEnabled: boolean;
-    session: Session | null;
-    user: User | null;
+    isSignedIn: boolean;
     me: MePayload | null;
     meError: string | null;
     waitlisted: boolean;
-    /** True when signed in + founding (or auth off for local dev). */
     canUseEngine: boolean;
-    signInWithGoogle: () => Promise<void>;
-    signOut: () => Promise<void>;
+    email: string | null;
+    displayName: string | null;
+    imageUrl: string | null;
     refreshMe: () => Promise<void>;
 };
 
 const AuthCtx = createContext<AuthState | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+const publishableKey = (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined)?.trim() || '';
+
+export function isAuthEnabled(): boolean {
+    return Boolean(publishableKey);
+}
+
+function AuthBridge({ children }: { children: ReactNode }) {
     const authEnabled = isAuthEnabled();
-    const [ready, setReady] = useState(!authEnabled);
-    const [session, setSession] = useState<Session | null>(null);
-    const [user, setUser] = useState<User | null>(null);
+    const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
+    const { user } = useUser();
     const [me, setMe] = useState<MePayload | null>(null);
     const [meError, setMeError] = useState<string | null>(null);
     const [waitlisted, setWaitlisted] = useState(false);
 
-    const refreshMe = useCallback(async () => {
+    // Register token getter for apiFetch
+    useEffect(() => {
         if (!authEnabled) {
+            setTokenGetter(null);
+            return;
+        }
+        setTokenGetter(async () => {
+            try {
+                return (await getToken()) || null;
+            } catch {
+                return null;
+            }
+        });
+        return () => setTokenGetter(null);
+    }, [authEnabled, getToken]);
+
+    const refreshMe = useCallback(async () => {
+        if (!authEnabled || !isSignedIn) {
             setMe(null);
             setWaitlisted(false);
             setMeError(null);
-            return;
-        }
-        if (!session?.access_token) {
-            setMe(null);
-            setWaitlisted(false);
             return;
         }
         try {
@@ -73,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setMeError(null);
         } catch (err) {
             if (err instanceof ApiError && err.status === 403) {
-                const code = err.payload?.error;
+                const code = (err.payload as any)?.error;
                 if (code === 'not_founding_member') {
                     setWaitlisted(true);
                     setMe(null);
@@ -81,93 +101,109 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     return;
                 }
             }
+            // Backend may still be open / cold — still allow engine if Clerk session exists
+            // and no allowlist rejection.
+            if (err instanceof ApiError && err.status === 401) {
+                setMeError(err.message);
+            } else {
+                // Soft: signed-in users can use app; meters fill when /api/me works
+                setMeError(err instanceof Error ? err.message : 'Could not load usage');
+            }
             setMe(null);
-            setMeError(err instanceof Error ? err.message : 'Could not load founding profile');
         }
-    }, [authEnabled, session?.access_token]);
+    }, [authEnabled, isSignedIn]);
 
     useEffect(() => {
-        if (!authEnabled) {
-            setReady(true);
-            return;
-        }
-        const sb = getSupabase()!;
-        let mounted = true;
-
-        sb.auth.getSession().then(({ data }) => {
-            if (!mounted) return;
-            setSession(data.session);
-            setUser(data.session?.user ?? null);
-            setReady(true);
-        });
-
-        const { data: sub } = sb.auth.onAuthStateChange((_event, next) => {
-            setSession(next);
-            setUser(next?.user ?? null);
-        });
-
-        return () => {
-            mounted = false;
-            sub.subscription.unsubscribe();
-        };
-    }, [authEnabled]);
-
-    useEffect(() => {
-        if (!ready) return;
+        if (!isLoaded) return;
         refreshMe();
-    }, [ready, session?.access_token, refreshMe]);
+    }, [isLoaded, isSignedIn, refreshMe]);
 
-    const signInWithGoogle = useCallback(async () => {
-        const sb = getSupabase();
-        if (!sb) throw new Error('Auth is not configured (missing VITE_SUPABASE_URL).');
-        const redirectTo = `${window.location.origin}/engine`;
-        const { error } = await sb.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo },
-        });
-        if (error) throw error;
-    }, []);
+    // Persist lightweight profile for Studio pitches when Clerk has identity
+    useEffect(() => {
+        if (!user) return;
+        try {
+            const existing = localStorage.getItem('sovereign_identity');
+            const base = existing ? JSON.parse(existing) : {};
+            const email = user.primaryEmailAddress?.emailAddress || '';
+            const name = user.fullName || user.firstName || base.artistAlias || 'Artist';
+            localStorage.setItem(
+                'sovereign_identity',
+                JSON.stringify({
+                    ...base,
+                    artistAlias: base.artistAlias || name,
+                    agentName: base.agentName || name,
+                    agentEmail: base.agentEmail || email,
+                })
+            );
+            if (user.imageUrl) {
+                localStorage.setItem('sovereign_avatar', user.imageUrl);
+            }
+        } catch {
+            /* ignore */
+        }
+    }, [user]);
 
-    const signOut = useCallback(async () => {
-        const sb = getSupabase();
-        if (sb) await sb.auth.signOut();
-        setMe(null);
-        setWaitlisted(false);
-        setMeError(null);
-    }, []);
-
-    const canUseEngine = !authEnabled || (!!session && !waitlisted && !!me);
+    const ready = !authEnabled || isLoaded;
+    const canUseEngine =
+        !authEnabled || (Boolean(isSignedIn) && !waitlisted);
 
     const value = useMemo<AuthState>(
         () => ({
             ready,
             authEnabled,
-            session,
-            user,
+            isSignedIn: Boolean(isSignedIn),
             me,
             meError,
             waitlisted,
             canUseEngine,
-            signInWithGoogle,
-            signOut,
+            email: user?.primaryEmailAddress?.emailAddress ?? null,
+            displayName: user?.fullName || user?.firstName || null,
+            imageUrl: user?.imageUrl ?? null,
             refreshMe,
         }),
         [
             ready,
             authEnabled,
-            session,
-            user,
+            isSignedIn,
             me,
             meError,
             waitlisted,
             canUseEngine,
-            signInWithGoogle,
-            signOut,
+            user,
             refreshMe,
         ]
     );
 
+    // expose signOut via window for badge? FoundingBadge uses Clerk UserButton instead
+    void signOut;
+
     return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+    if (!publishableKey) {
+        // Open mode — no Clerk key
+        const openValue: AuthState = {
+            ready: true,
+            authEnabled: false,
+            isSignedIn: false,
+            me: null,
+            meError: null,
+            waitlisted: false,
+            canUseEngine: true,
+            email: null,
+            displayName: null,
+            imageUrl: null,
+            refreshMe: async () => {},
+        };
+        return <AuthCtx.Provider value={openValue}>{children}</AuthCtx.Provider>;
+    }
+
+    return (
+        <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/">
+            <AuthBridge>{children}</AuthBridge>
+        </ClerkProvider>
+    );
 }
 
 export function useAuth(): AuthState {
@@ -175,3 +211,5 @@ export function useAuth(): AuthState {
     if (!ctx) throw new Error('useAuth must be used within AuthProvider');
     return ctx;
 }
+
+export { SignedIn, SignedOut };

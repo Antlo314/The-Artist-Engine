@@ -17,18 +17,12 @@ function RouteFallback() {
     );
 }
 
-/** Gate /engine behind Google founding auth when Supabase is configured. */
-function RequireFounding({ children }: { children: React.ReactNode }) {
-    const { ready, authEnabled, session, canUseEngine, waitlisted } = useAuth();
+function RequireAuth({ children }: { children: React.ReactNode }) {
+    const { ready, authEnabled, isSignedIn, canUseEngine } = useAuth();
 
     if (!ready) return <RouteFallback />;
-
-    // Local / unconfigured deploy stays open
     if (!authEnabled) return <>{children}</>;
-
-    if (!session) return <Navigate to="/login" replace />;
-    if (waitlisted || !canUseEngine) return <Navigate to="/login" replace />;
-
+    if (!isSignedIn || !canUseEngine) return <Navigate to="/login" replace />;
     return <>{children}</>;
 }
 
@@ -44,9 +38,9 @@ export default function App() {
                         <Route
                             path="/engine"
                             element={
-                                <RequireFounding>
+                                <RequireAuth>
                                     <EngineCore />
-                                </RequireFounding>
+                                </RequireAuth>
                             }
                         />
                     </Routes>

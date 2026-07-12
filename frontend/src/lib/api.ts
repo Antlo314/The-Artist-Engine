@@ -1,9 +1,15 @@
 /**
- * Authenticated fetch helper — attaches Supabase access token when present.
- * All heavy Engine API calls should go through this.
+ * Authenticated fetch — attaches Clerk session token when signed in.
  */
 
-import { getSupabase, isAuthEnabled } from './supabase';
+type TokenGetter = () => Promise<string | null>;
+
+let tokenGetter: TokenGetter | null = null;
+
+/** Wired once from AuthProvider (Clerk getToken). */
+export function setTokenGetter(fn: TokenGetter | null) {
+    tokenGetter = fn;
+}
 
 export class ApiError extends Error {
     status: number;
@@ -20,37 +26,32 @@ export class ApiError extends Error {
 }
 
 export async function getAccessToken(): Promise<string | null> {
-    if (!isAuthEnabled()) return null;
-    const sb = getSupabase();
-    if (!sb) return null;
-    const { data } = await sb.auth.getSession();
-    return data.session?.access_token ?? null;
+    if (!tokenGetter) return null;
+    try {
+        return await tokenGetter();
+    } catch {
+        return null;
+    }
 }
 
 export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
     const headers = new Headers(init.headers || {});
     const token = await getAccessToken();
-    if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-    }
-    // Don't force Content-Type on FormData — browser sets boundary.
-    const res = await fetch(input, { ...init, headers });
-    return res;
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    return fetch(input, { ...init, headers });
 }
 
 export async function apiJson<T = any>(input: string, init: RequestInit = {}): Promise<T> {
     const res = await apiFetch(input, init);
-    let payload: any = null;
     const text = await res.text();
+    let payload: any = null;
     try {
         payload = text ? JSON.parse(text) : null;
     } catch {
         payload = text;
     }
     if (!res.ok) {
-        // Normalize FastAPI detail shapes
-        const detail = payload?.detail ?? payload;
-        throw new ApiError(res.status, detail);
+        throw new ApiError(res.status, payload?.detail ?? payload);
     }
     return payload as T;
 }
