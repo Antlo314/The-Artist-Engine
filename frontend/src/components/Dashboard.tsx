@@ -1,133 +1,296 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Activity, Zap, TrendingUp, Music, BarChart, ShieldAlert } from 'lucide-react';
+import {
+    Activity, Mic2, Radar as RadarIcon, Send, ShieldAlert, FileWarning,
+    ArrowRight, Radio, CheckCircle2, Trash2, Wifi, WifiOff, Cpu
+} from 'lucide-react';
+import { useEngine, relTime, type Lead, type LeadStage } from '../lib/engineState';
 
-export default function Dashboard() {
-    const stats = [
-        { label: 'ACTIVE STREAMS', value: '1.24M', icon: Music, color: 'text-red-600' },
-        { label: 'REVENUE BALANCE', value: '$42,050', icon: TrendingUp, color: 'text-red-600' },
-        { label: 'THREATS NEUTRALIZED', value: '14', icon: ShieldAlert, color: 'text-red-700' },
-        { label: 'GLOBAL REACH', value: '88.4K', icon: Zap, color: 'text-red-500' }
-    ];
+interface DashboardProps {
+    onNavigate: (view: string) => void;
+}
+
+const STAT_DEFS = [
+    { key: 'mastersCompleted', label: 'Masters', icon: Mic2, accent: '#22d3ee' },
+    { key: 'venuesScouted', label: 'Venues Scouted', icon: RadarIcon, accent: '#fb923c' },
+    { key: 'pitchesDrafted', label: 'Pitches', icon: Send, accent: '#f4f4f5' },
+    { key: 'contractsScanned', label: 'Contracts Scanned', icon: FileWarning, accent: '#a78bfa' },
+    { key: 'threatsFlagged', label: 'Threats Flagged', icon: ShieldAlert, accent: '#ef4444' },
+] as const;
+
+const STAGES: { key: LeadStage; label: string }[] = [
+    { key: 'scouted', label: 'Scouted' },
+    { key: 'pitched', label: 'Pitched' },
+    { key: 'negotiating', label: 'Negotiating' },
+    { key: 'booked', label: 'Booked' },
+];
+
+const NEXT: Record<LeadStage, LeadStage | null> = {
+    scouted: 'pitched',
+    pitched: 'negotiating',
+    negotiating: 'booked',
+    booked: null,
+    dead: null,
+};
+
+const ACCENT_HEX: Record<string, string> = {
+    audio: '#22d3ee', radar: '#fb923c', zion: '#a78bfa', shark: '#f4f4f5', ember: '#ef4444',
+};
+
+export default function Dashboard({ onNavigate }: DashboardProps) {
+    const { state, record } = useEngine();
+    const { stats, pipeline, activity } = state;
+
+    // Live system telemetry (real backend status; handles Render cold starts).
+    const [sys, setSys] = useState<'checking' | 'online' | 'offline'>('checking');
+    const [keyVerified, setKeyVerified] = useState<boolean>(false);
+    useEffect(() => {
+        let alive = true;
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 8000);
+        fetch('/api/system-status', { signal: ctrl.signal })
+            .then((r) => r.json())
+            .then((d) => { if (alive) { setSys('online'); setKeyVerified(!!d.key_verified); } })
+            .catch(() => { if (alive) setSys('offline'); })
+            .finally(() => clearTimeout(t));
+        return () => { alive = false; ctrl.abort(); clearTimeout(t); };
+    }, []);
+
+    const activeLeads = pipeline.filter((l) => l.stage !== 'dead');
+    const deadCount = pipeline.length - activeLeads.length;
+    const bookedCount = pipeline.filter((l) => l.stage === 'booked').length;
+    const tmLive = pipeline.some((l) => l.verifiedLive);
+    const hasAnyActivity = activity.length > 0;
 
     return (
         <div className="space-y-6">
 
-            {/* Header */}
-            <div className="flex items-end justify-between border-b border-white/10 pb-4 relative z-10">
-                <div className="flex items-center gap-4">
-                    <div>
-                        <h2 className="font-display text-3xl font-bold text-red-500 tracking-widest text-glow glitch-hover cursor-pointer">COMMAND CENTER</h2>
-                        <p className="font-mono text-xs text-red-400/60 tracking-widest uppercase mt-1">Holistic View // System Nomimal // Level 4 Access</p>
-                    </div>
+            {/* ===== Header ===== */}
+            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+                <div>
+                    <h2 className="font-display text-3xl font-bold text-red-500 tracking-widest text-glow">COMMAND CENTER</h2>
+                    <p className="font-mono text-xs text-ink-400 tracking-widest uppercase mt-1">
+                        Live operations · every metric is real
+                    </p>
                 </div>
-                
-                <div className="hidden md:flex items-center gap-4">
-                    {/* Faux EQ Node Simulator */}
-                    <div className="flex items-end gap-[2px] h-6 mr-4 opacity-70">
+                <div className="hidden md:flex items-center gap-3">
+                    <div className="flex items-end gap-[2px] h-6 opacity-70">
                         {[40, 70, 30, 90, 50, 80].map((h, idx) => (
                             <motion.div
                                 key={idx}
                                 animate={{ height: [`${h}%`, `${h * 0.4}%`, `${h * 1.2}%`, `${h}%`] }}
-                                transition={{ duration: 1.5 + (idx * 0.2), repeat: Infinity, ease: "easeInOut" }}
+                                transition={{ duration: 1.5 + idx * 0.2, repeat: Infinity, ease: 'easeInOut' }}
                                 className="w-1 bg-red-600 rounded-t-sm"
                             />
                         ))}
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                        </span>
-                        <span className="font-mono text-[10px] tracking-widest text-green-400 bg-green-900/30 px-2 py-1 border border-green-500/50 rounded drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]">
-                            LIVE TELEMETRY
-                        </span>
-                    </div>
                 </div>
             </div>
 
-            {/* Hero Sparklines */}
-            <motion.div 
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-                initial="hidden"
-                animate="visible"
-                variants={{
-                    hidden: { opacity: 0 },
-                    visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
-                }}
-            >
-                {stats.map((stat, i) => (
-                    <motion.div
-                        variants={{
-                            hidden: { opacity: 0, y: 30, scale: 0.9 },
-                            visible: { opacity: 1, y: 0, scale: 1 }
-                        }}
-                        whileHover={{ scale: 1.05, translateY: -5 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                        key={i}
-                        className={`glass-obsidian glass-obsidian-hover p-6 flex flex-col justify-between group relative overflow-hidden ${i % 2 === 0 ? 'shape-cyber-leaf' : 'rounded-full px-8 items-center text-center shape-chamfer-br'}`}
-                    >
-                        <div className={`absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent z-0 pointer-events-none ${i % 2 !== 0 && 'rotate-180'}`} />
-                        <div className="flex items-start justify-between">
-                            <stat.icon size={20} className={`${stat.color} mb-4 group-hover:scale-110 transition-transform`} />
-                            <Activity size={14} className="text-red-500/20" />
+            {/* ===== Stat row (real counters) ===== */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {STAT_DEFS.map((s) => {
+                    const value = stats[s.key];
+                    const Icon = s.icon;
+                    const empty = value === 0;
+                    const isThreat = s.key === 'threatsFlagged' && value > 0;
+                    return (
+                        <div key={s.key} className="glass-obsidian glass-obsidian-hover p-5 rounded-xl relative overflow-hidden">
+                            <div className="flex items-center justify-between mb-3">
+                                <Icon size={18} style={{ color: isThreat ? '#ef4444' : s.accent }} />
+                                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: empty ? '#333' : s.accent }} />
+                            </div>
+                            <div
+                                className="font-display font-bold text-3xl tracking-tight tabular-nums"
+                                style={{ color: empty ? '#55555e' : isThreat ? '#f87171' : '#f4f4f5' }}
+                            >
+                                {empty ? '—' : value.toLocaleString()}
+                            </div>
+                            <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400 mt-1">{s.label}</div>
+                            {empty && <div className="font-mono text-[9px] text-ink-700 mt-0.5">awaiting first op</div>}
                         </div>
+                    );
+                })}
+            </div>
 
+            {/* ===== Pipeline + Activity ===== */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                {/* Booking Pipeline board */}
+                <div className="lg:col-span-2 glass-obsidian rounded-xl p-5 border border-white/10">
+                    <div className="flex items-center justify-between mb-5">
                         <div>
-                            <div className="text-xs sm:text-[10px] font-mono text-red-400/60 tracking-widest uppercase mb-1">{stat.label}</div>
-                            {stat.label === 'REVENUE BALANCE' ? (
-                                <div className="flex flex-col gap-1">
-                                    <div className="font-mono text-3xl font-bold text-red-400 tracking-tight leading-none">{stat.value}</div>
-                                    <div className="font-mono text-sm text-yellow-500 tracking-tight font-bold flex items-center gap-1 drop-shadow-sm">
-                                        <span className="font-sans font-bold text-yellow-500">Ξ</span> 14.50 ETH
+                            <h3 className="font-display text-lg text-ink-50 tracking-wide">Booking Pipeline</h3>
+                            <p className="font-mono text-[10px] text-ink-400 tracking-widest uppercase mt-0.5">
+                                {activeLeads.length} active · {bookedCount} booked{deadCount > 0 ? ` · ${deadCount} archived` : ''}
+                            </p>
+                        </div>
+                        <RadarIcon size={16} className="text-orange-400" />
+                    </div>
+
+                    {activeLeads.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center text-center py-14 border border-dashed border-white/10 rounded-lg">
+                            <RadarIcon size={30} className="text-ink-700 mb-4" />
+                            <p className="text-ink-400 text-sm mb-1">Pipeline empty</p>
+                            <p className="font-mono text-[10px] text-ink-700 tracking-widest uppercase mb-5">Run a scout to populate real leads</p>
+                            <button
+                                onClick={() => onNavigate('radar')}
+                                className="group flex items-center gap-2 rounded-full bg-orange-500/90 hover:bg-orange-500 transition-colors px-5 py-2.5 font-display font-medium text-sm text-ink-950"
+                            >
+                                Open Gig Radar
+                                <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            {STAGES.map((col) => {
+                                const leads = activeLeads.filter((l) => l.stage === col.key);
+                                return (
+                                    <div key={col.key} className="flex flex-col">
+                                        <div className="flex items-center justify-between mb-2 px-1">
+                                            <span className="font-mono text-[9px] tracking-widest uppercase text-ink-400">{col.label}</span>
+                                            <span className="font-mono text-[9px] text-ink-700 tabular-nums">{leads.length}</span>
+                                        </div>
+                                        <div className="space-y-2 min-h-[40px]">
+                                            {leads.map((l) => (
+                                                <LeadCard key={l.id} lead={l} onMove={record.moveLead} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* Activity feed */}
+                <div className="glass-obsidian rounded-xl p-5 border border-white/10 flex flex-col">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <Activity size={15} className="text-red-500" />
+                            <h3 className="font-display text-lg text-ink-50 tracking-wide">Activity</h3>
+                        </div>
+                        {hasAnyActivity && (
+                            <button
+                                onClick={record.clearActivity}
+                                className="font-mono text-[9px] tracking-widest uppercase text-ink-700 hover:text-ink-400 transition-colors"
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </div>
+
+                    {!hasAnyActivity ? (
+                        <div className="flex-1 flex flex-col items-center justify-center text-center py-10">
+                            <Radio size={24} className="text-ink-700 mb-3" />
+                            <p className="font-mono text-[10px] text-ink-700 tracking-widest uppercase">No operations logged yet</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3 overflow-y-auto max-h-[360px] pr-1 custom-scrollbar">
+                            {activity.map((ev) => (
+                                <div key={ev.id} className="flex gap-3">
+                                    <span
+                                        className="mt-1.5 h-2 w-2 rounded-full shrink-0"
+                                        style={{ backgroundColor: ACCENT_HEX[ev.accent || 'ember'] }}
+                                    />
+                                    <div className="min-w-0">
+                                        <p className="text-sm text-ink-200 leading-snug break-words">{ev.label}</p>
+                                        <p className="font-mono text-[9px] text-ink-700 tracking-widest uppercase mt-0.5">
+                                            {relTime(ev.ts)}
+                                        </p>
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="font-mono text-3xl font-bold text-red-400 tracking-tight">
-                                    {stat.value}
-                                </div>
-                            )}
+                            ))}
                         </div>
+                    )}
+                </div>
+            </div>
 
-                        {/* Sparkline decoration */}
-                        <div className="w-full h-1 bg-sky-800/10 rounded-full mt-4 overflow-hidden relative z-10">
-                            <motion.div
-                                className="absolute left-0 top-0 h-full bg-red-500/50 mix-blend-screen"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${(i * 25 + 35) % 60 + 20}%` }}
-                                transition={{ duration: 1.5, delay: i * 0.2 }}
-                            />
-                        </div>
-                    </motion.div>
-                ))}
-            </motion.div>
-
-            {/* Main Graph Area */}
-            <div className="glass-obsidian glass-obsidian-hover p-4 md:p-8 rounded-xl min-h-[300px] md:min-h-[400px] border-glow flex flex-col relative overflow-hidden group border-red-400/30 shadow-[0_0_40px_rgba(220,38,38,0.05)]">
-                {/* Background Art - Blended and Resized */}
-                <div
-                    className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-[0.05] z-0 group-hover:opacity-10 transition-all duration-700 pointer-events-none mix-blend-multiply"
-                    style={{ backgroundImage: "url('/site/favicon.png')" }}
+            {/* ===== System telemetry strip ===== */}
+            <div className="glass-obsidian rounded-xl px-5 py-4 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8">
+                <TelemetryItem
+                    icon={sys === 'online' ? Wifi : WifiOff}
+                    label="Engine Core"
+                    value={sys === 'checking' ? 'Checking…' : sys === 'online' ? 'Online' : 'Offline — cold start likely, retry in 60s'}
+                    tone={sys === 'online' ? 'good' : sys === 'offline' ? 'bad' : 'idle'}
                 />
+                <TelemetryItem
+                    icon={Cpu}
+                    label="AI Core"
+                    value={sys !== 'online' ? '—' : keyVerified ? 'Key verified' : 'Key missing'}
+                    tone={sys !== 'online' ? 'idle' : keyVerified ? 'good' : 'bad'}
+                />
+                <TelemetryItem
+                    icon={RadarIcon}
+                    label="Ticketmaster Grid"
+                    value={tmLive ? 'Live — verified venues returned' : 'Standby'}
+                    tone={tmLive ? 'good' : 'idle'}
+                />
+            </div>
+        </div>
+    );
+}
 
-                <div className="absolute top-0 right-0 p-4 z-10">
-                    <div className="h-4 w-4 rounded-sm border border-red-400/20 bg-sky-800/10 flex items-center justify-center">
-                        <BarChart size={10} className="text-red-500" />
-                    </div>
-                </div>
+function LeadCard({ lead, onMove }: { lead: Lead; onMove: (id: string, stage: LeadStage) => void }) {
+    const next = NEXT[lead.stage];
+    return (
+        <div className="bg-ink-900 border border-white/10 rounded-lg p-3 group">
+            <div className="flex items-start justify-between gap-2">
+                <span className="text-[13px] text-ink-50 font-medium leading-tight break-words">{lead.venueName}</span>
+                {lead.verifiedLive && (
+                    <span className="shrink-0 flex items-center gap-1 font-mono text-[8px] tracking-widest uppercase text-emerald-400 border border-emerald-500/30 rounded px-1 py-0.5">
+                        <CheckCircle2 size={9} /> Live
+                    </span>
+                )}
+            </div>
+            <div className="mt-1 font-mono text-[9px] text-ink-400 tracking-wide truncate">{lead.city}</div>
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+                {typeof lead.reputationScore === 'number' && (
+                    <span className="font-mono text-[9px] text-ink-200 bg-white/5 rounded px-1.5 py-0.5 tabular-nums">
+                        REP {lead.reputationScore}
+                    </span>
+                )}
+                {typeof lead.grossPotential === 'number' && lead.grossPotential > 0 && (
+                    <span className="font-mono text-[9px] text-emerald-400/80 tabular-nums">
+                        ${lead.grossPotential.toLocaleString()}
+                    </span>
+                )}
+            </div>
+            <div className="mt-3 flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                {next ? (
+                    <button
+                        onClick={() => onMove(lead.id, next)}
+                        className="flex-1 font-mono text-[9px] tracking-widest uppercase text-orange-300 border border-orange-500/30 hover:bg-orange-500/10 rounded px-2 py-1 transition-colors"
+                    >
+                        → {next}
+                    </button>
+                ) : (
+                    <span className="flex-1 flex items-center justify-center gap-1 font-mono text-[9px] tracking-widest uppercase text-emerald-400">
+                        <CheckCircle2 size={10} /> Booked
+                    </span>
+                )}
+                <button
+                    onClick={() => onMove(lead.id, 'dead')}
+                    title="Archive lead"
+                    className="text-ink-700 hover:text-red-500 transition-colors p-1"
+                >
+                    <Trash2 size={12} />
+                </button>
+            </div>
+        </div>
+    );
+}
 
-                <h3 className="font-display text-lg md:text-xl text-red-500 tracking-widest mb-1 relative z-10">REVENUE VELOCITY</h3>
-                <p className="font-mono text-[9px] md:text-[10px] text-red-400/60 tracking-widest uppercase relative z-10">7-Day Trajectory Overview</p>
-
-                <div className="flex-1 flex items-center justify-center mt-8 border border-white/10 glass-obsidian rounded-lg relative overflow-hidden">
-                    {/* Fake Graph Lines - Tron style */}
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(220,38,38,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(220,38,38,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.1),transparent_70%)]" />
-                    <div className="text-red-500 font-mono text-xs sm:text-sm tracking-widest flex items-center gap-2 relative z-10 shadow-[0_0_20px_rgba(220,38,38,0.2)] glass-obsidian backdrop-blur-md px-4 py-3 sm:py-2 border border-red-400/30 rounded">
-                        <Activity size={16} className="text-red-600 animate-pulse" />
-                        AWAITING DATA SYNC...
-                    </div>
-                </div>
+function TelemetryItem({
+    icon: Icon, label, value, tone,
+}: { icon: any; label: string; value: string; tone: 'good' | 'bad' | 'idle' }) {
+    const color = tone === 'good' ? '#4ade80' : tone === 'bad' ? '#f87171' : '#8a8a93';
+    return (
+        <div className="flex items-center gap-3">
+            <Icon size={16} style={{ color }} />
+            <div>
+                <div className="font-mono text-[9px] tracking-widest uppercase text-ink-400">{label}</div>
+                <div className="text-[13px]" style={{ color }}>{value}</div>
             </div>
         </div>
     );

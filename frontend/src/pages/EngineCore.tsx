@@ -8,8 +8,17 @@ import GigRadar from '../components/GigRadar';
 import StudioCore from '../components/StudioCore';
 import LegalCore from '../components/LegalCore';
 import ArtistProfile from '../components/ArtistProfile';
+import { EngineProvider } from '../lib/engineState';
 
 export default function EngineCore() {
+    return (
+        <EngineProvider>
+            <EngineCoreInner />
+        </EngineProvider>
+    );
+}
+
+function EngineCoreInner() {
     const [activeView, setActiveView] = useState('dashboard');
     const [systemStatus, setSystemStatus] = useState<any>({ status: 'online' });
 
@@ -40,38 +49,21 @@ export default function EngineCore() {
 
     const renderActiveView = () => {
         switch (activeView) {
-            case 'dashboard': return <Dashboard />;
+            case 'dashboard': return <Dashboard onNavigate={setActiveView} />;
             case 'radar': return <GigRadar profile={profile} />;
             case 'legal': return <LegalCore />;
             case 'studio': return <StudioCore />;
             case 'profile': return <ArtistProfile profile={profile} setProfile={setProfile} />;
-            default: return <Dashboard />;
+            default: return <Dashboard onNavigate={setActiveView} />;
         }
     };
 
     return (
         <div className="flex h-screen w-full bg-ink-950 overflow-hidden relative selection:bg-white/10">
 
-            {/* Global Video Background */}
-            <div 
-                className="absolute inset-0 w-full h-full pointer-events-none z-0 mix-blend-normal overflow-hidden opacity-90"
-                dangerouslySetInnerHTML={{
-                    __html: `
-                    <video
-                        autoplay
-                        loop
-                        muted
-                        playsinline
-                        class="w-full h-full object-cover transform scale-[1.02]"
-                    >
-                        <source src="/site/soverein_server.mp4" type="video/mp4" />
-                    </video>
-                    `
-                }}
-            />
-
-            {/* Glassmorphic Layer Over Video */}
-            <div className="absolute inset-0 bg-white/5 backdrop-blur-[10px] shadow-[inset_0_0_100px_rgba(255,255,255,0.05)] pointer-events-none z-0" />
+            {/* Static cinematic background (replaces 1.2MB looping video —
+                lighter payload, no mobile battery drain) */}
+            <div className="absolute inset-0 z-0 pointer-events-none grain bg-[radial-gradient(ellipse_at_top,_#12070a_0%,_#08080a_45%,_#060607_100%)]" />
 
             {/* Background Ambient Glows */}
             <motion.div 

@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Scale, FileText, Activity, AlertOctagon, TrendingUp, ShieldAlert, CheckCircle2, UploadCloud, Sword, X } from 'lucide-react';
 import { codexEntries } from './TheCodex';
 import LoadingProgressBar from './LoadingProgressBar';
+import { useEngine } from '../lib/engineState';
 
 export default function ZionSentinel() {
+    const { record } = useEngine();
     const [contractText, setContractText] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [scanType, setScanType] = useState<'contract' | 'offer'>('contract');
@@ -48,6 +50,9 @@ export default function ZionSentinel() {
 
             if (data.status === 'success') {
                 setAnalysis(data.analysis);
+                // Record real telemetry: contracts scanned + threats flagged.
+                const flags = Array.isArray(data.analysis?.red_flags) ? data.analysis.red_flags.length : 0;
+                record.scan(flags, data.analysis?.integrity_score);
             } else {
                 throw new Error(data.error || 'Legal Scan Failed');
             }

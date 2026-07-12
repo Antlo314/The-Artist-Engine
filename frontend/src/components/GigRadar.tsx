@@ -3,12 +3,14 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Radar, Target, MapPin, Activity, DollarSign, BrainCircuit, Search, Music2, AlertTriangle, Users, Calendar, Send, X, ShieldAlert, Link as LinkIcon, Phone, Mail, MessageCircle, Instagram, Twitter, Facebook, Globe } from 'lucide-react';
 import LoadingProgressBar from './LoadingProgressBar';
+import { useEngine } from '../lib/engineState';
 
 interface GigRadarProps {
     profile: any;
 }
 
 export default function GigRadar({ profile }: GigRadarProps) {
+    const { record } = useEngine();
     // Search State
     const [city, setCity] = useState('Chicago');
     const [genre, setGenre] = useState('Deep House');
@@ -58,6 +60,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
             if (data.status === 'success') {
                 const results = data.gigs.venues ? data.gigs.venues : (Array.isArray(data.gigs) ? data.gigs : []);
                 setGigs(results);
+                // Record real telemetry: venues flow into the dashboard pipeline.
+                if (results.length) record.scout(city, genre, results);
             } else {
                 throw new Error(data.error || 'API Error');
             }
@@ -117,6 +121,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
         const newGigs = [...gigs];
         newGigs[gigIdx].pipeline_status = 'PITCHED';
         setGigs(newGigs);
+        // Record real telemetry: advances the lead to Pitched in the pipeline.
+        if (newGigs[gigIdx]?.name) record.pitch(newGigs[gigIdx].name, outreachType);
         setPitchModal(null);
     };
 

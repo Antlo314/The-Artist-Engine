@@ -4,8 +4,10 @@ import { Mic2, Activity, Play, Pause, Settings2, Shield, UploadCloud, Volume2, W
 import WaveSurfer from 'wavesurfer.js';
 import Spectrogram from 'wavesurfer.js/dist/plugins/spectrogram.esm.js';
 import LoadingProgressBar from './LoadingProgressBar';
+import { useEngine } from '../lib/engineState';
 
 export default function StudioCore() {
+    const { record } = useEngine();
     const [phase, setPhase] = useState<'dropzone' | 'processing' | 'tuning'>('dropzone');
     const [knobs, setKnobs] = useState({ sub: 50, air: 60, snap: 40, width: 70 });
     const [targetFile, setTargetFile] = useState<File | null>(null);
@@ -228,6 +230,8 @@ export default function StudioCore() {
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             setMasterAudioUrl(url);
+            // Record real telemetry: increments Masters + logs to activity feed.
+            record.master(targetFile?.name || 'master', outputFormat);
             setPhase('tuning');
         } catch (err) {
             console.error(err);
