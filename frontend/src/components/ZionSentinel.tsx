@@ -65,9 +65,14 @@ export default function ZionSentinel() {
             }
 
             if (data.status === 'success') {
-                setAnalysis(data.analysis);
+                setAnalysis({
+                    ...data.analysis,
+                    linter: data.linter || data.analysis?.linter,
+                    disclaimer: data.disclaimer || data.analysis?.disclaimer,
+                });
                 const flags = Array.isArray(data.analysis?.red_flags) ? data.analysis.red_flags.length : 0;
-                record.scan(flags, data.analysis?.integrity_score);
+                const lintHits = data.linter?.counts?.total || 0;
+                record.scan(Math.max(flags, lintHits), data.analysis?.integrity_score);
                 refreshMe();
             } else {
                 throw new Error(data.error || 'Legal Scan Failed');
@@ -341,6 +346,11 @@ export default function ZionSentinel() {
                                 </Btn>
                             </div>
 
+                            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-ink-200 leading-relaxed">
+                                {analysis.disclaimer ||
+                                    'Not legal advice. Educational tool only — have a qualified entertainment attorney review any agreement before signing.'}
+                            </div>
+
                             {/* Top Row: Score & Summary */}
                             <div className="grid grid-cols-3 gap-4">
                                 <ScoreGauge score={analysis.integrity_score || 50} />
@@ -353,6 +363,27 @@ export default function ZionSentinel() {
                                     </p>
                                 </Panel>
                             </div>
+
+                            {analysis.linter?.findings?.length > 0 && (
+                                <Panel
+                                    title={`Rule linter · ${analysis.linter.counts?.total || analysis.linter.findings.length} hits`}
+                                    sub="Free · no AI · regex codex"
+                                    accent={ACCENT}
+                                >
+                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                        {analysis.linter.findings.slice(0, 12).map((f: any, i: number) => (
+                                            <div key={i} className="text-xs border border-white/10 rounded-lg p-2">
+                                                <div className="flex items-center justify-between gap-2 mb-1">
+                                                    <span className="font-mono text-[10px] uppercase tracking-widest text-ink-50">{f.label}</span>
+                                                    <span className="font-mono text-[9px] uppercase text-ink-400">{f.severity}</span>
+                                                </div>
+                                                <p className="text-ink-400 italic text-[11px] mb-1">“{f.clause_snippet}”</p>
+                                                <p className="text-ink-200">{f.risk}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Panel>
+                            )}
 
                             {/* Red Flags List */}
                             {analysis.red_flags && analysis.red_flags.length > 0 && (

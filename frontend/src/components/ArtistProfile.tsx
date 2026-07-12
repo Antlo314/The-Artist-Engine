@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { Upload, Save, CheckCircle } from 'lucide-react';
 import { PageHeader, Panel, Field, Btn } from './ui/Shell';
+import { apiJson } from '../lib/api';
+import { downloadText, downloadJson } from '../lib/exportUtils';
 import { useAuth } from '../lib/auth';
 
 interface ArtistProfileProps {
@@ -14,6 +16,9 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
     const { email, displayName, me, signOut } = useAuth();
     const [avatarPreview, setAvatarPreview] = useState<string | null>(localStorage.getItem('sovereign_avatar'));
     const [isSaved, setIsSaved] = useState(false);
+    const [epk, setEpk] = useState<any | null>(null);
+    const [epkBusy, setEpkBusy] = useState(false);
+    const [epkErr, setEpkErr] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,18 +216,119 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                         </div>
                     </Panel>
 
+                    <Panel title="EPK pack (free)" sub="MusicBrainz + Cover Art Archive" accent="#eab308">
+                        <p className="text-xs text-ink-400 mb-3 leading-relaxed">
+                            Pull open metadata and cover-art URLs for your press kit. No paid APIs.
+                        </p>
+                        <Btn
+                            variant="accent"
+                            accent="#eab308"
+                            disabled={epkBusy || !(profile.artistAlias || '').trim()}
+                            onClick={async () => {
+                                setEpkBusy(true);
+                                setEpkErr(null);
+                                try {
+                                    const q = encodeURIComponent(profile.artistAlias || profile.agentName || '');
+                                    const data = await apiJson(`/api/epk?q=${q}`);
+                                    setEpk(data);
+                                    try {
+                                        localStorage.setItem('source_epk_cache', JSON.stringify(data));
+                                    } catch {
+                                        /* ignore */
+                                    }
+                                } catch (e: any) {
+                                    setEpkErr(e?.message || 'EPK fetch failed');
+                                } finally {
+                                    setEpkBusy(false);
+                                }
+                            }}
+                        >
+                            {epkBusy ? 'Fetching…' : 'Build EPK from MusicBrainz'}
+                        </Btn>
+                        {epkErr && <p className="text-sm text-red-400 mt-2">{epkErr}</p>}
+                        {epk?.artist && (
+                            <div className="mt-4 space-y-3">
+                                <div className="text-sm text-ink-50 font-medium">{epk.artist.name}</div>
+                                <div className="font-mono text-[10px] text-ink-400 uppercase tracking-widest">
+                                    {epk.artist.type || 'Artist'} · {epk.artist.country || '—'} · MB score {epk.artist.score ?? '—'}
+                                </div>
+                                {epk.artist.tags?.length > 0 && (
+                                    <p className="text-xs text-ink-200">{(epk.artist.tags as string[]).join(' · ')}</p>
+                                )}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    {(epk.releases || []).slice(0, 6).map((r: any) => (
+                                        <div key={r.id} className="border border-white/10 rounded-lg overflow-hidden bg-ink-900/40">
+                                            {r.cover_art_url && (
+                                                <img
+                                                    src={r.cover_art_url}
+                                                    alt={r.title}
+                                                    className="w-full aspect-square object-cover"
+                                                    loading="lazy"
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).style.display = 'none';
+                                                    }}
+                                                />
+                                            )}
+                                            <div className="p-2">
+                                                <div className="text-[11px] text-ink-50 truncate">{r.title}</div>
+                                                <div className="font-mono text-[9px] text-ink-400">{r.date || ''}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    <Btn
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() =>
+                                            downloadJson(
+                                                `epk-${(epk.artist?.name || 'artist').replace(/\s+/g, '_')}.json`,
+                                                epk
+                                            )
+                                        }
+                                    >
+                                        Download JSON
+                                    </Btn>
+                                    <Btn
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                            const lines = [
+                                                `# EPK — ${epk.artist?.name}`,
+                                                `Source: MusicBrainz / Cover Art Archive`,
+                                                `Country: ${epk.artist?.country || '—'}`,
+                                                `Tags: ${(epk.artist?.tags || []).join(', ')}`,
+                                                '',
+                                                '## Releases',
+                                                ...(epk.releases || []).map(
+                                                    (r: any) => `- ${r.title} (${r.date || '?'}) ${r.musicbrainz_url || ''}`
+                                                ),
+                                                '',
+                                                profile.agentEmail ? `Contact: ${profile.agentEmail}` : '',
+                                                profile.agentSocial ? `Social: ${profile.agentSocial}` : '',
+                                            ];
+                                            downloadText(
+                                                `epk-${(epk.artist?.name || 'artist').replace(/\s+/g, '_')}.md`,
+                                                lines.filter(Boolean).join('\n')
+                                            );
+                                        }}
+                                    >
+                                        Download Markdown
+                                    </Btn>
+                                </div>
+                                {epk.license_note && (
+                                    <p className="text-[10px] text-ink-400 leading-relaxed">{epk.license_note}</p>
+                                )}
+                            </div>
+                        )}
+                    </Panel>
+
                     <Panel title="Coming soon" accent="#eab308">
                         <ul className="space-y-4">
                             <li className="flex gap-3">
                                 <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-yellow-500 shrink-0" />
                                 <span className="text-sm text-ink-200 leading-relaxed">
                                     Outcome tracking — follow each pitch from sent to booked to paid.
-                                </span>
-                            </li>
-                            <li className="flex gap-3">
-                                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-yellow-500 shrink-0" />
-                                <span className="text-sm text-ink-200 leading-relaxed">
-                                    More live data sources feeding Find Gigs and the Legal suite.
                                 </span>
                             </li>
                             <li className="flex gap-3">

@@ -26,6 +26,27 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 from agent_memory import AgentMemory
 from gig_sources import ticketmaster_available, fetch_ticketmaster_venues
+from bandsintown_client import bandsintown_available, venues_near_city as bit_venues_near_city
+from musicbrainz_client import search_artist, artist_releases, epk_bundle
+from legal_linter import lint_text, DISCLAIMER as LEGAL_DISCLAIMER
+from audio_meters import measure_audio
+from stem_engine import separate_stems
+from crm import (
+    init_crm_tables,
+    list_leads,
+    upsert_lead,
+    bulk_upsert_leads,
+    move_lead,
+    delete_lead,
+    add_pitch,
+    list_pitches,
+    add_activity,
+    list_activity,
+    export_all,
+    import_all,
+    create_reset_token,
+    reset_password_with_code,
+)
 from founding_auth import (
     AppUser,
     auth_configured,
@@ -70,6 +91,8 @@ app.add_middleware(
         "https://artist-engine.vercel.app",
         "https://theartistengine.com",
         "https://www.theartistengine.com",
+        "https://thesourceengine.com",
+        "https://www.thesourceengine.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -379,16 +402,22 @@ async def startup_event():
 
     try:
         init_db()
+        init_crm_tables()
         system_startup_log.append("[AUTH] Simple login ONLINE (name/email/password · sessions on backend).")
+        system_startup_log.append("[CRM] Server-side leads/pitches/activity tables ONLINE.")
     except Exception as e:
-        system_startup_log.append(f"[AUTH] Init warning: {e}")
+        system_startup_log.append(f"[AUTH/CRM] Init warning: {e}")
 
     if auth_required():
         system_startup_log.append("[AUTH] Engine routes require sign-in.")
     else:
         system_startup_log.append("[AUTH] AUTH_REQUIRED=0 — open dev mode.")
 
-    system_startup_log.append("[STATUS] All Sovereign Pillars (ZION, WAR ROOM, STUDIO, SHARK) Active.")
+    system_startup_log.append(
+        f"[GIGS] Ticketmaster={'ON' if ticketmaster_available() else 'off'} · "
+        f"Bandsintown={'ON' if bandsintown_available() else 'off'}"
+    )
+    system_startup_log.append("[STATUS] Source pillars online: Studio · Radar · Legal · CRM · EPK.")
 
 # ---------------------------------------------------------------------------
 # MODELS
@@ -451,6 +480,16 @@ class LoginBody(BaseModel):
     password: str
 
 
+class ForgotBody(BaseModel):
+    email: str
+
+
+class ResetBody(BaseModel):
+    email: str
+    code: str
+    new_password: str
+
+
 @app.post("/api/auth/register")
 async def auth_register(body: RegisterBody):
     """Create account — name, email, password. Site opens after this."""
@@ -494,6 +533,44 @@ async def auth_logout(request: Request):
     token = auth.split(" ", 1)[1].strip() if auth.lower().startswith("bearer ") else auth.strip()
     logout_token(token)
     return {"status": "success"}
+
+
+@app.post("/api/auth/forgot-password")
+async def auth_forgot(body: ForgotBody):
+    """
+    Free password-reset: issues a 6-digit code (1h TTL).
+    Without SMTP we return the code once for founding beta (document in UI).
+    Always returns the same outer shape so emails can't be enumerated easily —
+    but when the user exists and AUTH_SHOW_RESET_CODE is not '0', include code.
+    """
+    pack = create_reset_token(body.email)
+    show = os.getenv("AUTH_SHOW_RESET_CODE", "1").strip().lower() not in ("0", "false", "no")
+    if not pack:
+        return {
+            "status": "success",
+            "message": "If that email is registered, a reset code was issued.",
+        }
+    print(f"[AUTH] Password reset code for {pack['email']}: {pack['code']}")
+    out = {
+        "status": "success",
+        "message": "Reset code issued. Enter it with your new password.",
+        "expires_in_sec": pack["expires_in_sec"],
+    }
+    if show:
+        out["code"] = pack["code"]  # free beta: no email provider required
+        out["note"] = "Beta: code returned in API (no SMTP). Set AUTH_SHOW_RESET_CODE=0 when you wire email."
+    return out
+
+
+@app.post("/api/auth/reset-password")
+async def auth_reset(body: ResetBody):
+    try:
+        ok = reset_password_with_code(body.email, body.code, body.new_password)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    if not ok:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset code.")
+    return {"status": "success", "message": "Password updated. You can sign in."}
 
 
 @app.get("/api/me")
@@ -602,7 +679,10 @@ async def scout_gigs(request: ScoutRequest, user: AppUser = Depends(require_foun
     if not api_key:
          return {"status": "error", "error": "GEMINI_API_KEY is not configured.", "log": "\n".join(logs)}
 
-    # ---- PRIMARY SOURCE: Ticketmaster live events (real, verified venues) ----
+    # ---- PRIMARY: Ticketmaster · SECONDARY: Bandsintown (free public app_id) ----
+    real_venues = []
+    source_tag = "unknown"
+
     if ticketmaster_available():
         logs.append("[GIG RADAR] Ticketmaster live grid ONLINE. Pulling verified active venues...")
         try:
@@ -610,32 +690,58 @@ async def scout_gigs(request: ScoutRequest, user: AppUser = Depends(require_foun
                 city=request.city, genre=request.genre,
                 radius=request.radius, timeframe=request.timeframe
             )
-            # Cap enriched venues to keep the AI step fast (fewer output tokens).
-            real_venues = real_venues[:SCOUT_VENUE_CAP]
-            if real_venues:
-                logs.append(f"[GIG RADAR] {len(real_venues)} verified live venues intercepted. Enriching with strategic AI...")
-                client = get_genai_client()
-                enrich_resp = await _generate_fast(
-                    client,
-                    contents=_enrich_prompt(request, real_venues),
-                    config=types.GenerateContentConfig(
-                        temperature=0.4,
-                        response_mime_type="application/json",
-                        max_output_tokens=4096,
-                    ),
-                )
-                data = json.loads(enrich_resp.text)
-                if data.get("venues"):
-                    logs.append(f"[GIG RADAR] {len(data['venues'])} live targets locked (Ticketmaster-verified + AI intel).")
-                    await record_usage(user.id, "scout", {"city": request.city, "source": "ticketmaster_live", "n": len(data["venues"])})
-                    return {"status": "success", "gigs": data, "source": "ticketmaster_live", "log": "\n".join(logs)}
-                logs.append("[GIG RADAR] Enrichment returned empty; falling back to grounded search.")
-            else:
-                logs.append("[GIG RADAR] No Ticketmaster events for this query; falling back to grounded search.")
+            source_tag = "ticketmaster_live"
         except Exception as tm_err:
-            logs.append(f"[GIG RADAR] Ticketmaster path error ({str(tm_err)}); falling back to grounded search.")
+            logs.append(f"[GIG RADAR] Ticketmaster path error ({str(tm_err)}).")
+            real_venues = []
     else:
-        logs.append("[GIG RADAR] Ticketmaster key not set — using Google-grounded search. (Add TICKETMASTER_API_KEY for live venue data.)")
+        logs.append("[GIG RADAR] Ticketmaster key not set.")
+
+    # Merge Bandsintown venues (open public API)
+    if bandsintown_available():
+        logs.append("[GIG RADAR] Bandsintown public API — sampling genre tours through city...")
+        try:
+            bit = await bit_venues_near_city(request.city, request.genre)
+            if bit:
+                logs.append(f"[GIG RADAR] Bandsintown contributed {len(bit)} venue hits.")
+                seen = {(v.get("name") or "").lower() for v in real_venues}
+                for v in bit:
+                    key = (v.get("name") or "").lower()
+                    if key and key not in seen:
+                        real_venues.append(v)
+                        seen.add(key)
+                source_tag = "ticketmaster+bandsintown" if source_tag == "ticketmaster_live" else "bandsintown"
+        except Exception as bit_err:
+            logs.append(f"[GIG RADAR] Bandsintown error ({bit_err}).")
+
+    real_venues = real_venues[:SCOUT_VENUE_CAP]
+    if real_venues:
+        logs.append(f"[GIG RADAR] {len(real_venues)} live venues. Enriching with strategic AI...")
+        try:
+            client = get_genai_client()
+            enrich_resp = await _generate_fast(
+                client,
+                contents=_enrich_prompt(request, real_venues),
+                config=types.GenerateContentConfig(
+                    temperature=0.4,
+                    response_mime_type="application/json",
+                    max_output_tokens=4096,
+                ),
+            )
+            data = json.loads(enrich_resp.text)
+            if data.get("venues"):
+                logs.append(f"[GIG RADAR] {len(data['venues'])} targets locked ({source_tag}).")
+                await record_usage(user.id, "scout", {"city": request.city, "source": source_tag, "n": len(data["venues"])})
+                try:
+                    add_activity(user.id, "scout", f"Scouted {request.city} · {len(data['venues'])} venues", "radar")
+                except Exception:
+                    pass
+                return {"status": "success", "gigs": data, "source": source_tag, "log": "\n".join(logs)}
+            logs.append("[GIG RADAR] Enrichment empty; falling back to grounded search.")
+        except Exception as enr_err:
+            logs.append(f"[GIG RADAR] Enrichment failed ({enr_err}); grounded fallback.")
+    else:
+        logs.append("[GIG RADAR] No TM/BIT venues — Google-grounded search fallback.")
 
 
     cities_knowledge = """
@@ -921,13 +1027,59 @@ async def analyze_contract(
         )
         
         data = json.loads(response.text)
-        logs.append(f"[ZION SHARK PROTOCOL] {scan_type.capitalize()} Analysis Complete. Engine Scored.")
+        # Deterministic open-source linter (always free, no AI)
+        lint_source = extracted_text or text or ""
+        lint = lint_text(lint_source)
+        data["disclaimer"] = LEGAL_DISCLAIMER
+        data["linter"] = lint
+        # Prefer AI score if present; else linter hint
+        if data.get("integrity_score") is None and lint.get("integrity_hint") is not None:
+            data["integrity_score"] = lint["integrity_hint"]
+        logs.append(
+            f"[ZION] {scan_type.capitalize()} analysis + linter "
+            f"({lint.get('counts', {}).get('total', 0)} rule hits)."
+        )
         await record_usage(user.id, "contract", {"scan_type": scan_type})
-        return {"status": "success", "analysis": data, "log": "\n".join(logs)}
+        try:
+            add_activity(user.id, "scan", f"{scan_type.title()} scan · {len(data.get('red_flags') or [])} flags", "zion")
+        except Exception:
+            pass
+        return {
+            "status": "success",
+            "analysis": data,
+            "linter": lint,
+            "disclaimer": LEGAL_DISCLAIMER,
+            "log": "\n".join(logs),
+        }
         
     except Exception as e:
         logs.append(f"[ZION SHARK PROTOCOL] System Failure: {str(e)}")
         return {"status": "error", "error": str(e), "log": "\n".join(logs)}
+
+
+@app.post("/api/lint-contract")
+async def lint_contract_only(
+    text: str = Form(None),
+    file: UploadFile = File(None),
+    user: AppUser = Depends(require_founding_user),
+):
+    """Pure free linter — no Gemini, no quota burn."""
+    extracted = text or ""
+    if file:
+        raw = await file.read()
+        name = (file.filename or "").lower()
+        if name.endswith(".pdf"):
+            reader = PyPDF2.PdfReader(io.BytesIO(raw))
+            extracted = "\n".join((p.extract_text() or "") for p in reader.pages)
+        elif name.endswith(".docx"):
+            doc = Document(io.BytesIO(raw))
+            extracted = "\n".join(p.text for p in doc.paragraphs)
+        else:
+            extracted = raw.decode("utf-8", errors="ignore")
+    if not extracted.strip():
+        raise HTTPException(status_code=400, detail="Paste or upload text to lint.")
+    lint = lint_text(extracted)
+    return {"status": "success", "linter": lint, "disclaimer": LEGAL_DISCLAIMER}
 
 # ---------------------------------------------------------------------------
 # PILLAR 5: AUDIO CORE (Matchering + Pedalboard)
@@ -1062,11 +1214,22 @@ async def master_audio(
         elif output_format.lower() == "flac": media_type = "audio/flac"
 
         mode = "pure-fallback" if fell_back else ("reference" if use_ref else "pure")
-        await record_usage(user.id, "master", {"mode": mode, "format": output_format})
+        meters = measure_audio(mastered_wav_path)
+        await record_usage(user.id, "master", {"mode": mode, "format": output_format, "lufs": meters.get("lufs_integrated")})
+        try:
+            add_activity(user.id, "master", f"Mastered track ({mode} · {output_format})", "audio")
+        except Exception:
+            pass
+        # Meters as JSON headers (FileResponse body stays the audio blob)
+        headers = {
+            "X-Master-Mode": mode,
+            "X-Master-Meters": json.dumps(meters),
+            "Access-Control-Expose-Headers": "X-Master-Mode, X-Master-Meters",
+        }
         return FileResponse(
             final_output_path, media_type=media_type,
-            filename=f"SOVEREIGN_MASTER.{output_format.lower()}",
-            headers={"X-Master-Mode": mode},
+            filename=f"SOURCE_MASTER.{output_format.lower()}",
+            headers=headers,
         )
     finally:
         release_master_slot(user.id)
@@ -1197,67 +1360,171 @@ DSP baseline knobs (you may refine): {json.dumps(dsp_oracle.get("knobs", {}))}
 
 @app.post("/api/extract-stems")
 async def extract_stems(
+    background_tasks: BackgroundTasks,
     target: UploadFile = File(...),
     user: AppUser = Depends(require_founding_user),
 ):
-    print(f"[STEM ENGINE] Extracting neural stems from: {target.filename}")
+    """Open-source stems: Demucs if installed, else scipy HPSS+bands (honest labels)."""
+    print(f"[STEM ENGINE] Separating stems from: {target.filename}")
     await assert_quota(user, "stems")
     os.makedirs("temp", exist_ok=True)
     job_id = str(int(time.time()))
-    
-    # Force WAV extension for pydub stability
     temp_path = f"temp/stem_source_{job_id}.wav"
-    
+
     try:
         with open(temp_path, "wb") as f:
-            f.write(await target.read())
-            
-        # Simulate heavy Demucs/Spleeter GPU processing latency
-        await asyncio.sleep(3)
-        
-        # Mocking stem separation using Pydub frequency manipulation mapping
-        print("[STEM ENGINE] Separating audio matrix...")
-        audio = AudioSegment.from_file(temp_path)
-        
-        # STEM 1: BASS (Low Pass)
-        bass = audio.low_pass_filter(250)
-        bass_path = f"stem_{job_id}_bass.wav"
-        bass.export(os.path.join("temp", bass_path), format="wav")
-        
-        # STEM 2: DRUMS (Mocked via Mid-cut)
-        drums = audio.high_pass_filter(100).low_pass_filter(6000)
-        drums_path = f"stem_{job_id}_drums.wav"
-        drums.export(os.path.join("temp", drums_path), format="wav")
-        
-        # STEM 3: ACAPELLA/VOCALS (High Pass)
-        acapella = audio.high_pass_filter(1000)
-        acapella_path = f"stem_{job_id}_acapella.wav"
-        acapella.export(os.path.join("temp", acapella_path), format="wav")
-        
-        # STEM 4: SYNTH/OTHER (Slight volume reduction of original)
-        synth = audio - 3
-        synth_path = f"stem_{job_id}_synth.wav"
-        synth.export(os.path.join("temp", synth_path), format="wav")
-        
-        # Cleanup original source
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-            
-        print("[STEM ENGINE] Stem separation complete. Extracted 4 multi-tracks.")
-        await record_usage(user.id, "stems", {})
+            while True:
+                chunk = await target.read(1024 * 1024)
+                if not chunk:
+                    break
+                f.write(chunk)
+
+        result = await asyncio.to_thread(separate_stems, temp_path, "temp", job_id)
+        stems_map = {
+            k: f"/api/temp/{v}" for k, v in (result.get("stems") or {}).items()
+        }
+        background_tasks.add_task(cleanup_audio_files, [temp_path])
+        await record_usage(user.id, "stems", {"method": result.get("method")})
+        print(f"[STEM ENGINE] Done via {result.get('method')}")
         return {
             "status": "success",
-            "stems": {
-                "bass": f"/api/temp/{bass_path}",
-                "drums": f"/api/temp/{drums_path}",
-                "acapella": f"/api/temp/{acapella_path}",
-                "synth": f"/api/temp/{synth_path}"
-            }
+            "stems": stems_map,
+            "method": result.get("method"),
+            "note": result.get("note"),
         }
-        
     except Exception as e:
         print(f"[STEM ENGINE] Fatal Error: {str(e)}")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# FREE DATA: MusicBrainz EPK · CRM · export
+# ---------------------------------------------------------------------------
+
+class MbSearchBody(BaseModel):
+    query: str
+    limit: int = 8
+
+
+class CrmLeadBody(BaseModel):
+    id: Optional[str] = None
+    venueName: Optional[str] = None
+    venue_name: Optional[str] = None
+    city: Optional[str] = None
+    stage: Optional[str] = "scouted"
+    reputationScore: Optional[int] = None
+    payoutModel: Optional[str] = None
+    grossPotential: Optional[float] = None
+    verifiedLive: Optional[bool] = None
+    meta: Optional[dict] = None
+
+
+class CrmMoveBody(BaseModel):
+    stage: str
+
+
+class CrmPitchBody(BaseModel):
+    venueName: Optional[str] = None
+    venue_name: Optional[str] = None
+    leadId: Optional[str] = None
+    lead_id: Optional[str] = None
+    outreach: Optional[str] = None
+    subject: Optional[str] = None
+    body: Optional[str] = None
+
+
+class CrmImportBody(BaseModel):
+    leads: Optional[list] = None
+    pitches: Optional[list] = None
+    activity: Optional[list] = None
+    version: Optional[int] = 1
+
+
+@app.get("/api/musicbrainz/search")
+async def mb_search(q: str, user: AppUser = Depends(require_founding_user)):
+    try:
+        return {"status": "success", **(await search_artist(q))}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"MusicBrainz error: {e}")
+
+
+@app.get("/api/musicbrainz/releases/{artist_id}")
+async def mb_releases(artist_id: str, user: AppUser = Depends(require_founding_user)):
+    try:
+        return {"status": "success", **(await artist_releases(artist_id))}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"MusicBrainz error: {e}")
+
+
+@app.get("/api/epk")
+async def epk(q: str, user: AppUser = Depends(require_founding_user)):
+    """Free EPK metadata pack: MusicBrainz + Cover Art Archive URLs."""
+    try:
+        pack = await epk_bundle(q)
+        return {"status": "success", **pack, "disclaimer": "Metadata for promotional use; verify rights before commercial reuse of images."}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"EPK pack failed: {e}")
+
+
+@app.get("/api/crm/state")
+async def crm_state(user: AppUser = Depends(require_founding_user)):
+    return {
+        "status": "success",
+        "leads": list_leads(user.id),
+        "pitches": list_pitches(user.id),
+        "activity": list_activity(user.id),
+    }
+
+
+@app.post("/api/crm/leads")
+async def crm_upsert_lead(body: CrmLeadBody, user: AppUser = Depends(require_founding_user)):
+    lead = upsert_lead(user.id, body.model_dump(exclude_none=True))
+    return {"status": "success", "lead": lead}
+
+
+@app.post("/api/crm/leads/bulk")
+async def crm_bulk(body: CrmImportBody, user: AppUser = Depends(require_founding_user)):
+    leads = bulk_upsert_leads(user.id, body.leads or [])
+    return {"status": "success", "count": len(leads), "leads": leads}
+
+
+@app.patch("/api/crm/leads/{lead_id}")
+async def crm_move(lead_id: str, body: CrmMoveBody, user: AppUser = Depends(require_founding_user)):
+    lead = move_lead(user.id, lead_id, body.stage)
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return {"status": "success", "lead": lead}
+
+
+@app.delete("/api/crm/leads/{lead_id}")
+async def crm_delete(lead_id: str, user: AppUser = Depends(require_founding_user)):
+    ok = delete_lead(user.id, lead_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return {"status": "success"}
+
+
+@app.post("/api/crm/pitches")
+async def crm_pitch(body: CrmPitchBody, user: AppUser = Depends(require_founding_user)):
+    pitch = add_pitch(user.id, body.model_dump(exclude_none=True))
+    try:
+        add_activity(user.id, "pitch", f"Pitch · {body.venueName or body.venue_name or 'venue'}", "radar")
+    except Exception:
+        pass
+    return {"status": "success", "pitch": pitch}
+
+
+@app.get("/api/crm/export")
+async def crm_export(user: AppUser = Depends(require_founding_user)):
+    return {"status": "success", **export_all(user.id)}
+
+
+@app.post("/api/crm/import")
+async def crm_import(body: CrmImportBody, user: AppUser = Depends(require_founding_user)):
+    result = import_all(user.id, body.model_dump())
+    return {"status": "success", **result}
+
 
 if __name__ == "__main__":
     import uvicorn

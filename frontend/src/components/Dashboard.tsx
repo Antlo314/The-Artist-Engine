@@ -5,7 +5,9 @@ import {
     ArrowRight, Radio, CheckCircle2, Trash2, Cpu
 } from 'lucide-react';
 import { useEngine, relTime, type Lead, type LeadStage } from '../lib/engineState';
-import { PageHeader } from './ui/Shell';
+import { PageHeader, Btn } from './ui/Shell';
+import { apiJson, getStoredToken } from '../lib/api';
+import { downloadCsv, downloadJson } from '../lib/exportUtils';
 
 interface DashboardProps {
     onNavigate: (view: string) => void;
@@ -81,7 +83,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 accent="var(--color-ember-500)"
                 module="COMMAND CENTER"
                 title="Dashboard"
-                desc="Live ops board — real numbers only. Gigs ~8s · pitches ~2s · masters ~35s."
+                desc="Live ops board — real numbers only. Gigs ~8s · pitches ~2s · masters ~35s. CRM syncs to server when online."
                 speedHint="live"
             />
 
@@ -101,6 +103,81 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                         <div className="text-xs mt-1" style={{ color: a.accent }}>{a.sub}</div>
                     </button>
                 ))}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+                <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                        downloadCsv(
+                            'source-pipeline.csv',
+                            pipeline.map((l) => ({
+                                venue: l.venueName,
+                                city: l.city,
+                                stage: l.stage,
+                                reputation: l.reputationScore ?? '',
+                                payout: l.payoutModel ?? '',
+                                gross: l.grossPotential ?? '',
+                                verified: l.verifiedLive ? 'yes' : 'no',
+                            }))
+                        )
+                    }
+                >
+                    Export pipeline CSV
+                </Btn>
+                <Btn
+                    variant="ghost"
+                    size="sm"
+                    onClick={async () => {
+                        if (getStoredToken()) {
+                            try {
+                                const data = await apiJson('/api/crm/export');
+                                downloadJson(`source-crm-${Date.now()}.json`, data);
+                                return;
+                            } catch {
+                                /* fall through local */
+                            }
+                        }
+                        downloadJson(`source-local-${Date.now()}.json`, { pipeline, activity, stats });
+                    }}
+                >
+                    Export JSON
+                </Btn>
+                <label className="inline-flex">
+                    <input
+                        type="file"
+                        accept="application/json,.json"
+                        className="hidden"
+                        onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            try {
+                                const text = await f.text();
+                                const data = JSON.parse(text);
+                                if (getStoredToken()) {
+                                    await apiJson('/api/crm/import', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            leads: data.leads || data.pipeline || [],
+                                            pitches: data.pitches || [],
+                                        }),
+                                    });
+                                    alert('Imported to server CRM. Refresh to hydrate.');
+                                } else {
+                                    alert('Sign in to import into server CRM.');
+                                }
+                            } catch (err: any) {
+                                alert(err?.message || 'Import failed');
+                            }
+                            e.target.value = '';
+                        }}
+                    />
+                    <span className="inline-flex items-center justify-center gap-2 rounded-full font-display font-medium transition-colors px-4 py-2 text-xs border border-white/10 hover:border-white/25 text-ink-200 hover:text-ink-50 cursor-pointer">
+                        Import JSON
+                    </span>
+                </label>
             </div>
 
             {/* ===== Animated bento grid ===== */}

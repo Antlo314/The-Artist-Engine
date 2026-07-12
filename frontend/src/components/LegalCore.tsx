@@ -20,9 +20,13 @@ export default function LegalCore() {
                 accent={LEGAL_ACCENT}
                 module="ZION LEGAL"
                 title="Legal"
-                desc="Contract scans in ~3s — predatory clauses in plain language."
+                desc="Contract scans in ~3s — predatory clauses in plain language. Not legal advice."
                 speedHint="~3s"
             />
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-ink-200 leading-relaxed">
+                Not legal advice and not an attorney–client relationship. Free rule linter + AI scan are educational —
+                have a qualified entertainment lawyer review any deal before you sign.
+            </div>
 
             <div className="flex flex-col flex-1 min-h-0 space-y-4 md:space-y-6">
                 <Segmented

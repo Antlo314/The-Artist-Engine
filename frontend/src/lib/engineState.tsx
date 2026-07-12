@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useReducer, type ReactNode } from 'react';
+import { apiJson, getStoredToken } from './api';
 
 /* ============================================================
    Engine v2 — central telemetry store.
@@ -88,7 +89,9 @@ type Action =
     | { type: 'PITCH'; venueName: string; outreach: string }
     | { type: 'SCAN'; flagCount: number; integrityScore?: number }
     | { type: 'MOVE_LEAD'; id: string; stage: LeadStage }
-    | { type: 'CLEAR_ACTIVITY' };
+    | { type: 'CLEAR_ACTIVITY' }
+    | { type: 'HYDRATE'; pipeline?: Lead[]; activity?: ActivityEvent[] }
+    | { type: 'IMPORT_PIPELINE'; pipeline: Lead[] };
 
 // Deterministic id without a uuid dependency. `now` is passed in so the
 // reducer stays pure-ish and testable; collisions are avoided with a suffix.
@@ -211,9 +214,35 @@ function reducer(state: EngineState, action: Action): EngineState {
         }
         case 'CLEAR_ACTIVITY':
             return { ...state, activity: [] };
+        case 'HYDRATE': {
+            // Server CRM wins when it has more leads; otherwise keep local.
+            const serverPipe = action.pipeline || [];
+            const pipeline =
+                serverPipe.length >= state.pipeline.length
+                    ? serverPipe
+                    : mergeLeads(state.pipeline, serverPipe);
+            const activity =
+                (action.activity && action.activity.length)
+                    ? action.activity
+                    : state.activity;
+            return { ...state, pipeline, activity };
+        }
+        case 'IMPORT_PIPELINE':
+            return { ...state, pipeline: mergeLeads(state.pipeline, action.pipeline) };
         default:
             return state;
     }
+}
+
+function mergeLeads(a: Lead[], b: Lead[]): Lead[] {
+    const map = new Map<string, Lead>();
+    for (const l of [...a, ...b]) {
+        const key = (l.venueName || '').toLowerCase();
+        if (!key) continue;
+        const prev = map.get(key);
+        if (!prev || (l.updatedAt || 0) >= (prev.updatedAt || 0)) map.set(key, l);
+    }
+    return Array.from(map.values()).sort((x, y) => (y.updatedAt || 0) - (x.updatedAt || 0));
 }
 
 function numOr(v: any): number | undefined {
@@ -247,12 +276,100 @@ export function EngineProvider({ children }: { children: ReactNode }) {
         }
     }, [state]);
 
+    // Hydrate pipeline from server CRM (multi-device) when signed in
+    useEffect(() => {
+        if (!getStoredToken()) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const data = await apiJson<any>('/api/crm/state');
+                if (cancelled || data?.status !== 'success') return;
+                const pipeline: Lead[] = (data.leads || []).map((l: any) => ({
+                    id: l.id,
+                    venueName: l.venueName,
+                    city: l.city || '',
+                    stage: l.stage || 'scouted',
+                    reputationScore: l.reputationScore,
+                    payoutModel: l.payoutModel,
+                    grossPotential: l.grossPotential,
+                    verifiedLive: !!l.verifiedLive,
+                    addedAt: l.addedAt || Date.now(),
+                    updatedAt: l.updatedAt || Date.now(),
+                }));
+                const activity: ActivityEvent[] = (data.activity || []).map((a: any) => ({
+                    id: a.id,
+                    ts: a.ts || Date.now(),
+                    kind: a.kind || 'system',
+                    label: a.label,
+                    accent: a.accent,
+                }));
+                dispatch({ type: 'HYDRATE', pipeline, activity });
+                // Push local-only leads up once
+                if (pipeline.length === 0) {
+                    const local = loadState().pipeline;
+                    if (local.length) {
+                        await apiJson('/api/crm/leads/bulk', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ leads: local }),
+                        }).catch(() => null);
+                    }
+                }
+            } catch {
+                /* offline / backend cold — keep localStorage */
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     const record: EngineContextValue['record'] = {
         master: (filename, format) => dispatch({ type: 'MASTER', filename, format }),
-        scout: (city, genre, venues) => dispatch({ type: 'SCOUT', city, genre, venues }),
-        pitch: (venueName, outreach) => dispatch({ type: 'PITCH', venueName, outreach }),
+        scout: (city, genre, venues) => {
+            dispatch({ type: 'SCOUT', city, genre, venues });
+            // Best-effort CRM sync
+            if (getStoredToken()) {
+                const now = Date.now();
+                const leads = (venues || []).map((v: any) => ({
+                    venueName: v.name,
+                    city: v.city || city,
+                    stage: 'scouted',
+                    reputationScore: Number(v.reputation_score) || undefined,
+                    payoutModel: v.payout_model,
+                    grossPotential: Number(v.gross_potential_usd) || undefined,
+                    verifiedLive: !!v.verified_live,
+                    addedAt: now,
+                    updatedAt: now,
+                }));
+                apiJson('/api/crm/leads/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ leads }),
+                }).catch(() => null);
+            }
+        },
+        pitch: (venueName, outreach) => {
+            dispatch({ type: 'PITCH', venueName, outreach });
+            if (getStoredToken()) {
+                apiJson('/api/crm/pitches', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ venueName, outreach }),
+                }).catch(() => null);
+            }
+        },
         scan: (flagCount, integrityScore) => dispatch({ type: 'SCAN', flagCount, integrityScore }),
-        moveLead: (id, stage) => dispatch({ type: 'MOVE_LEAD', id, stage }),
+        moveLead: (id, stage) => {
+            dispatch({ type: 'MOVE_LEAD', id, stage });
+            if (getStoredToken()) {
+                apiJson(`/api/crm/leads/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stage }),
+                }).catch(() => null);
+            }
+        },
         clearActivity: () => dispatch({ type: 'CLEAR_ACTIVITY' }),
     };
 

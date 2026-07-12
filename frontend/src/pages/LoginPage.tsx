@@ -8,12 +8,14 @@ import BrandMark from '../components/BrandMark';
 
 export default function LoginPage() {
     const { ready, isSignedIn, canUseEngine, login, register } = useAuth();
-    const [mode, setMode] = useState<'login' | 'register'>('login');
+    const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [resetCode, setResetCode] = useState('');
     const [busy, setBusy] = useState(false);
     const [err, setErr] = useState<string | null>(null);
+    const [info, setInfo] = useState<string | null>(null);
 
     if (!ready) {
         return (
@@ -31,9 +33,34 @@ export default function LoginPage() {
         e.preventDefault();
         setBusy(true);
         setErr(null);
+        setInfo(null);
         try {
             if (mode === 'register') {
                 await register(name, email, password);
+            } else if (mode === 'reset') {
+                const { apiJson } = await import('../lib/api');
+                if (!resetCode) {
+                    const res = await apiJson<any>('/api/auth/forgot-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email }),
+                    });
+                    if (res.code) {
+                        setResetCode(res.code);
+                        setInfo(`Beta reset code: ${res.code} (also logged on server). Enter a new password and submit.`);
+                    } else {
+                        setInfo(res.message || 'If that email exists, a code was issued.');
+                    }
+                } else {
+                    await apiJson('/api/auth/reset-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, code: resetCode, new_password: password }),
+                    });
+                    setInfo('Password updated. Sign in with your new password.');
+                    setMode('login');
+                    setResetCode('');
+                }
             } else {
                 await login(email, password);
             }
@@ -76,16 +103,18 @@ export default function LoginPage() {
                         thesourceengine.com
                     </p>
                     <h1 className="font-display text-3xl font-semibold tracking-tight mb-2">
-                        {mode === 'register' ? 'Create your account' : 'Sign in'}
+                        {mode === 'register' ? 'Create your account' : mode === 'reset' ? 'Reset password' : 'Sign in'}
                     </h1>
                     <p className="text-sm text-ink-200 leading-relaxed mb-6">
-                        Enter with name, email, and password. Your session is saved so you stay signed in.
+                        {mode === 'reset'
+                            ? 'Free reset: we issue a 6-digit code (shown in beta without email SMTP).'
+                            : 'Enter with name, email, and password. Your session is saved so you stay signed in.'}
                     </p>
 
                     <div className="flex gap-2 mb-6">
                         <button
                             type="button"
-                            onClick={() => setMode('register')}
+                            onClick={() => { setMode('register'); setErr(null); setInfo(null); }}
                             className={`flex-1 py-2 rounded-full font-mono text-[10px] tracking-widest uppercase border transition-colors ${
                                 mode === 'register'
                                     ? 'bg-ember-600 border-ember-500 text-white'
@@ -96,7 +125,7 @@ export default function LoginPage() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => setMode('login')}
+                            onClick={() => { setMode('login'); setErr(null); setInfo(null); }}
                             className={`flex-1 py-2 rounded-full font-mono text-[10px] tracking-widest uppercase border transition-colors ${
                                 mode === 'login'
                                     ? 'bg-ember-600 border-ember-500 text-white'
@@ -133,23 +162,44 @@ export default function LoginPage() {
                                 autoComplete="email"
                             />
                         </label>
-                        <label className="block">
-                            <span className="font-mono text-[10px] tracking-widest uppercase text-ink-400">Password</span>
-                            <input
-                                required
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="mt-1.5 w-full bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-ink-50 focus:outline-none focus:border-white/30"
-                                placeholder={mode === 'register' ? 'At least 6 characters' : 'Your password'}
-                                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-                                minLength={6}
-                            />
-                        </label>
+                        {mode === 'reset' && resetCode && (
+                            <label className="block">
+                                <span className="font-mono text-[10px] tracking-widest uppercase text-ink-400">Reset code</span>
+                                <input
+                                    required
+                                    value={resetCode}
+                                    onChange={(e) => setResetCode(e.target.value)}
+                                    className="mt-1.5 w-full bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-ink-50 focus:outline-none focus:border-white/30"
+                                    placeholder="6-digit code"
+                                />
+                            </label>
+                        )}
+                        {(mode !== 'reset' || !!resetCode) && (
+                            <label className="block">
+                                <span className="font-mono text-[10px] tracking-widest uppercase text-ink-400">
+                                    {mode === 'reset' ? 'New password' : 'Password'}
+                                </span>
+                                <input
+                                    required={mode !== 'reset' || !!resetCode}
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="mt-1.5 w-full bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-ink-50 focus:outline-none focus:border-white/30"
+                                    placeholder={mode === 'register' || mode === 'reset' ? 'At least 6 characters' : 'Your password'}
+                                    autoComplete={mode === 'register' || mode === 'reset' ? 'new-password' : 'current-password'}
+                                    minLength={mode === 'reset' && !resetCode ? undefined : 6}
+                                />
+                            </label>
+                        )}
 
                         {err && (
                             <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
                                 {err}
+                            </p>
+                        )}
+                        {info && (
+                            <p className="text-sm text-ink-200 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                                {info}
                             </p>
                         )}
 
@@ -158,9 +208,35 @@ export default function LoginPage() {
                             disabled={busy}
                             className="w-full rounded-full bg-ember-600 hover:bg-ember-500 text-white font-display font-medium py-3.5 transition-colors disabled:opacity-50"
                         >
-                            {busy ? 'Working…' : mode === 'register' ? 'Create account & enter' : 'Sign in & enter'}
+                            {busy
+                                ? 'Working…'
+                                : mode === 'register'
+                                    ? 'Create account & enter'
+                                    : mode === 'reset'
+                                        ? resetCode
+                                            ? 'Set new password'
+                                            : 'Email me a code'
+                                        : 'Sign in & enter'}
                         </button>
                     </form>
+
+                    {mode !== 'reset' ? (
+                        <button
+                            type="button"
+                            onClick={() => { setMode('reset'); setErr(null); setInfo(null); setResetCode(''); }}
+                            className="mt-4 w-full font-mono text-[10px] tracking-widest uppercase text-ink-400 hover:text-ink-50"
+                        >
+                            Forgot password?
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => { setMode('login'); setErr(null); setInfo(null); }}
+                            className="mt-4 w-full font-mono text-[10px] tracking-widest uppercase text-ink-400 hover:text-ink-50"
+                        >
+                            ← Back to sign in
+                        </button>
+                    )}
 
                     <p className="mt-6 font-mono text-[9px] text-ink-500 tracking-wide text-center leading-relaxed">
                         Fair-use daily limits apply after you sign in so the engine stays fast for everyone.

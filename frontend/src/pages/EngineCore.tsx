@@ -24,7 +24,7 @@ const ALL_NAV: {
 }[] = [
     { id: 'dashboard', label: 'Dashboard', short: 'Home', desc: 'Overview & pipeline', icon: BarChart2, mobile: true },
     { id: 'radar', label: 'Find Gigs', short: 'Gigs', desc: 'Live venue scouting', icon: Radio, mobile: true },
-    { id: 'studio', label: 'Studio', short: 'Studio', desc: 'Mastering & analysis', icon: Mic2, mobile: false },
+    { id: 'studio', label: 'Studio', short: 'Studio', desc: 'Mastering & analysis', icon: Mic2, mobile: true },
     { id: 'legal', label: 'Legal', short: 'Legal', desc: 'Contracts & splits', icon: Scale, mobile: true },
     { id: 'profile', label: 'Profile', short: 'You', desc: 'Identity & settings', icon: ShieldCheck, mobile: true },
 ];
@@ -130,11 +130,6 @@ function EngineCoreInner() {
         localStorage.setItem('sovereign_identity', JSON.stringify(profile));
     }, [profile]);
 
-    // If resize to mobile while on Studio, bounce to Gigs
-    useEffect(() => {
-        if (isMobile && activeView === 'studio') setActiveView('radar');
-    }, [isMobile, activeView]);
-
     const current = ALL_NAV.find((n) => n.id === activeView) || ALL_NAV[0];
     const avatar = localStorage.getItem('sovereign_avatar');
 
@@ -205,7 +200,7 @@ function EngineCoreInner() {
                     className="shrink-0 border-t border-white/10 bg-ink-950/98 backdrop-blur-md z-20"
                     style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
                 >
-                    <div className="grid grid-cols-4 h-[3.75rem]">
+                    <div className="grid grid-cols-5 h-[3.75rem]">
                         {MOBILE_NAV.map((item) => {
                             const active = activeView === item.id;
                             return (

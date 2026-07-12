@@ -39,9 +39,11 @@ export default function StudioCore() {
     const [showAnalytics, setShowAnalytics] = useState(false);
     const [showHeatmap, setShowHeatmap] = useState(false);
 
-    // Neural Stem states
+    // Stem separation (open-source HPSS or Demucs)
     const [isExtractingStems, setIsExtractingStems] = useState(false);
-    const [stemsData, setStemsData] = useState<{ bass: string, drums: string, acapella: string, synth: string } | null>(null);
+    const [stemsData, setStemsData] = useState<Record<string, string> | null>(null);
+    const [stemsMeta, setStemsMeta] = useState<{ method?: string; note?: string } | null>(null);
+    const [masterMeters, setMasterMeters] = useState<any | null>(null);
 
     // Blind Test states
     const [showBlindTest, setShowBlindTest] = useState(false);
@@ -261,6 +263,16 @@ export default function StudioCore() {
                 );
             }
 
+            const metersHeader = response.headers.get('X-Master-Meters');
+            if (metersHeader) {
+                try {
+                    setMasterMeters(JSON.parse(metersHeader));
+                } catch {
+                    setMasterMeters(null);
+                }
+            } else {
+                setMasterMeters(null);
+            }
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             setMasterAudioUrl(url);
@@ -304,13 +316,14 @@ export default function StudioCore() {
             }
             if (data.status === 'success') {
                 setStemsData(data.stems);
+                setStemsMeta({ method: data.method, note: data.note });
                 refreshMe();
             } else {
                 throw new Error(data.detail || 'Stem Engine Failure');
             }
         } catch (err: any) {
             console.error(err);
-            alert(err?.message || 'Neural Stem Extraction Failed.');
+            alert(err?.message || 'Stem extraction failed.');
         } finally {
             setIsExtractingStems(false);
         }
@@ -752,7 +765,7 @@ export default function StudioCore() {
                                     </motion.div>
                                 )}
 
-                                {/* Neural Stem Extraction */}
+                                {/* Open-source stem split (HPSS or Demucs) */}
                                 {targetFile && (
                                     <div className="mt-auto border-t border-white/10 pt-4 pb-2">
                                         <h3 className="font-mono text-[11px] tracking-widest text-ink-400 uppercase mb-3 flex items-center gap-2">
@@ -761,10 +774,13 @@ export default function StudioCore() {
                                             </svg>
                                             Split into stems
                                         </h3>
+                                        <p className="text-[10px] text-ink-400 mb-3 leading-relaxed">
+                                            Free open-source path: scipy HPSS by default; Demucs if installed on the server.
+                                        </p>
 
                                         {!isExtractingStems && !stemsData && (
                                             <Btn variant="ghost" onClick={handleExtractStems} className="w-full shrink-0">
-                                                Bass / drums / vocals / synth
+                                                Bass / drums / vocals / other
                                             </Btn>
                                         )}
 
@@ -772,11 +788,15 @@ export default function StudioCore() {
                                             <LoadingProgressBar
                                                 active={isExtractingStems}
                                                 message="Splitting the mix"
-                                                subMessage="Bass / drums / vocals / synth. Measured ~5 seconds live."
+                                                subMessage="Open-source separation. Longer on full songs."
                                                 colorClass="blue"
-                                                estimatedDurationMs={5000}
-                                                speedLabel="~5s live"
+                                                estimatedDurationMs={8000}
+                                                speedLabel="open source"
                                             />
+                                        )}
+
+                                        {stemsData && stemsMeta?.note && (
+                                            <p className="font-mono text-[9px] text-ink-400 mb-2 leading-relaxed">{stemsMeta.note}</p>
                                         )}
 
                                         {stemsData && (
@@ -877,6 +897,24 @@ export default function StudioCore() {
 
                                     <div className={`transition-all duration-500 ${isPlaying ? 'ml-16' : 'ml-0'}`}>
                                         <h3 className="font-display text-xl text-ink-50 font-medium tracking-tight mb-1">Your master</h3>
+                                        {masterMeters && (
+                                            <div className="mt-2 flex flex-wrap gap-2 font-mono text-[10px] tracking-wide">
+                                                <span className="px-2 py-0.5 rounded border border-white/10 text-ink-200">
+                                                    LUFS {masterMeters.lufs_integrated ?? '—'}
+                                                </span>
+                                                <span className="px-2 py-0.5 rounded border border-white/10 text-ink-200">
+                                                    TP {masterMeters.true_peak_db ?? '—'} dB
+                                                </span>
+                                                <span className="px-2 py-0.5 rounded border border-white/10 text-ink-200">
+                                                    Crest {masterMeters.crest_factor_db ?? '—'} dB
+                                                </span>
+                                                {masterMeters.streaming_ready && (
+                                                    <span className="px-2 py-0.5 rounded border border-emerald-500/40 text-emerald-400">
+                                                        Streaming-ready band
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                         <div className="flex items-center gap-2 font-mono text-xs text-ink-400 uppercase tracking-widest">
                                             <Shield size={12} className="text-cyan-400" /> LUFS -14.0 · True peak -1.0dB
                                         </div>

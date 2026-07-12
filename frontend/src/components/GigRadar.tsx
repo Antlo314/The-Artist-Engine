@@ -7,6 +7,7 @@ import { useEngine } from '../lib/engineState';
 import { apiFetch } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { PageHeader, Panel, Field, Btn, EmptyState, StepHint, Segmented, inputCls } from './ui/Shell';
+import { openMailto, downloadEml, cachePitch } from '../lib/exportUtils';
 
 interface GigRadarProps {
     profile: any;
@@ -158,12 +159,30 @@ export default function GigRadar({ profile }: GigRadarProps) {
         }
     };
 
-    const handleDeployPitch = (gigIdx: number) => {
-        // Simulate sending pitch and update pipeline status
+    const handleDeployPitch = (gigIdx: number, mode: 'mailto' | 'eml' | 'copy' = 'mailto') => {
+        const gig = gigs[gigIdx];
+        if (!gig) return;
+        const body = generatedPitch || '';
+        const subject = `Booking inquiry — ${profile?.artistAlias || profile?.agentName || 'Artist'} × ${gig.name}`;
+        const rawTo = pitchRoutingTo || gig.contact || '';
+        const to = rawTo.includes('@') ? rawTo : '';
+
+        cachePitch({ venue: gig.name, body, outreach: outreachType });
+        if (mode === 'mailto') openMailto({ to, subject, body });
+        else if (mode === 'eml') {
+            downloadEml(`pitch-${String(gig.name).replace(/\s+/g, '_')}.eml`, {
+                to,
+                subject,
+                body,
+                from: profile?.agentEmail,
+            });
+        } else if (mode === 'copy') {
+            navigator.clipboard?.writeText(body).catch(() => null);
+        }
+
         const newGigs = [...gigs];
         newGigs[gigIdx].pipeline_status = 'PITCHED';
         setGigs(newGigs);
-        // Record real telemetry: advances the lead to Pitched in the pipeline.
         if (newGigs[gigIdx]?.name) record.pitch(newGigs[gigIdx].name, outreachType);
         setPitchModal(null);
     };
@@ -623,10 +642,16 @@ export default function GigRadar({ profile }: GigRadarProps) {
 
                                 {/* Modal Footer */}
                                 {!isDrafting && (
-                                    <div className="p-4 border-t border-white/10 flex justify-end gap-3">
+                                    <div className="p-4 border-t border-white/10 flex flex-wrap justify-end gap-2">
                                         <Btn variant="ghost" onClick={() => setPitchModal(null)}>Cancel</Btn>
-                                        <Btn variant="accent" accent="var(--color-radar)" onClick={() => handleDeployPitch(gigs.indexOf(pitchModal))}>
-                                            <Send size={14} /> Send pitch
+                                        <Btn variant="ghost" onClick={() => handleDeployPitch(gigs.indexOf(pitchModal), 'copy')}>
+                                            Copy
+                                        </Btn>
+                                        <Btn variant="ghost" onClick={() => handleDeployPitch(gigs.indexOf(pitchModal), 'eml')}>
+                                            <Download size={14} /> .eml
+                                        </Btn>
+                                        <Btn variant="accent" accent="var(--color-radar)" onClick={() => handleDeployPitch(gigs.indexOf(pitchModal), 'mailto')}>
+                                            <Send size={14} /> Open mail
                                         </Btn>
                                     </div>
                                 )}
