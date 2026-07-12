@@ -75,7 +75,7 @@ export default function RecoupmentSandbox() {
         <div className="space-y-6">
             <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
                 <div>
-                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                    <h2 className="font-display text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
                         <Activity className="text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
                         RECOUPMENT SIMULATOR v2.0
                     </h2>
@@ -90,7 +90,7 @@ export default function RecoupmentSandbox() {
                 <div className="lg:col-span-5 space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar pr-2 pb-10">
 
                     {/* Core Deal */}
-                    <div className="glass-card p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md">
+                    <div className="glass-obsidian-hover p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md">
                         <h3 className="font-mono text-xs text-emerald-400 tracking-widest uppercase mb-4 border-b border-emerald-500/50 pb-2 drop-shadow-sm">The 'Bait' (Advance & Royalties)</h3>
                         <div className="space-y-4">
                             <div>
@@ -111,7 +111,7 @@ export default function RecoupmentSandbox() {
                     </div>
 
                     {/* Hidden Debt */}
-                    <div className="glass-card p-6 rounded-2xl border border-red-500/50 bg-red-900/20 shadow-[0_0_20px_rgba(239,68,68,0.15)] backdrop-blur-md">
+                    <div className="glass-obsidian-hover p-6 rounded-2xl border border-red-500/50 bg-red-900/20 shadow-[0_0_20px_rgba(239,68,68,0.15)] backdrop-blur-md">
                         <h3 className="font-mono text-xs text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase mb-4 border-b border-red-500/50 pb-2 flex items-center gap-2 drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]">
                             <AlertTriangle size={14} className="text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" /> 100% Recoupable Debt
                         </h3>
@@ -134,7 +134,7 @@ export default function RecoupmentSandbox() {
                     </div>
 
                     {/* 360 Cross-Collateralization */}
-                    <div className="glass-card p-6 rounded-2xl border border-purple-500/50 bg-purple-900/20 shadow-[0_0_20px_rgba(168,85,247,0.15)] backdrop-blur-md">
+                    <div className="glass-obsidian-hover p-6 rounded-2xl border border-purple-500/50 bg-purple-900/20 shadow-[0_0_20px_rgba(168,85,247,0.15)] backdrop-blur-md">
                         <h3 className="font-mono text-xs text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase mb-4 border-b border-purple-500/50 pb-2 drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">360 Deal (Cross-Collateralization)</h3>
                         <div className="space-y-4">
                             <div>
@@ -160,7 +160,7 @@ export default function RecoupmentSandbox() {
                 <div className="lg:col-span-7 flex flex-col space-y-6">
 
                     {/* The Big Number */}
-                    <div className="glass-card p-8 rounded-2xl border-l-[4px] border-l-red-500 relative overflow-hidden bg-white/60 shadow-md">
+                    <div className="glass-obsidian p-8 rounded-2xl border-l-[4px] border-l-red-500 relative overflow-hidden shadow-md">
                         <div className="absolute inset-0 bg-red-500/5 z-0" />
                         <div className="relative z-10 space-y-2">
                             <p className="font-mono text-xs text-gray-700 tracking-widest uppercase">Total Debt To Recoup</p>
@@ -173,7 +173,7 @@ export default function RecoupmentSandbox() {
                                 key={streamsNeeded}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="font-cinzel text-3xl sm:text-5xl md:text-7xl font-bold text-red-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-sm tracking-wider"
+                                className="font-display text-3xl sm:text-5xl md:text-7xl font-bold text-red-400 tracking-wider"
                             >
                                 {formatNumber(streamsNeeded)}
                             </motion.h1>
@@ -184,8 +184,8 @@ export default function RecoupmentSandbox() {
                     </div>
 
                     {/* The Reality Bar Breakdown */}
-                    <div className="glass-card p-6 rounded-2xl border border-purple-900/10 bg-white/40 shadow-sm">
-                        <h3 className="font-cinzel text-xl text-purple-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest border-b border-purple-900/10 pb-4 mb-6">THE REALITY MATRIX</h3>
+                    <div className="glass-obsidian p-6 rounded-2xl border border-white/10 shadow-sm">
+                        <h3 className="font-display text-xl text-purple-300 font-bold tracking-widest border-b border-white/10 pb-4 mb-6">THE REALITY MATRIX</h3>
 
                         {/* Stacked Progress Bar */}
                         <div className="h-10 w-full bg-gray-200 rounded-full flex overflow-hidden shadow-inner mb-6">

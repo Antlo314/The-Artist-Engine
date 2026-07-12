@@ -319,9 +319,9 @@ export default function StudioCore() {
                     className="w-1 h-3 bg-blue-800 absolute top-1 origin-[50%_28px] rounded-full shadow-[0_0_5px_rgba(16,185,129,0.8)] transition-transform duration-300 group-hover:bg-white"
                     style={{ transform: `rotate(${(value / 100) * 270 - 135}deg)` }}
                 />
-                <div className="text-blue-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-mono text-xs">{value}%</div>
+                <div className="text-cyan-400 font-mono text-xs">{value}%</div>
             </div>
-            <span className="font-mono text-[10px] text-gray-700 tracking-widest uppercase text-center leading-tight">
+            <span className="font-mono text-[10px] text-ink-200 tracking-widest uppercase text-center leading-tight">
                 {label}
             </span>
         </div>
@@ -370,20 +370,20 @@ export default function StudioCore() {
         if (!url) return null;
 
         return (
-            <div className="flex flex-col gap-2 bg-black/40 shadow-sm p-4 rounded border border-blue-900/30 relative backdrop-blur-md">
+            <div className="flex flex-col gap-2 bg-black/40 p-4 rounded border border-blue-900/30 relative backdrop-blur-md">
                 <div className="flex justify-between items-center z-10">
                     <span className="font-mono text-[10px] uppercase tracking-widest" style={{ color }}>{title}</span>
                     <button
                         onClick={() => wavesurferRef.current?.playPause()}
                         className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
                     >
-                        <Play size={10} className="text-blue-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] ml-0.5" />
+                        <Play size={10} className="text-cyan-400 ml-0.5" />
                     </button>
                 </div>
                 <div ref={containerRef} className="w-full relative z-10" />
                 {renderHeatmap && (
                     <div className="w-full mt-2 relative z-0 border-t border-blue-900/10 pt-2">
-                        <span className="font-mono text-[8px] text-gray-600 uppercase tracking-widest absolute -top-1 left-0 bg-black/50 px-1 rounded z-20">Acoustic Heatmap</span>
+                        <span className="font-mono text-[8px] text-ink-200 uppercase tracking-widest absolute -top-1 left-0 bg-black/50 px-1 rounded z-20">Acoustic Heatmap</span>
                         <div ref={spectrogramRef} className="w-full rounded overflow-hidden opacity-80" />
                     </div>
                 )}
@@ -396,21 +396,21 @@ export default function StudioCore() {
             {/* Global Header */}
             <div className="flex items-end justify-between border-b border-blue-900/10 pb-4">
                 <div>
-                    <h2 className="font-cinzel text-3xl font-bold text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest text-glow flex items-center gap-3 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)] glitch-hover cursor-pointer w-fit">
-                        <Mic2 className="text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" />
+                    <h2 className="font-display text-3xl font-bold text-cyan-400 tracking-widest text-glow flex items-center gap-3 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)] glitch-hover cursor-pointer w-fit">
+                        <Mic2 className="text-cyan-400" />
                         AUDIO MASTER CORE
                     </h2>
-                    <p className="font-mono text-xs text-blue-200 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase mt-1 drop-shadow-md">
+                    <p className="font-mono text-xs text-blue-200 tracking-widest uppercase mt-1">
                         Neural Processing Engine // Matchering Framework
                     </p>
                 </div>
                 <div className="hidden md:flex flex-col items-end">
                     <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-mono text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border border-blue-900/30 px-2 rounded">
+                        <span className="text-[10px] font-mono text-cyan-400 border border-blue-900/30 px-2 rounded">
                             LUFS OMEGA
                         </span>
                     </div>
-                    <span className="font-mono text-[10px] text-gray-600 tracking-widest uppercase">
+                    <span className="font-mono text-[10px] text-ink-200 tracking-widest uppercase">
                         AI Models: ACTIVE
                     </span>
                 </div>
@@ -430,7 +430,7 @@ export default function StudioCore() {
                             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                             onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
                             onDrop={handleDrop}
-                            className={`md:col-span-2 glass-card bg-black/40 shape-cyber-leaf p-10 flex flex-col items-center justify-center border-dashed border-2 hover:border-cyan-500/50 transition-all min-h-[400px] relative overflow-hidden group backdrop-blur-md ${isDragging ? 'border-cyan-400 bg-cyan-900/20 shadow-[0_0_30px_rgba(34,211,238,0.3)]' : 'border-blue-900/30 hover:bg-black/60 cursor-default'}`}
+                            className={`md:col-span-2 glass-obsidian glass-obsidian-hover bg-black/40 shape-cyber-leaf p-10 flex flex-col items-center justify-center border-dashed border-2 hover:border-cyan-500/50 transition-all min-h-[400px] relative overflow-hidden group backdrop-blur-md ${isDragging ? 'border-cyan-400 bg-cyan-900/20 shadow-[0_0_30px_rgba(34,211,238,0.3)]' : 'border-blue-900/30 hover:bg-black/60 cursor-default'}`}
                         >
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity z-0" />
                             {/* Audio Core Ambient Soundwaves Video Background */}
@@ -445,10 +445,10 @@ export default function StudioCore() {
                             </video>
 
                             <div className="w-20 h-20 rounded-full border-2 border-dashed border-blue-950 flex items-center justify-center mb-6 group-hover:rotate-180 transition-transform duration-1000 ease-in-out">
-                                <UploadCloud size={32} className="text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" />
+                                <UploadCloud size={32} className="text-cyan-400" />
                             </div>
-                            <h3 className="font-cinzel text-2xl text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mb-2 tracking-wider drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">INITIATE INGEST SEQUENCE</h3>
-                            <p className="font-mono text-gray-600 text-sm tracking-widest text-center max-w-sm mb-8">
+                            <h3 className="font-display text-2xl text-cyan-400 mb-2 tracking-wider drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">INITIATE INGEST SEQUENCE</h3>
+                            <p className="font-mono text-ink-200 text-sm tracking-widest text-center max-w-sm mb-8">
                                 Drag and drop unmastered multitrack payload here. Max payload size: 2.5GB.
                             </p>
 
@@ -560,7 +560,7 @@ export default function StudioCore() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     onClick={handleMaster}
-                                    className="mt-8 px-12 py-3 bg-white text-black font-cinzel font-bold tracking-widest rounded shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:scale-105 transition-transform z-10 w-full md:w-auto"
+                                    className="mt-8 px-12 py-3 bg-white text-black font-display font-bold tracking-widest rounded shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:scale-105 transition-transform z-10 w-full md:w-auto"
                                 >
                                     GENERATE MASTER
                                 </motion.button>
@@ -568,7 +568,7 @@ export default function StudioCore() {
                         </div>
 
                         {/* Sidebar Info - Oracle Engine Mode */}
-                        <div className="md:col-span-1 glass-card bg-black/40 backdrop-blur-md shape-chamfer-br p-6 flex flex-col gap-4 relative overflow-hidden border border-blue-900/30">
+                        <div className="md:col-span-1 glass-obsidian-hover bg-black/40 backdrop-blur-md shape-chamfer-br p-6 flex flex-col gap-4 relative overflow-hidden border border-blue-900/30">
                             <h3 className="font-mono text-[11px] tracking-widest text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-b border-blue-900/30 pb-2 flex items-center justify-between drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
                                 <span className="flex items-center gap-2"><Activity size={14} /> AUDIO INSIGHTS</span>
                                 {isOracleScanning && <span className="animate-pulse bg-blue-50/500 text-blue-950 px-2 rounded">SCANNING OMEGA CORE...</span>}
@@ -631,7 +631,7 @@ export default function StudioCore() {
                                     >
                                         <Shield size={32} className="text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-md" />
                                         <div className="flex flex-col items-center">
-                                            <h4 className="font-cinzel text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold tracking-widest mb-1 drop-shadow-md">TARGET ACQUIRED</h4>
+                                            <h4 className="font-display text-cyan-400 font-bold tracking-widest mb-1">TARGET ACQUIRED</h4>
                                             <p className="font-mono text-[10px] text-blue-200 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] uppercase tracking-widest text-center">
                                                 DSP topology auto-locked to Oracle AI parameters.
                                             </p>
@@ -701,7 +701,7 @@ export default function StudioCore() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="glass-card bg-black/60 backdrop-blur-md border border-cyan-900/50 shape-cyber-leaf h-[400px] flex flex-col items-center justify-center relative overflow-hidden shadow-[inset_0_0_50px_rgba(34,211,238,0.1)]"
+                        className="glass-obsidian-hover bg-black/60 backdrop-blur-md border border-cyan-900/50 shape-cyber-leaf h-[400px] flex flex-col items-center justify-center relative overflow-hidden shadow-[inset_0_0_50px_rgba(34,211,238,0.1)]"
                     >
                         {/* Audio Processing Video Background */}
                         <video
@@ -711,7 +711,7 @@ export default function StudioCore() {
                             playsInline
                             className="absolute inset-0 w-full h-full object-cover opacity-100 pointer-events-none z-0 mix-blend-screen hue-rotate-[110deg]"
                         >
-                            <source src="/the_sine_wave.mp4" type="video/mp4" />
+                            <source src="/audio-core.mp4" type="video/mp4" />
                         </video>
 
                         <div className="relative z-10 flex flex-col items-center">
@@ -741,7 +741,7 @@ export default function StudioCore() {
                         className="flex flex-col gap-6"
                     >
                         {/* Player & Toggle */}
-                        <div className="glass-card p-6 flex items-center justify-between shape-cyber-leaf border-blue-900 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                        <div className="glass-obsidian glass-obsidian-hover p-6 flex items-center justify-between shape-cyber-leaf border-blue-900 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
                             <div className="flex items-center gap-6">
                                 {masterAudioUrl && (
                                     <audio
@@ -753,7 +753,7 @@ export default function StudioCore() {
                                 <button
                                     onClick={togglePlay}
                                     disabled={!masterAudioUrl}
-                                    className="h-16 w-16 bg-white rounded-full flex items-center justify-center hover:scale-105 transition-transform text-black shadow-[0_0_20px_rgba(0,0,0,0.1)] disabled:opacity-50 relative z-10 shrink-0"
+                                    className="h-16 w-16 bg-cyan-500 rounded-full flex items-center justify-center hover:scale-105 transition-transform text-black shadow-[0_0_20px_rgba(34,211,238,0.4)] disabled:opacity-50 relative z-10 shrink-0"
                                 >
                                     {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
                                 </button>
@@ -772,18 +772,18 @@ export default function StudioCore() {
                                 )}
 
                                 <div className={`transition-all duration-500 ${isPlaying ? 'ml-16' : 'ml-0'}`}>
-                                    <h3 className="font-cinzel text-2xl text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold tracking-widest mb-1 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">FINAL_RENDER_AE94.wav</h3>
-                                    <div className="flex items-center gap-4 font-mono text-xs text-blue-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] uppercase tracking-widest drop-shadow-md">
+                                    <h3 className="font-display text-2xl text-cyan-400 font-bold tracking-widest mb-1 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">FINAL_RENDER_AE94.wav</h3>
+                                    <div className="flex items-center gap-4 font-mono text-xs text-blue-300 uppercase tracking-widest">
                                         <Shield size={12} /> LUFS: -14.0 | TRUE PEAK: -1.0dB
                                     </div>
                                 </div>
                             </div>
 
                             {/* Sovereign Master Toggle */}
-                            <div className="flex items-center gap-4 bg-white/60 shadow-sm p-2 pr-6 rounded-full border border-blue-900/10">
+                            <div className="flex items-center gap-4 bg-white/5 p-2 pr-6 rounded-full border border-blue-900/10">
                                 <button
                                     onClick={() => setIsSovereignMaster(!isSovereignMaster)}
-                                    className={`w-12 h-6 rounded-full p-1 transition-colors ${isSovereignMaster ? 'bg-blue-900 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-gray-700'}`}
+                                    className={`w-12 h-6 rounded-full p-1 transition-colors ${isSovereignMaster ? 'bg-blue-900 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-white/10'}`}
                                 >
                                     <motion.div
                                         className="bg-white w-4 h-4 rounded-full"
@@ -791,19 +791,19 @@ export default function StudioCore() {
                                     />
                                 </button>
                                 <div className="flex flex-col">
-                                    <span className="font-cinzel text-xs text-blue-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold -mb-1">SOVEREIGN MODE</span>
-                                    <span className="font-mono text-[9px] text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase">A/B Testing Active</span>
+                                    <span className="font-display text-xs text-cyan-400 font-bold -mb-1">SOVEREIGN MODE</span>
+                                    <span className="font-mono text-[9px] text-cyan-400 tracking-widest uppercase">A/B Testing Active</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Fine-Tuning Console */}
-                        <div className="glass-card p-8 rounded-2xl relative overflow-hidden">
+                        <div className="glass-obsidian glass-obsidian-hover p-8 rounded-2xl relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-8 opacity-5">
-                                <Settings2 size={200} className="text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mix-blend-screen" />
+                                <Settings2 size={200} className="text-cyan-400 mix-blend-screen" />
                             </div>
 
-                            <h3 className="font-cinzel text-xl text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest mb-8 border-b border-blue-900/30 pb-4 inline-block pr-12 drop-shadow-[0_0_10px_rgba(34,211,238,0.6)]">
+                            <h3 className="font-display text-xl text-cyan-400 tracking-widest mb-8 border-b border-blue-900/30 pb-4 inline-block pr-12 drop-shadow-[0_0_10px_rgba(34,211,238,0.6)]">
                                 FINE-TUNING CONSOLE
                             </h3>
 
@@ -819,13 +819,13 @@ export default function StudioCore() {
                                     <>
                                         <button
                                             onClick={handleDownload}
-                                            className="font-mono text-xs text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] hover:text-blue-900 border-b border-blue-950 pb-1 tracking-widest uppercase transition-colors flex items-center gap-2"
+                                            className="font-mono text-xs text-cyan-400 hover:text-cyan-300 border-b border-blue-950 pb-1 tracking-widest uppercase transition-colors flex items-center gap-2"
                                         >
                                             [CHOOSE OUTPUT DESTINATION]
                                         </button>
                                         <button
                                             onClick={initiateBlindTest}
-                                            className="font-mono text-xs text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] hover:text-orange-300 border-b border-orange-600 pb-1 tracking-widest uppercase transition-colors flex items-center gap-2 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]"
+                                            className="font-mono text-xs text-orange-400 hover:text-orange-300 border-b border-orange-600 pb-1 tracking-widest uppercase transition-colors flex items-center gap-2 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]"
                                         >
                                             <HelpCircle size={14} /> [BLIND TEST VALIDATOR]
                                         </button>
@@ -833,7 +833,7 @@ export default function StudioCore() {
                                 )}
                                 <button
                                     onClick={() => setShowAnalytics(true)}
-                                    className="font-mono text-xs text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] hover:text-blue-900 border-b border-blue-950 pb-1 tracking-widest uppercase transition-colors flex items-center gap-2"
+                                    className="font-mono text-xs text-cyan-400 hover:text-cyan-300 border-b border-blue-950 pb-1 tracking-widest uppercase transition-colors flex items-center gap-2"
                                 >
                                     <Waves size={14} /> [WAVEFORM ANALYTICS]
                                 </button>
@@ -851,7 +851,7 @@ export default function StudioCore() {
                                         setShowAnalytics(false);
                                         setStemsData(null);
                                     }}
-                                    className="font-mono text-xs text-gray-600 hover:text-blue-900 border-b border-gray-600 pb-1 tracking-widest uppercase transition-colors"
+                                    className="font-mono text-xs text-ink-400 hover:text-cyan-400 border-b border-white/10 pb-1 tracking-widest uppercase transition-colors"
                                 >
                                     [X] TERMINATE SESSION
                                 </button>
@@ -876,19 +876,19 @@ export default function StudioCore() {
                             exit={{ scale: 0.95, y: 20 }}
                             className="bg-black/90 border border-blue-900/30 shadow-[0_0_50px_rgba(34,211,238,0.15)] rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
                         >
-                            <div className="p-4 border-b border-blue-900/30 flex justify-between items-center bg-black/60 shadow-sm backdrop-blur-md">
-                                <h2 className="font-cinzel text-xl font-bold text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-3 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">
-                                    <Waves className="text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" />
+                            <div className="p-4 border-b border-blue-900/30 flex justify-between items-center bg-black/60 backdrop-blur-md">
+                                <h2 className="font-display text-xl font-bold text-cyan-400 tracking-widest flex items-center gap-3 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">
+                                    <Waves className="text-cyan-400" />
                                     TOPOLOGY COMPARISON MATRIX
                                 </h2>
                                 <div className="flex items-center gap-4">
                                     <button
                                         onClick={() => setShowHeatmap(!showHeatmap)}
-                                        className={`font-mono text-[9px] uppercase tracking-widest py-1 px-3 border rounded transition-colors ${showHeatmap ? 'bg-blue-100 text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-blue-950' : 'bg-transparent text-gray-600 border-gray-600'}`}
+                                        className={`font-mono text-[9px] uppercase tracking-widest py-1 px-3 border rounded transition-colors ${showHeatmap ? 'bg-cyan-500/10 text-cyan-400 border-blue-950' : 'bg-transparent text-ink-200 border-white/10'}`}
                                     >
                                         Toggle Heatmap {showHeatmap ? '[ON]' : '[OFF]'}
                                     </button>
-                                    <button onClick={() => setShowAnalytics(false)} className="text-gray-700 hover:text-blue-900 transition-colors">
+                                    <button onClick={() => setShowAnalytics(false)} className="text-ink-200 hover:text-cyan-400 transition-colors">
                                         <X size={24} />
                                     </button>
                                 </div>
@@ -900,27 +900,27 @@ export default function StudioCore() {
                                         <WaveformViewer url={targetUrl} title="Original Unmastered Source" color="#9ca3af" renderHeatmap={showHeatmap} />
                                         <WaveformViewer url={refUrl} title="Acoustic Reference Goal" color="#10b981" renderHeatmap={showHeatmap} />
                                     </div>
-                                    <div className="flex flex-col h-full bg-white/40 shadow-sm border border-blue-900/10 rounded p-6">
-                                        <h3 className="font-mono text-xs text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase mb-4 flex items-center gap-2">
+                                    <div className="flex flex-col h-full glass-obsidian rounded p-6">
+                                        <h3 className="font-mono text-xs text-cyan-400 tracking-widest uppercase mb-4 flex items-center gap-2">
                                             <Activity size={14} /> Neural DSP Decision Log
                                         </h3>
-                                        <div className="text-xs font-mono text-gray-300 space-y-3 flex-1">
+                                        <div className="text-xs font-mono text-ink-200 space-y-3 flex-1">
                                             <p className="border-l-2 border-blue-900 pl-2">
-                                                <span className="text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold block mb-1">Phase 1: LUFS & RMS Alignment</span>
+                                                <span className="text-cyan-400 font-bold block mb-1">Phase 1: LUFS & RMS Alignment</span>
                                                 Matchering Engine successfully aligned target crest factor with the reference goal track. Global dynamic range reduction: -3.2dB.
                                             </p>
                                             <p className="border-l-2 border-blue-900 pl-2">
-                                                <span className="text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold block mb-1">Phase 2: Sovereign Clarity Polish</span>
+                                                <span className="text-cyan-400 font-bold block mb-1">Phase 2: Sovereign Clarity Polish</span>
                                                 Gemini Oracle detected excessive low-mid mud. Applied High-Shelf Air injection at 10kHz (+{(knobs.air - 50) / 10}dB) to prevent algorithm muffling.
                                             </p>
                                             <p className="border-l-2 border-red-500 pl-2">
-                                                <span className="text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold block mb-1">Phase 3: Transient Restoration</span>
+                                                <span className="text-red-400 font-bold block mb-1">Phase 3: Transient Restoration</span>
                                                 Parallel compression snap applied to kick/snare transients to maintain punch alongside the reference.
                                             </p>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-4 border border-blue-950 rounded-lg p-1 bg-blue-100/50">
+                                <div className="mt-4 border border-blue-950 rounded-lg p-1 bg-cyan-500/10">
                                     <WaveformViewer url={masterAudioUrl} title="FINAL SOVEREIGN MASTER" color="#10b981" renderHeatmap={showHeatmap} />
                                 </div>
                             </div>
@@ -942,15 +942,15 @@ export default function StudioCore() {
                             initial={{ scale: 0.9, y: 30 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.9, y: 30 }}
-                            className="bg-white/90 border border-blue-900/10 shadow-sm w-full max-w-2xl border border-orange-500/30 shadow-[0_0_80px_rgba(251,146,60,0.15)] rounded-2xl overflow-hidden flex flex-col relative"
+                            className="glass-obsidian w-full max-w-2xl border border-orange-500/30 shadow-[0_0_80px_rgba(251,146,60,0.15)] rounded-2xl overflow-hidden flex flex-col relative"
                         >
                             <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                                <HelpCircle size={150} className="text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" />
+                                <HelpCircle size={150} className="text-orange-400" />
                             </div>
 
                             <div className="p-6 border-b border-blue-900/10 flex justify-between items-center relative z-10">
-                                <h2 className="font-cinzel text-2xl font-bold text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-3 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">
-                                    <HelpCircle className="text-cyan-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" />
+                                <h2 className="font-display text-2xl font-bold text-cyan-400 tracking-widest flex items-center gap-3 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">
+                                    <HelpCircle className="text-cyan-400" />
                                     BLIND TEST VALIDATOR
                                 </h2>
                                 <button
@@ -959,14 +959,14 @@ export default function StudioCore() {
                                         if (blindTestAudioRef) blindTestAudioRef.pause();
                                         setBlindTestPlaying(null);
                                     }}
-                                    className="text-gray-700 hover:text-blue-900 transition-colors"
+                                    className="text-ink-200 hover:text-cyan-400 transition-colors"
                                 >
                                     <X size={24} />
                                 </button>
                             </div>
 
                             <div className="p-8 flex flex-col gap-8 relative z-10">
-                                <p className="font-mono text-sm text-gray-700 text-center leading-relaxed max-w-lg mx-auto">
+                                <p className="font-mono text-sm text-ink-200 text-center leading-relaxed max-w-lg mx-auto">
                                     {blindTestWinner
                                         ? "Validation complete. Placebo effect neutralized. The Sovereign Engine's true impact is revealed below."
                                         : "Objective analysis engaged. The Master and the Original have been scrambled. Listen precisely and select the superior topography."
@@ -978,22 +978,22 @@ export default function StudioCore() {
                                     <div className="flex flex-col gap-4">
                                         <button
                                             onClick={() => toggleBlindTestPlay('A')}
-                                            className={`h-24 rounded-2xl flex items-center justify-center border-2 transition-all shadow-lg group ${blindTestPlaying === 'A' ? 'bg-orange-500/20 border-orange-400 shadow-[inset_0_0_30px_rgba(251,146,60,0.3)]' : 'bg-white/40 shadow-sm border-blue-900/10 hover:border-orange-500/50 hover:bg-white/60 shadow-sm'}`}
+                                            className={`h-24 rounded-2xl flex items-center justify-center border-2 transition-all shadow-lg group ${blindTestPlaying === 'A' ? 'bg-orange-500/20 border-orange-400 shadow-[inset_0_0_30px_rgba(251,146,60,0.3)]' : 'bg-white/5 border-blue-900/10 hover:border-orange-500/50 hover:bg-white/10'}`}
                                         >
-                                            {blindTestPlaying === 'A' ? <Pause size={32} className="text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" /> : <Play size={32} className="text-gray-700 group-hover:text-orange-400 ml-2" />}
+                                            {blindTestPlaying === 'A' ? <Pause size={32} className="text-orange-400" /> : <Play size={32} className="text-ink-200 group-hover:text-orange-400 ml-2" />}
                                         </button>
 
                                         {!blindTestWinner ? (
                                             <button
                                                 onClick={() => handleBlindTestVote('A')}
-                                                className="py-3 bg-white/5 border border-blue-900/10 text-blue-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-mono text-xs tracking-widest uppercase hover:bg-orange-600 hover:border-orange-400 transition-colors rounded shadow-md"
+                                                className="py-3 bg-white/5 border border-blue-900/10 text-cyan-400 font-mono text-xs tracking-widest uppercase hover:bg-orange-600 hover:border-orange-400 transition-colors rounded shadow-md"
                                             >
                                                 [ VOTE SOURCE A ]
                                             </button>
                                         ) : (
-                                            <div className={`p-4 rounded border font-mono tracking-widest text-center text-xs uppercase ${isSovereignA ? 'bg-blue-900/30 border-blue-900 text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]' : 'bg-red-900/30 border-red-500 text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'}`}>
+                                            <div className={`p-4 rounded border font-mono tracking-widest text-center text-xs uppercase ${isSovereignA ? 'bg-blue-900/30 border-blue-900 text-cyan-400' : 'bg-red-900/30 border-red-500 text-red-500'}`}>
                                                 {isSovereignA ? "🏆 SOVEREIGN MASTER" : "❌ ORIGINAL UNMASTERED"}
-                                                {blindTestWinner === 'A' && <div className="mt-2 text-[9px] text-blue-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">YOUR SELECTION</div>}
+                                                {blindTestWinner === 'A' && <div className="mt-2 text-[9px] text-cyan-400">YOUR SELECTION</div>}
                                             </div>
                                         )}
                                     </div>
@@ -1002,22 +1002,22 @@ export default function StudioCore() {
                                     <div className="flex flex-col gap-4">
                                         <button
                                             onClick={() => toggleBlindTestPlay('B')}
-                                            className={`h-24 rounded-2xl flex items-center justify-center border-2 transition-all shadow-lg group ${blindTestPlaying === 'B' ? 'bg-orange-500/20 border-orange-400 shadow-[inset_0_0_30px_rgba(251,146,60,0.3)]' : 'bg-white/40 shadow-sm border-blue-900/10 hover:border-orange-500/50 hover:bg-white/60 shadow-sm'}`}
+                                            className={`h-24 rounded-2xl flex items-center justify-center border-2 transition-all shadow-lg group ${blindTestPlaying === 'B' ? 'bg-orange-500/20 border-orange-400 shadow-[inset_0_0_30px_rgba(251,146,60,0.3)]' : 'bg-white/5 border-blue-900/10 hover:border-orange-500/50 hover:bg-white/10'}`}
                                         >
-                                            {blindTestPlaying === 'B' ? <Pause size={32} className="text-orange-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]" /> : <Play size={32} className="text-gray-700 group-hover:text-orange-400 ml-2" />}
+                                            {blindTestPlaying === 'B' ? <Pause size={32} className="text-orange-400" /> : <Play size={32} className="text-ink-200 group-hover:text-orange-400 ml-2" />}
                                         </button>
 
                                         {!blindTestWinner ? (
                                             <button
                                                 onClick={() => handleBlindTestVote('B')}
-                                                className="py-3 bg-white/5 border border-blue-900/10 text-blue-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-mono text-xs tracking-widest uppercase hover:bg-orange-600 hover:border-orange-400 transition-colors rounded shadow-md"
+                                                className="py-3 bg-white/5 border border-blue-900/10 text-cyan-400 font-mono text-xs tracking-widest uppercase hover:bg-orange-600 hover:border-orange-400 transition-colors rounded shadow-md"
                                             >
                                                 [ VOTE SOURCE B ]
                                             </button>
                                         ) : (
-                                            <div className={`p-4 rounded border font-mono tracking-widest text-center text-xs uppercase ${!isSovereignA ? 'bg-blue-900/30 border-blue-900 text-blue-700 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]' : 'bg-red-900/30 border-red-500 text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]'}`}>
+                                            <div className={`p-4 rounded border font-mono tracking-widest text-center text-xs uppercase ${!isSovereignA ? 'bg-blue-900/30 border-blue-900 text-cyan-400' : 'bg-red-900/30 border-red-500 text-red-500'}`}>
                                                 {!isSovereignA ? "🏆 SOVEREIGN MASTER" : "❌ ORIGINAL UNMASTERED"}
-                                                {blindTestWinner === 'B' && <div className="mt-2 text-[9px] text-blue-900 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">YOUR SELECTION</div>}
+                                                {blindTestWinner === 'B' && <div className="mt-2 text-[9px] text-cyan-400">YOUR SELECTION</div>}
                                             </div>
                                         )}
                                     </div>

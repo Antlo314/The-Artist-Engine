@@ -209,7 +209,7 @@ export default function TheCodex() {
         <div className="space-y-6">
             <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
                 <div>
-                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                    <h2 className="font-display text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
                         <BookOpen className="text-amber-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
                         THE CODEX
                     </h2>
@@ -219,7 +219,7 @@ export default function TheCodex() {
                 </div>
             </div>
 
-            <div className="glass-card p-4 flex items-center gap-4 rounded-xl border border-purple-900/30 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md">
+            <div className="glass-obsidian-hover p-4 flex items-center gap-4 rounded-xl border border-purple-900/30 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md">
                 <Search className="text-amber-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" size={20} />
                 <input
                     type="text"
@@ -239,7 +239,7 @@ export default function TheCodex() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ delay: idx * 0.05 }}
-                            className="glass-card p-6 rounded-2xl border border-purple-900/30 bg-black/40 hover:bg-black/60 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all relative overflow-hidden group shadow-[inset_0_0_20px_rgba(168,85,247,0.05)] backdrop-blur-md"
+                            className="glass-obsidian-hover p-6 rounded-2xl border border-purple-900/30 bg-black/40 hover:bg-black/60 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all relative overflow-hidden group shadow-[inset_0_0_20px_rgba(168,85,247,0.05)] backdrop-blur-md"
                         >
                             <div className={`absolute top-0 left-0 w-1 h-full shadow-[0_0_10px_currentColor]
                                 ${entry.dangerLevel === 'CRITICAL' ? 'bg-red-500 text-red-500 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]' :
@@ -249,7 +249,7 @@ export default function TheCodex() {
                             />
 
                             <div className="flex justify-between items-start mb-4">
-                                <h3 className="font-cinzel text-xl text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold tracking-widest pl-3 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">{entry.term}</h3>
+                                <h3 className="font-display text-xl text-purple-400 font-bold tracking-widest pl-3 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">{entry.term}</h3>
                                 <span className={`font-mono text-[10px] tracking-widest px-2 py-1 rounded bg-black/60 shadow-sm border backdrop-blur-md
                                     ${entry.dangerLevel === 'CRITICAL' ? 'text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.3)]' :
                                         entry.dangerLevel === 'HIGH' ? 'text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.3)]' :

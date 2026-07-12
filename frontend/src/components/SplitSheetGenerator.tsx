@@ -79,13 +79,13 @@ export default function SplitSheetGenerator() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-end justify-between border-b border-purple-900/40 pb-2 lg:pb-4">
+            <div className="flex items-end justify-between border-b border-white/10 pb-2 lg:pb-4">
                 <div>
-                    <h2 className="font-cinzel text-xl lg:text-3xl font-bold text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
-                        <FileSignature className="text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
+                    <h2 className="font-display text-xl lg:text-3xl font-bold text-purple-400 tracking-widest flex items-center gap-2 lg:gap-3 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]">
+                        <FileSignature className="text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] w-5 h-5 lg:w-8 lg:h-8" />
                         SPLIT SHEET CACHE v2.0
                     </h2>
-                    <p className="font-mono text-xs text-purple-300/80 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
+                    <p className="font-mono text-xs text-purple-300/80 mt-1 tracking-widest uppercase drop-shadow-md hidden sm:block">
                         Interactive Publishing Mathematics & Legal Rendering
                     </p>
                 </div>
@@ -96,12 +96,12 @@ export default function SplitSheetGenerator() {
                 {/* Left Column: Interactive Form */}
                 <div className="xl:col-span-7 space-y-4 lg:space-y-6 overflow-y-auto max-h-[80vh] custom-scrollbar pr-2 pb-10">
 
-                    <div className="glass-card p-4 lg:p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md space-y-4">
+                    <div className="glass-obsidian-hover p-4 lg:p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md space-y-4">
                         <h3 className="font-mono text-xs text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase border-b border-purple-900/40 pb-2 mb-2 lg:mb-4 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">Master Metadata</h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block font-mono text-[10px] text-gray-400 tracking-widest uppercase mb-1">Track Title</label>
-                                <input type="text" value={songTitle} onChange={(e) => setSongTitle(e.target.value)} className="w-full bg-black/60 border border-purple-900/40 p-3 rounded text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-cinzel text-lg focus:border-purple-500/50 outline-none transition-colors shadow-inner" />
+                                <input type="text" value={songTitle} onChange={(e) => setSongTitle(e.target.value)} className="w-full bg-black/60 border border-purple-900/40 p-3 rounded text-purple-300 font-bold font-display text-lg focus:border-purple-500/50 outline-none transition-colors shadow-inner" />
                             </div>
                             <div>
                                 <label className="block font-mono text-[10px] text-gray-400 tracking-widest uppercase mb-1">Date of Creation</label>
@@ -110,7 +110,7 @@ export default function SplitSheetGenerator() {
                         </div>
                     </div>
 
-                    <div className="glass-card p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md space-y-4">
+                    <div className="glass-obsidian-hover p-6 rounded-2xl border border-purple-900/40 bg-black/40 shadow-[0_0_20px_rgba(168,85,247,0.1)] backdrop-blur-md space-y-4">
                         <div className="flex justify-between items-end border-b border-purple-900/40 pb-2 mb-4">
                             <h3 className="font-mono text-xs text-purple-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] tracking-widest uppercase drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">The Math (Ownership Grid)</h3>
                             <div className={`font-mono text-xs font-bold ${totalSplit === 100 ? 'text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)] border border-emerald-500/50 bg-emerald-900/20' : 'text-red-400 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] shadow-[0_0_10px_rgba(239,68,68,0.3)] border border-red-500/50 bg-red-900/20'} p-1 px-3 rounded backdrop-blur-sm`}>
@@ -142,7 +142,7 @@ export default function SplitSheetGenerator() {
                                             <input type="text" placeholder="PRO" value={writer.pro} onChange={(e) => updateWriter(idx, 'pro', e.target.value)} className="w-full bg-transparent border-b border-purple-900/30 p-1 text-xs font-mono text-purple-400/60 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] focus:border-purple-500 outline-none uppercase placeholder-purple-900/50" />
                                         </div>
                                         <div className="col-span-3 flex items-center gap-1">
-                                            <input type="number" min="0" max="100" value={writer.split} onChange={(e) => updateWriter(idx, 'split', Number(e.target.value))} className="w-full bg-purple-900/20 border border-purple-700/50 p-2 rounded text-lg font-cinzel text-purple-300 font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)] font-bold focus:border-purple-500 outline-none text-center shadow-inner" />
+                                            <input type="number" min="0" max="100" value={writer.split} onChange={(e) => updateWriter(idx, 'split', Number(e.target.value))} className="w-full bg-purple-900/20 border border-purple-700/50 p-2 rounded text-lg font-display text-purple-300 font-bold focus:border-purple-500 outline-none text-center shadow-inner" />
                                         </div>
                                     </div>
 
