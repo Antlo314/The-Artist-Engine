@@ -551,20 +551,29 @@ async def master_audio(
     use_ref = reference is not None and bool(getattr(reference, "filename", None))
 
     try:
-        # Pydub often fails trying to sniff headers from raw byte streams or mismatched extensions.
-        # We explicitly save the UploadFile stream physical data first.
-        content_target = await target.read()
-        with open(wav_target_path, "wb") as f:
-            f.write(content_target)
+        # Stream uploads to disk in chunks so the web server never holds the
+        # full file(s) in RAM. This matters: the mastering worker (matchering)
+        # peaks near the instance memory limit for full-length songs, so every
+        # megabyte the parent process frees is headroom the worker needs.
+        async def _save(upload, path):
+            with open(path, "wb") as f:
+                while True:
+                    chunk = await upload.read(1024 * 1024)  # 1MB
+                    if not chunk:
+                        break
+                    f.write(chunk)
+
+        await _save(target, wav_target_path)
 
         # Reference is optional — no reference => "Pure mode" (DSP only, no matchering).
         if use_ref:
-            content_ref = await reference.read()
-            if content_ref:
-                with open(wav_ref_path, "wb") as f:
-                    f.write(content_ref)
-            else:
+            await _save(reference, wav_ref_path)
+            if os.path.getsize(wav_ref_path) == 0:
                 use_ref = False
+
+        # Release upload buffers + force GC before the memory-heavy worker runs.
+        import gc
+        gc.collect()
 
         print(f"[DEBUG] Audio Streams pinned to disk. Mode: {'REFERENCE' if use_ref else 'PURE'}")
     except Exception as e:
@@ -589,17 +598,31 @@ async def master_audio(
     if lufs_target is not None:
         flags.append(f"--lufs={lufs_target}")
 
-    process = subprocess.run([
-        sys.executable, "matcher_worker.py",
-        wav_target_path, ref_arg, mastered_wav_path,
-        str(sub), str(air), str(snap), str(width),
-        *flags,
-    ], capture_output=True, text=True)
+    def _run_worker(ref_path):
+        return subprocess.run([
+            sys.executable, "matcher_worker.py",
+            wav_target_path, ref_path, mastered_wav_path,
+            str(sub), str(air), str(snap), str(width),
+            *flags,
+        ], capture_output=True, text=True)
 
+    process = _run_worker(ref_arg)
     print(process.stdout)
+
+    fell_back = False
     if process.returncode != 0:
         print(process.stderr)
-        raise HTTPException(status_code=500, detail="Mastering engine failed. Check terminal logs.")
+        # Reference matching (matchering) is memory-heavy and can be killed on
+        # long songs. Rather than fail the whole request, retry once in Pure
+        # mode (DSP only, no matchering) so the artist still gets a master.
+        if use_ref:
+            print("[AUDIO CORE] Reference master failed — retrying in Pure mode (no matchering).")
+            process = _run_worker("NONE")
+            print(process.stdout)
+            fell_back = True
+        if process.returncode != 0:
+            print(process.stderr)
+            raise HTTPException(status_code=500, detail="Mastering engine failed. Check terminal logs.")
 
     # Format conversion
     final_output_path = mastered_wav_path
@@ -616,8 +639,12 @@ async def master_audio(
     media_type = "audio/wav"
     if output_format.lower() == "mp3": media_type = "audio/mpeg"
     elif output_format.lower() == "flac": media_type = "audio/flac"
-    
-    return FileResponse(final_output_path, media_type=media_type, filename=f"SOVEREIGN_MASTER.{output_format.lower()}")
+
+    return FileResponse(
+        final_output_path, media_type=media_type,
+        filename=f"SOVEREIGN_MASTER.{output_format.lower()}",
+        headers={"X-Master-Mode": "pure-fallback" if fell_back else ("reference" if use_ref else "pure")},
+    )
 
 # ---------------------------------------------------------------------------
 # PILLAR 6: THE ORACLE ENGINE (Mix Analysis)
