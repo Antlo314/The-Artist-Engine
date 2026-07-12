@@ -128,7 +128,7 @@ export default function LandingPage() {
     }, []);
 
     return (
-        <div ref={root} className="min-h-screen bg-ink-950 text-ink-50 overflow-x-hidden relative">
+        <div ref={root} className="min-h-screen bg-ink-950 text-ink-50 overflow-x-hidden relative pb-20 md:pb-0">
             <MarketingNav />
 
             {/* ============ HERO ============ */}

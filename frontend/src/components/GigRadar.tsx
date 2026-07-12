@@ -264,20 +264,22 @@ export default function GigRadar({ profile }: GigRadarProps) {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-4 md:space-y-8">
             <PageHeader
                 view="radar"
                 accent="#fb923c"
-                module="GIG RADAR ARRAY · LIVE TICKETING GRID"
+                module="GIG RADAR"
                 title="Find Gigs"
-                desc="Live Ticketmaster venues + AI leverage intel — scan results in ~8 seconds, not an afternoon of tab-hopping."
-                speedHint="~8s live scan"
+                desc="Live venues + payout intel. Scans measure ~8 seconds."
+                speedHint="~8s"
             />
 
-            <StepHint steps={['Set your search', 'Review verified venues', 'Send the pitch']} accent="#fb923c" />
+            <div className="hidden md:block">
+                <StepHint steps={['Set your search', 'Review verified venues', 'Send the pitch']} accent="#fb923c" />
+            </div>
 
             <Panel title="Search" accent="#fb923c">
-                <div className="grid md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
                     <Field label="City">
                         <div className="relative">
                             <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-700 pointer-events-none" />
@@ -285,14 +287,14 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 type="text"
                                 value={city}
                                 onChange={(e) => setCity(e.target.value)}
-                                placeholder="Brooklyn, NY or 60601"
-                                className={`${inputCls()} pl-9`}
+                                placeholder="Atlanta or 30301"
+                                className={`${inputCls()} pl-9 min-h-[44px]`}
                             />
                         </div>
                     </Field>
 
                     <Field label="Genre">
-                        <select value={genre} onChange={(e) => setGenre(e.target.value)} className={inputCls()}>
+                        <select value={genre} onChange={(e) => setGenre(e.target.value)} className={`${inputCls()} min-h-[44px]`}>
                             <option>House</option>
                             <option>Deep House</option>
                             <option>Techno</option>
@@ -314,7 +316,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                     </Field>
 
                     <Field label="Venue tier">
-                        <select value={tier} onChange={(e) => setTier(e.target.value)} className={inputCls()}>
+                        <select value={tier} onChange={(e) => setTier(e.target.value)} className={`${inputCls()} min-h-[44px]`}>
                             <option>Grassroots / Mom & Pop (50-250 cap)</option>
                             <option>Mid-Size Touring (250-1000 cap)</option>
                             <option>Top-Tier Theater (1000-3000 cap)</option>
@@ -323,7 +325,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                     </Field>
 
                     <Field label="Radius">
-                        <select value={radius} onChange={(e) => setRadius(e.target.value)} className={inputCls()}>
+                        <select value={radius} onChange={(e) => setRadius(e.target.value)} className={`${inputCls()} min-h-[44px]`}>
                             <option>Exact City</option>
                             <option>10 miles</option>
                             <option>50 miles</option>
@@ -332,7 +334,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                     </Field>
 
                     <Field label="Timeframe">
-                        <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)} className={inputCls()}>
+                        <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)} className={`${inputCls()} min-h-[44px]`}>
                             <option>Active Now</option>
                             <option>Summer 2026</option>
                             <option>Fall 2026</option>
@@ -341,8 +343,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
                     </Field>
                 </div>
 
-                <div className="mt-5 flex justify-end">
-                    <Btn variant="accent" accent="#fb923c" onClick={handleScout} disabled={isScouting}>
+                <div className="mt-4 md:mt-5 flex md:justify-end">
+                    <Btn variant="accent" accent="#fb923c" onClick={handleScout} disabled={isScouting} className="w-full md:w-auto min-h-[48px]">
                         {isScouting ? (
                             <><Activity size={16} className="animate-spin" /> Scanning venues…</>
                         ) : (

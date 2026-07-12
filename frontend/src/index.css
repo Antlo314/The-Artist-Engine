@@ -181,6 +181,23 @@
         padding-top: max(0.5rem, env(safe-area-inset-top));
     }
 
+    /* Hide horizontal scrollbar on tab strips */
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Mobile readability base */
+    @media (max-width: 767px) {
+        body {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+    }
+
     /* Soft ember halo behind elements */
     .halo-ember {
         box-shadow: 0 0 80px 10px rgba(220,38,38,0.18);

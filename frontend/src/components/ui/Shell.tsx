@@ -80,45 +80,68 @@ export function PageHeader({
 }) {
     const media = HEADER_MEDIA[view] || { video: null, poster: null };
     return (
-        <div className="hud-corners relative overflow-hidden rounded-2xl border border-white/10 mb-5 md:mb-8 h-[120px] sm:h-[148px] md:h-[188px] group">
-            {media.video ? (
-                <LazyHeaderVideo src={media.video} poster={media.poster} />
-            ) : (
-                <div
-                    className="absolute inset-0 bg-cover bg-center opacity-25 transition-transform duration-700 group-hover:scale-[1.03]"
-                    style={{ backgroundImage: `url('${media.poster || '/site/light_abstract_bg_1773233140940.png'}')` }}
-                />
-            )}
-            {/* Cinematic masking */}
-            <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/85 to-ink-950/35" />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950 to-transparent" />
-
-            <div className="relative z-10 h-full flex items-end justify-between p-4 sm:p-6 md:p-8 gap-3">
-                <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-1 sm:mb-2">
-                        <p className="font-mono text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.3em] uppercase truncate" style={{ color: accent }}>
-                            {module}
-                        </p>
-                        {speedHint && (
-                            <span
-                                className="font-mono text-[8px] sm:text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full border shrink-0"
-                                style={{ color: accent, borderColor: `${accent}55`, backgroundColor: `${accent}14` }}
-                            >
-                                {speedHint}
-                            </span>
-                        )}
-                    </div>
-                    <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-ink-50 tracking-tight">{title}</h1>
-                    <p className="text-ink-200 font-light text-xs sm:text-sm mt-1 max-w-xl leading-relaxed line-clamp-2 md:line-clamp-none">{desc}</p>
+        <>
+            {/* Mobile: compact text header (no video) — stops the “scrunched banner” problem */}
+            <div className="md:hidden mb-4">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <p className="font-mono text-[10px] tracking-[0.2em] uppercase" style={{ color: accent }}>
+                        {module}
+                    </p>
+                    {speedHint && (
+                        <span
+                            className="font-mono text-[9px] tracking-wide uppercase px-2 py-0.5 rounded-full border"
+                            style={{ color: accent, borderColor: `${accent}44`, backgroundColor: `${accent}12` }}
+                        >
+                            {speedHint}
+                        </span>
+                    )}
                 </div>
-                {children && <div className="shrink-0 hidden sm:block">{children}</div>}
+                <h1 className="font-display text-[1.65rem] font-semibold text-ink-50 tracking-tight leading-tight">
+                    {title}
+                </h1>
+                <p className="text-ink-300 text-sm mt-1.5 leading-relaxed">{desc}</p>
+                {children && <div className="mt-3">{children}</div>}
             </div>
 
-            {/* HUD meter line */}
-            <div className="absolute bottom-0 inset-x-0 h-px bg-white/10 z-10">
-                <div className="h-full w-1/5 transition-all duration-700 group-hover:w-2/5" style={{ backgroundColor: accent }} />
+            {/* Desktop / tablet: cinematic video band */}
+            <div className="hidden md:block hud-corners relative overflow-hidden rounded-2xl border border-white/10 mb-8 h-[188px] group">
+                {media.video ? (
+                    <LazyHeaderVideo src={media.video} poster={media.poster} />
+                ) : (
+                    <div
+                        className="absolute inset-0 bg-cover bg-center opacity-25 transition-transform duration-700 group-hover:scale-[1.03]"
+                        style={{ backgroundImage: `url('${media.poster || '/site/light_abstract_bg_1773233140940.png'}')` }}
+                    />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/85 to-ink-950/35" />
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950 to-transparent" />
+
+                <div className="relative z-10 h-full flex items-end justify-between p-8 gap-4">
+                    <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <p className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color: accent }}>
+                                {module}
+                            </p>
+                            {speedHint && (
+                                <span
+                                    className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full border shrink-0"
+                                    style={{ color: accent, borderColor: `${accent}55`, backgroundColor: `${accent}14` }}
+                                >
+                                    {speedHint}
+                                </span>
+                            )}
+                        </div>
+                        <h1 className="font-display text-4xl font-semibold text-ink-50 tracking-tight">{title}</h1>
+                        <p className="text-ink-200 font-light text-sm mt-1.5 max-w-xl leading-relaxed">{desc}</p>
+                    </div>
+                    {children && <div className="shrink-0">{children}</div>}
+                </div>
+
+                <div className="absolute bottom-0 inset-x-0 h-px bg-white/10 z-10">
+                    <div className="h-full w-1/5 transition-all duration-700 group-hover:w-2/5" style={{ backgroundColor: accent }} />
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 
@@ -257,20 +280,25 @@ export function Segmented<T extends string>({
     accent?: string;
 }) {
     return (
-        <div className="inline-flex bg-white/5 rounded-full p-1 gap-1">
-            {options.map((o) => {
-                const active = o.value === value;
-                return (
-                    <button
-                        key={o.value}
-                        onClick={() => onChange(o.value)}
-                        className={`px-4 py-1.5 rounded-full font-mono text-[11px] tracking-widest uppercase transition-colors ${active ? 'text-ink-950' : 'text-ink-400 hover:text-ink-50'}`}
-                        style={active ? { backgroundColor: accent } : undefined}
-                    >
-                        {o.label}
-                    </button>
-                );
-            })}
+        <div className="w-full overflow-x-auto no-scrollbar -mx-0.5 px-0.5">
+            <div className="inline-flex min-w-full sm:min-w-0 bg-white/5 rounded-xl sm:rounded-full p-1 gap-1">
+                {options.map((o) => {
+                    const active = o.value === value;
+                    return (
+                        <button
+                            key={o.value}
+                            type="button"
+                            onClick={() => onChange(o.value)}
+                            className={`flex-1 sm:flex-none whitespace-nowrap px-3 sm:px-4 py-2.5 sm:py-1.5 rounded-lg sm:rounded-full text-[12px] sm:text-[11px] font-medium sm:font-mono sm:tracking-widest sm:uppercase transition-colors min-h-[44px] sm:min-h-0 ${
+                                active ? 'text-ink-950' : 'text-ink-400 hover:text-ink-50'
+                            }`}
+                            style={active ? { backgroundColor: accent } : undefined}
+                        >
+                            {o.label}
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 }

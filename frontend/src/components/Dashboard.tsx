@@ -70,23 +70,43 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     const hasAnyActivity = activity.length > 0;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
 
             <PageHeader
                 view="dashboard"
                 accent="#ef4444"
-                module="COMMAND CENTER · ENGINE CORE"
+                module="COMMAND CENTER"
                 title="Dashboard"
-                desc="Live ops board — every number is real. Gigs ~8s · pitches ~2s · masters ~35s · contracts ~3s."
-                speedHint="speed is the product"
+                desc="Live ops board — real numbers only. Gigs ~8s · pitches ~2s · masters ~35s."
+                speedHint="live"
             />
+
+            {/* Quick actions — primary on mobile */}
+            <div className="grid grid-cols-2 gap-2.5 md:hidden">
+                {[
+                    { id: 'radar', label: 'Find Gigs', accent: '#fb923c' },
+                    { id: 'legal', label: 'Scan contract', accent: '#a78bfa' },
+                ].map((a) => (
+                    <button
+                        key={a.id}
+                        type="button"
+                        onClick={() => onNavigate(a.id)}
+                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-3.5 text-left active:scale-[0.98] transition-transform"
+                    >
+                        <div className="font-medium text-sm text-ink-50">{a.label}</div>
+                        <div className="font-mono text-[9px] tracking-widest uppercase mt-1" style={{ color: a.accent }}>
+                            Open →
+                        </div>
+                    </button>
+                ))}
+            </div>
 
             {/* ===== Animated bento grid ===== */}
             <motion.div
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-2 lg:grid-cols-6 gap-4 auto-rows-[minmax(104px,auto)]"
+                className="grid grid-cols-2 lg:grid-cols-6 gap-2.5 sm:gap-4 auto-rows-[minmax(88px,auto)] sm:auto-rows-[minmax(104px,auto)]"
             >
                 {/* Row 1 — 5 stat tiles */}
                 {STAT_DEFS.map((s) => {
@@ -99,21 +119,22 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                             key={s.key}
                             variants={tile}
                             whileHover={{ y: -4 }}
-                            className="glass-obsidian sheen rounded-2xl p-5 flex flex-col justify-between"
+                            className="glass-obsidian sheen rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between min-h-[88px]"
                         >
                             <div className="flex items-center justify-between">
-                                <Icon size={18} style={{ color: isThreat ? '#ef4444' : '#8a8a93' }} />
+                                <Icon size={16} style={{ color: isThreat ? '#ef4444' : '#8a8a93' }} />
                                 <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: empty ? '#333' : isThreat ? '#ef4444' : '#8a8a93' }} />
                             </div>
                             <div>
                                 <div
-                                    className="font-display font-bold text-3xl tracking-tight tabular-nums leading-none"
+                                    className="font-display font-bold text-2xl sm:text-3xl tracking-tight tabular-nums leading-none"
                                     style={{ color: empty ? '#55555e' : isThreat ? '#f87171' : '#f4f4f5' }}
                                 >
                                     {empty ? '—' : value.toLocaleString()}
                                 </div>
-                                <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400 mt-1.5">{s.label}</div>
-                                {empty && <div className="font-mono text-[9px] text-ink-700 mt-0.5">awaiting first op</div>}
+                                <div className="text-[11px] sm:font-mono sm:text-[10px] sm:tracking-[0.2em] sm:uppercase text-ink-400 mt-1 sm:mt-1.5 leading-snug">
+                                    {s.label}
+                                </div>
                             </div>
                         </motion.div>
                     );
