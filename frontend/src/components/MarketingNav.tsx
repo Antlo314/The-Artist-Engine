@@ -50,7 +50,7 @@ export default function MarketingNav() {
                 <div className="w-8 h-8 rounded bg-white shadow-[0_0_15px_rgba(255,255,255,0.2)] flex items-center justify-center p-1 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-shadow">
                     <img src="/site/favicon.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
-                <span className="font-cinzel font-bold text-white tracking-widest">ENGINE.OS</span>
+                <span className="font-display font-semibold text-white tracking-widest">ENGINE.OS</span>
             </div>
 
             {/* Links & CTA */}
