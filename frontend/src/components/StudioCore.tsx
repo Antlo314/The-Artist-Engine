@@ -5,15 +5,27 @@ import WaveSurfer from 'wavesurfer.js';
 import Spectrogram from 'wavesurfer.js/dist/plugins/spectrogram.esm.js';
 import LoadingProgressBar from './LoadingProgressBar';
 import { useEngine } from '../lib/engineState';
-import { PageHeader, Panel, Btn, StepHint } from './ui/Shell';
+import { PageHeader, Panel, Btn, StepHint, Segmented } from './ui/Shell';
 
 export default function StudioCore() {
     const { record } = useEngine();
     const [phase, setPhase] = useState<'dropzone' | 'processing' | 'tuning'>('dropzone');
     const [knobs, setKnobs] = useState({ sub: 50, air: 60, snap: 40, width: 70 });
+    // New mastering options (v5): tone bands, mono-bass, loudness profile, blend.
+    const [tone, setTone] = useState({ warmth: 50, presence: 50, demud: 50 });
+    const [monoBass, setMonoBass] = useState(false);
+    const [masterProfile, setMasterProfile] = useState<'streaming' | 'club' | 'podcast' | 'custom' | 'off'>('streaming');
+    const [customLufs, setCustomLufs] = useState(-12);
+    const [refInfluence, setRefInfluence] = useState(100);
+    const [showMoreOptions, setShowMoreOptions] = useState(false);
     const [targetFile, setTargetFile] = useState<File | null>(null);
     const [refFile, setRefFile] = useState<File | null>(null);
     const [outputFormat, setOutputFormat] = useState('wav');
+
+    const PROFILE_LUFS: Record<string, number | null> = {
+        streaming: -14, club: -9, podcast: -16, off: null,
+    };
+    const resolvedLufs = () => (masterProfile === 'custom' ? customLufs : PROFILE_LUFS[masterProfile]);
     const [isSovereignMaster, setIsSovereignMaster] = useState(true);
     const [masterAudioUrl, setMasterAudioUrl] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -205,17 +217,26 @@ export default function StudioCore() {
     };
 
     const handleMaster = async () => {
-        if (!targetFile || !refFile) return;
+        if (!targetFile) return; // reference is optional (Pure mode)
         setPhase('processing');
 
         try {
             const formData = new FormData();
             formData.append('target', targetFile);
-            formData.append('reference', refFile);
+            if (refFile) {
+                formData.append('reference', refFile);
+                formData.append('ref_influence', refInfluence.toString());
+            }
             formData.append('sub', knobs.sub.toString());
             formData.append('air', knobs.air.toString());
             formData.append('snap', knobs.snap.toString());
             formData.append('width', knobs.width.toString());
+            formData.append('warmth', tone.warmth.toString());
+            formData.append('presence', tone.presence.toString());
+            formData.append('demud', tone.demud.toString());
+            formData.append('mono_bass', monoBass ? 'true' : 'false');
+            const lufs = resolvedLufs();
+            if (lufs !== null && lufs !== undefined) formData.append('lufs_target', lufs.toString());
             formData.append('output_format', outputFormat);
 
             const response = await fetch('/api/master', {
@@ -332,6 +353,22 @@ export default function StudioCore() {
                 </span>
                 {hint && <span className="text-[10px] text-ink-700 text-center leading-tight">{hint}</span>}
             </div>
+        </div>
+    );
+
+    const OptionSlider = ({ label, hint, value, min = 0, max = 100, suffix = '', onChange }:
+        { label: string; hint?: string; value: number; min?: number; max?: number; suffix?: string; onChange: (v: number) => void }) => (
+        <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] tracking-widest uppercase text-ink-200">{label}</span>
+                <span className="font-mono text-[10px] text-cyan-400 tabular-nums">{value}{suffix}</span>
+            </div>
+            <input
+                type="range" min={min} max={max} value={value}
+                onChange={(e) => onChange(Number(e.target.value))}
+                className="w-full accent-cyan-500"
+            />
+            {hint && <span className="font-mono text-[9px] text-ink-700">{hint}</span>}
         </div>
     );
 
@@ -497,9 +534,9 @@ export default function StudioCore() {
                                             <Volume2 size={14} />
                                         </div>
                                         <div className="flex flex-col truncate">
-                                            <span className={`font-mono text-[10px] tracking-widest uppercase ${refFile ? 'text-cyan-400' : 'text-ink-400'}`}>Reference track</span>
+                                            <span className={`font-mono text-[10px] tracking-widest uppercase ${refFile ? 'text-cyan-400' : 'text-ink-400'}`}>Reference track <span className="text-ink-700 normal-case">(optional)</span></span>
                                             <span className={`font-mono text-xs truncate ${refFile ? 'text-ink-50' : 'text-ink-700'}`}>
-                                                {refFile ? refFile.name : 'Choose a professionally mastered reference…'}
+                                                {refFile ? refFile.name : 'Optional — skip for a Pure master'}
                                             </span>
                                         </div>
                                     </div>
@@ -524,7 +561,40 @@ export default function StudioCore() {
                                 </div>
                             </div>
 
-                            <div className="mt-6 flex flex-col items-center gap-1.5 relative z-10 w-full">
+                            {/* Master profile (loudness target) */}
+                            {targetFile && (
+                                <div className="mt-6 flex flex-col items-center gap-2 relative z-10 w-full">
+                                    <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">Master profile</span>
+                                    <Segmented
+                                        accent="#22d3ee"
+                                        value={masterProfile}
+                                        onChange={setMasterProfile}
+                                        options={[
+                                            { value: 'streaming', label: 'Streaming' },
+                                            { value: 'club', label: 'Club' },
+                                            { value: 'podcast', label: 'Podcast' },
+                                            { value: 'custom', label: 'Custom' },
+                                            { value: 'off', label: 'Off' },
+                                        ]}
+                                    />
+                                    <span className="font-mono text-[9px] text-ink-700 tracking-wide">
+                                        {masterProfile === 'streaming' && 'Spotify / Apple standard · −14 LUFS'}
+                                        {masterProfile === 'club' && 'DJ-loud for club systems · −9 LUFS'}
+                                        {masterProfile === 'podcast' && 'Speech-optimized · −16 LUFS'}
+                                        {masterProfile === 'off' && 'No loudness normalization'}
+                                        {masterProfile === 'custom' && `Target ${customLufs} LUFS`}
+                                    </span>
+                                    {masterProfile === 'custom' && (
+                                        <input
+                                            type="range" min={-20} max={-8} step={0.5} value={customLufs}
+                                            onChange={(e) => setCustomLufs(Number(e.target.value))}
+                                            className="w-48 accent-cyan-500"
+                                        />
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="mt-5 flex flex-col items-center gap-1.5 relative z-10 w-full">
                                 <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">Export format</span>
                                 <div className="flex gap-2">
                                     {['wav', 'mp3', 'flac'].map(fmt => (
@@ -539,14 +609,51 @@ export default function StudioCore() {
                                 </div>
                             </div>
 
-                            {(targetFile && refFile) && (
+                            {/* More options (tone bands, mono-bass, reference blend) */}
+                            {targetFile && (
+                                <div className="mt-5 w-full max-w-md relative z-10">
+                                    <button
+                                        onClick={() => setShowMoreOptions(v => !v)}
+                                        className="mx-auto flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase text-ink-400 hover:text-ink-50 transition-colors"
+                                    >
+                                        {showMoreOptions ? '− Fewer options' : '+ More options'}
+                                    </button>
+                                    {showMoreOptions && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                                            className="mt-4 flex flex-col gap-4 bg-black/30 border border-white/10 rounded-xl p-4"
+                                        >
+                                            {refFile && (
+                                                <OptionSlider label="Reference influence" hint="how hard to chase the reference" value={refInfluence} min={0} max={100} onChange={setRefInfluence} suffix="%" />
+                                            )}
+                                            <OptionSlider label="Warmth" hint="low-mid body" value={tone.warmth} onChange={(v) => setTone({ ...tone, warmth: v })} />
+                                            <OptionSlider label="Presence" hint="vocal cut-through" value={tone.presence} onChange={(v) => setTone({ ...tone, presence: v })} />
+                                            <OptionSlider label="De-mud" hint="clears 300Hz congestion" value={tone.demud} onChange={(v) => setTone({ ...tone, demud: v })} />
+                                            <label className="flex items-center justify-between cursor-pointer">
+                                                <div>
+                                                    <span className="font-mono text-[10px] tracking-widest uppercase text-ink-200">Mono bass</span>
+                                                    <span className="block font-mono text-[9px] text-ink-700">phase-tight lows for clubs</span>
+                                                </div>
+                                                <button
+                                                    onClick={() => setMonoBass(v => !v)}
+                                                    className={`w-10 h-5 rounded-full transition-colors relative ${monoBass ? 'bg-cyan-500' : 'bg-white/10'}`}
+                                                >
+                                                    <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${monoBass ? 'left-5' : 'left-0.5'}`} />
+                                                </button>
+                                            </label>
+                                        </motion.div>
+                                    )}
+                                </div>
+                            )}
+
+                            {targetFile && (
                                 <motion.button
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     onClick={handleMaster}
                                     className="mt-8 px-12 py-3 bg-cyan-500 hover:bg-cyan-400 text-ink-950 font-display font-medium tracking-wide rounded-full transition-colors z-10 w-full md:w-auto"
                                 >
-                                    Master it
+                                    {refFile ? 'Master it' : 'Master it (Pure mode)'}
                                 </motion.button>
                             )}
                         </div>
