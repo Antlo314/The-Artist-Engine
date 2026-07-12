@@ -523,63 +523,89 @@ def cleanup_audio_files(paths: list):
 async def master_audio(
     background_tasks: BackgroundTasks,
     target: UploadFile = File(...),
-    reference: UploadFile = File(...),
+    reference: Optional[UploadFile] = File(None),
     sub: float = Form(50.0),
     air: float = Form(50.0),
     snap: float = Form(50.0),
     width: float = Form(50.0),
+    warmth: float = Form(50.0),
+    presence: float = Form(50.0),
+    demud: float = Form(50.0),
+    mono_bass: bool = Form(False),
+    ref_influence: float = Form(100.0),
+    lufs_target: Optional[float] = Form(None),
     output_format: str = Form("wav")
 ):
     print(f"[AUDIO CORE] Ingesting mastering request. Target: {target.filename}")
-    
+
     os.makedirs("temp", exist_ok=True)
     job_id = str(int(time.time()))
-    
+
     wav_target_path = f"temp/target_{job_id}.wav"
     wav_ref_path = f"temp/ref_{job_id}.wav"
-    
+    use_ref = reference is not None and bool(getattr(reference, "filename", None))
+
     try:
         # Pydub often fails trying to sniff headers from raw byte streams or mismatched extensions.
         # We explicitly save the UploadFile stream physical data first.
         content_target = await target.read()
-        content_ref = await reference.read()
-        
         with open(wav_target_path, "wb") as f:
             f.write(content_target)
-        with open(wav_ref_path, "wb") as f:
-            f.write(content_ref)
-            
-        print("[DEBUG] Audio Streams pinned to disk.")
+
+        # Reference is optional — no reference => "Pure mode" (DSP only, no matchering).
+        if use_ref:
+            content_ref = await reference.read()
+            if content_ref:
+                with open(wav_ref_path, "wb") as f:
+                    f.write(content_ref)
+            else:
+                use_ref = False
+
+        print(f"[DEBUG] Audio Streams pinned to disk. Mode: {'REFERENCE' if use_ref else 'PURE'}")
     except Exception as e:
         print("[CRITICAL] Stream Ingestion failed:")
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"File Stream I/O failed: {str(e)}")
-    
+
     # Output path from worker
     mastered_wav_path = f"temp/mastered_{job_id}.wav"
-    
-    print("[AUDIO CORE] Dispatching to OMEGA Matchering Worker...")
-    
-    # Run Matchering Worker
+    ref_arg = wav_ref_path if use_ref else "NONE"
+
+    print("[AUDIO CORE] Dispatching to Sovereign Mastering Worker...")
+
+    # New DSP/loudness options passed as trailing --key=value flags (backward compatible).
+    flags = [
+        f"--warmth={warmth}",
+        f"--presence={presence}",
+        f"--demud={demud}",
+        f"--mono_bass={'true' if mono_bass else 'false'}",
+        f"--ref_influence={ref_influence}",
+    ]
+    if lufs_target is not None:
+        flags.append(f"--lufs={lufs_target}")
+
     process = subprocess.run([
-        sys.executable, "matcher_worker.py", 
-        wav_target_path, wav_ref_path, mastered_wav_path,
-        str(sub), str(air), str(snap), str(width)
+        sys.executable, "matcher_worker.py",
+        wav_target_path, ref_arg, mastered_wav_path,
+        str(sub), str(air), str(snap), str(width),
+        *flags,
     ], capture_output=True, text=True)
-    
+
     print(process.stdout)
     if process.returncode != 0:
         print(process.stderr)
         raise HTTPException(status_code=500, detail="Mastering engine failed. Check terminal logs.")
-        
+
     # Format conversion
     final_output_path = mastered_wav_path
     if output_format.lower() in ["mp3", "flac"]:
         final_output_path = f"temp/final_{job_id}.{output_format.lower()}"
         AudioSegment.from_file(mastered_wav_path).export(final_output_path, format=output_format.lower())
-        
+
     # Cleanup task
-    files_to_cleanup = [wav_target_path, wav_ref_path, mastered_wav_path, final_output_path]
+    files_to_cleanup = [wav_target_path, mastered_wav_path, final_output_path]
+    if use_ref:
+        files_to_cleanup.append(wav_ref_path)
     background_tasks.add_task(cleanup_audio_files, files_to_cleanup)
     
     media_type = "audio/wav"
