@@ -1,39 +1,68 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=JetBrains+Mono:wght@100;300;400;700&family=Inter:wght@300;400;600;800&display=swap');
+/* ============================================================
+   THE ARTIST ENGINE — Design System v2 "SOVEREIGN CINEMA"
+   Fonts: Clash Display (display) + Satoshi (UI/body) — Fontshare, free
+          JetBrains Mono (data readouts) + Cinzel (legacy app views)
+   ============================================================ */
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@300,400,500,700,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=JetBrains+Mono:wght@100;300;400;700&display=swap');
 
 @import "tailwindcss";
 
 @theme {
-    --color-studio-dark: #f8fafc; /* Now actually the light background */
-    --color-studio-900: #0f172a; /* Main dark text */
-    --color-studio-800: #334155; /* Secondary text */
-    --color-studio-700: #475569;
-    --color-studio-accent: #dc2626; /* Vibrant red accent */
-    --color-studio-neon: #ef4444;
+    /* --- Core surface scale (dark cinematic) --- */
+    --color-ink-950: #060607;   /* page void */
+    --color-ink-900: #0a0a0c;   /* base surface */
+    --color-ink-800: #101014;   /* raised surface */
+    --color-ink-700: #1a1a20;   /* borders / wells */
+    --color-ink-400: #8a8a93;   /* muted text */
+    --color-ink-200: #d6d6da;   /* secondary text */
+    --color-ink-50:  #f4f4f5;   /* primary text */
 
-    --font-inter: 'Inter', sans-serif;
+    /* --- Brand --- */
+    --color-ember-600: #dc2626; /* signature red */
+    --color-ember-500: #ef4444;
+    --color-ember-400: #f87171;
+
+    /* --- Pillar accents (used sparingly) --- */
+    --color-radar: #fb923c;     /* Gig Radar — orange   */
+    --color-zion: #a78bfa;      /* Zion Legal — violet  */
+    --color-audio: #22d3ee;     /* Master Core — cyan   */
+    --color-shark: #f4f4f5;     /* Shark — bone white   */
+
+    /* --- Fonts --- */
+    --font-display: 'Clash Display', 'Inter', sans-serif;
+    --font-sans: 'Satoshi', 'Inter', sans-serif;
+    --font-inter: 'Satoshi', 'Inter', sans-serif;
     --font-cinzel: 'Cinzel', serif;
 }
 
 @layer base {
+    html {
+        scroll-behavior: initial; /* Lenis drives scrolling */
+    }
+
     body {
-        background-color: #f8fafc;
-        color: #0f172a;
-        font-family: var(--font-inter);
+        background-color: var(--color-ink-950);
+        color: var(--color-ink-50);
+        font-family: var(--font-sans);
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
     }
 
-    body::selection {
-        background-color: rgba(220, 38, 38, 0.2);
-        color: var(--color-studio-accent);
+    body::selection,
+    ::selection {
+        background-color: rgba(220, 38, 38, 0.3);
+        color: #fff;
     }
 
-    /* Global SVG Noise Overlay Removed for Clarity */
+    h1, h2, h3, h4 {
+        font-family: var(--font-display);
+    }
 
-    h1,
-    h2,
-    h3,
-    h4,
+    .font-display {
+        font-family: var(--font-display);
+    }
+
     .font-cinzel {
         font-family: var(--font-cinzel);
     }
@@ -44,11 +73,79 @@
 }
 
 @layer utilities {
+
+    /* ====== V2 dark glass (marketing surfaces) ====== */
+    .glass-obsidian {
+        background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .glass-obsidian-hover {
+        transition: border-color 400ms cubic-bezier(0.4,0,0.2,1),
+                    box-shadow 400ms cubic-bezier(0.4,0,0.2,1),
+                    transform 400ms cubic-bezier(0.4,0,0.2,1);
+    }
+    .glass-obsidian-hover:hover {
+        border-color: rgba(220,38,38,0.35);
+        box-shadow: 0 30px 80px rgba(0,0,0,0.65), 0 0 40px rgba(220,38,38,0.12), inset 0 1px 0 rgba(255,255,255,0.12);
+        transform: translateY(-3px);
+    }
+
+    /* Fine hairline divider */
+    .hairline {
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    /* Cinematic display text: tight, confident */
+    .text-cinema {
+        font-family: var(--font-display);
+        letter-spacing: -0.03em;
+        line-height: 0.94;
+        font-weight: 600;
+    }
+
+    /* Soft ember halo behind elements */
+    .halo-ember {
+        box-shadow: 0 0 80px 10px rgba(220,38,38,0.18);
+    }
+
+    .text-glow {
+        text-shadow: 0 0 10px rgba(220, 38, 38, 0.2), 0 0 20px rgba(220, 38, 38, 0.1);
+    }
+
+    .border-glow {
+        box-shadow: 0 0 15px rgba(220, 38, 38, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.08);
+    }
+
+    /* Film grain — subtle, layered over dark surfaces */
+    .grain::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.5;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZmlsdGVyIGlkPSJub2lzZUZpbHRlciI+CiAgICA8ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42NSIgbnVtT2N0YXZlcz0iMyIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPgogIDwvZmlsdGVyPgogIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZUZpbHRlcikiIG9wYWNpdHk9IjAuMDgiLz4KPC9zdmc+");
+    }
+
+    /* Infinite horizontal marquee */
+    .marquee-track {
+        display: flex;
+        width: max-content;
+        animation: marquee-scroll 30s linear infinite;
+    }
+    .marquee-track:hover {
+        animation-play-state: paused;
+    }
+
+    /* ====== Legacy glass (in-app views — keep until app overhaul) ====== */
     .glass-panel {
         background-color: rgba(255, 255, 255, 0.65);
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.8);
-        box-shadow: 0 8px 32px 0 rgba(220, 38, 38, 0.05); /* Slight red tint to shadow */
+        box-shadow: 0 8px 32px 0 rgba(220, 38, 38, 0.05);
     }
 
     .glass-card {
@@ -66,30 +163,22 @@
         box-shadow: 0 15px 50px rgba(220, 38, 38, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.8);
         transform: translateY(-2px);
     }
-
-    .text-glow {
-        text-shadow: 0 0 10px rgba(220, 38, 38, 0.2), 0 0 20px rgba(220, 38, 38, 0.1);
-    }
-
-    .border-glow {
-        box-shadow: 0 0 15px rgba(220, 38, 38, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.5);
-    }
 }
 
 @layer components {
 
-    /* Scrollbar override */
+    /* Scrollbar — dark */
     ::-webkit-scrollbar {
         width: 6px;
         height: 6px;
     }
 
     ::-webkit-scrollbar-track {
-        background: #f8fafc;
+        background: #0a0a0c;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
+        background: #2a2a32;
         border-radius: 3px;
     }
 
@@ -97,15 +186,13 @@
         background: rgba(220, 38, 38, 0.5);
     }
 
-    /* === ARTISTIC UI OVERRIDES === */
-    
-    /* Glitch Effect on Hover for Headers */
+    /* Glitch Effect on Hover for Headers (fixed: was invalid rgba(hex) syntax) */
     .glitch-hover {
         position: relative;
         transition: all 0.2s ease;
     }
     .glitch-hover:hover {
-        text-shadow: 2px 0 rgba(2dc2d1, 0.8), -2px 0 rgba(e92626, 0.8);
+        text-shadow: 2px 0 rgba(45, 194, 209, 0.8), -2px 0 rgba(233, 38, 38, 0.8);
         animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
     }
 
@@ -124,8 +211,6 @@
     .shape-chamfer-br {
         clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
     }
-
-    /* Hidden Default Cursor (Replaced by Framer) - REMOVED for performance */
 }
 
 @keyframes glitch-anim {
@@ -135,4 +220,9 @@
     60% { transform: translate(2px, 1px) }
     80% { transform: translate(1px, -1px) }
     100% { transform: translate(0) }
-}
+}
+
+@keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}

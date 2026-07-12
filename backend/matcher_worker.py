@@ -1,7 +1,7 @@
 import matchering as mg
 import sys
 import os
-from pedalboard import Pedalboard, HighShelfFilter, LowShelfFilter, Compressor, Chorus
+from pedalboard import Pedalboard, HighShelfFilter, LowShelfFilter, Compressor, Chorus, Limiter
 from pedalboard.io import AudioFile
 
 def process_audio(target_path, reference_path, output_path, sub, air, snap, width):
@@ -58,6 +58,11 @@ def process_audio(target_path, reference_path, output_path, sub, air, snap, widt
     if width > 50:
         mix = (width - 50) / 200.0 # max 0.25
         board.append(Chorus(rate_hz=0.5, depth=0.1, centre_delay_ms=7.0, feedback=0.0, mix=mix))
+
+    # True-peak safety limiter (ALWAYS last). The shelf boosts above can push
+    # peaks past 0 dBFS and clip; this ceilings the master at -1.0 dBTP, which
+    # is the streaming-safe standard and prevents the distortion/"muffled" issue.
+    board.append(Limiter(threshold_db=-1.0, release_ms=100.0))
 
     try:
         with AudioFile(temp_matched_path) as f:

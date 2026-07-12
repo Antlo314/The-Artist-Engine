@@ -1,116 +1,346 @@
-import { motion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Zap, Target, ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowDown, Radar, Scale, AudioWaveform, Swords } from 'lucide-react';
 import MarketingNav from '../components/MarketingNav';
+import VinylScene from '../components/three/VinylScene';
+import { useSmoothScroll, gsap, ScrollTrigger } from '../lib/useSmoothScroll';
+
+/* ============================================================
+   THE ARTIST ENGINE — Landing v2 "SOVEREIGN CINEMA"
+   Dark cinematic hero (procedural 3D vinyl) + scroll story.
+============================================================ */
+
+const PILLARS = [
+    {
+        id: '01',
+        icon: AudioWaveform,
+        accent: '#22d3ee',
+        name: 'AUDIO MASTER CORE',
+        headline: 'Commercial masters. Sixty seconds.',
+        copy: 'Reference-matched mastering driven by real DSP — RMS, EQ curve, loudness and stereo field matched to any record you point it at. Finished with a true-peak limiter at streaming standard.',
+        bullets: ['Reference-match engine', 'Sub / Air / Snap / Width controls', 'WAV · MP3 · FLAC delivery'],
+        image: '/site/neural_audio_mockup.png',
+    },
+    {
+        id: '02',
+        icon: Radar,
+        accent: '#fb923c',
+        name: 'GIG RADAR ARRAY',
+        headline: 'Real venues. Verified live.',
+        copy: 'The war room scans live ticketing data for rooms actively booking your genre — then layers AI strategy on every verified target: payout models, reputation scores, leverage angles, and who to talk to.',
+        bullets: ['Ticketmaster-verified targets', 'Reputation + payout intel', 'One-tap pitch generation'],
+        image: '/site/gig_radar_mockup.png',
+    },
+    {
+        id: '03',
+        icon: Swords,
+        accent: '#f4f4f5',
+        name: 'SHARK PROTOCOL',
+        headline: 'Every offer, countered.',
+        copy: 'An AI negotiator trained on predatory industry tactics reads every promoter offer, prices your leverage, and drafts the counter — email, call script, or DM — in your voice, before you lose the room.',
+        bullets: ['Offer decomposition', 'Leverage-priced counters', 'Email · Call · DM output'],
+        image: null,
+    },
+    {
+        id: '04',
+        icon: Scale,
+        accent: '#a78bfa',
+        name: 'ZION LEGAL SENTINEL',
+        headline: 'Predatory clauses, flagged instantly.',
+        copy: 'Forensic contract analysis across PDF, DOCX, or raw text. Recoupment traps, perpetuity grabs, and 180-day payout games get flagged and translated into plain language — before you sign.',
+        bullets: ['PDF / DOCX / text ingestion', 'Clause-level risk flags', 'Plain-language translation'],
+        image: '/site/zion_defense_mockup.png',
+    },
+];
+
+const STATS = [
+    { value: 230, suffix: 'K+', label: 'live events searchable' },
+    { value: 60, suffix: 's', label: 'to a commercial master' },
+    { value: 4, suffix: '', label: 'autonomous pillars' },
+    { value: 100, suffix: '%', label: 'artist-owned. no middlemen' },
+];
+
+const MARQUEE = ['MASTER', 'SCOUT', 'NEGOTIATE', 'PROTECT'];
 
 export default function LandingPage() {
     const navigate = useNavigate();
+    const root = useRef<HTMLDivElement>(null);
+    useSmoothScroll();
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            // Hero entrance — staggered word reveal
+            gsap.fromTo('.hero-word',
+                { yPercent: 110, opacity: 0 },
+                { yPercent: 0, opacity: 1, duration: 1.1, stagger: 0.08, ease: 'power4.out', delay: 0.15 }
+            );
+            gsap.fromTo('.hero-fade',
+                { y: 24, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.9, stagger: 0.12, ease: 'power3.out', delay: 0.7 }
+            );
+
+            // Pillar sections — content + image reveals
+            gsap.utils.toArray<HTMLElement>('.pillar-section').forEach((section) => {
+                gsap.fromTo(section.querySelectorAll('.pillar-reveal'),
+                    { y: 60, opacity: 0 },
+                    {
+                        y: 0, opacity: 1, duration: 1, stagger: 0.12, ease: 'power3.out',
+                        scrollTrigger: { trigger: section, start: 'top 65%' },
+                    }
+                );
+                const img = section.querySelector('.pillar-visual');
+                if (img) {
+                    gsap.fromTo(img,
+                        { yPercent: 10, scale: 0.96 },
+                        {
+                            yPercent: -10, scale: 1, ease: 'none',
+                            scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 1.2 },
+                        }
+                    );
+                }
+            });
+
+            // Stats counters
+            gsap.utils.toArray<HTMLElement>('.stat-num').forEach((el) => {
+                const target = Number(el.dataset.value || 0);
+                const obj = { n: 0 };
+                gsap.to(obj, {
+                    n: target, duration: 1.8, ease: 'power2.out',
+                    scrollTrigger: { trigger: el, start: 'top 85%' },
+                    onUpdate: () => { el.textContent = String(Math.round(obj.n)); },
+                });
+            });
+
+            // Finale headline
+            gsap.fromTo('.finale-reveal',
+                { y: 50, opacity: 0 },
+                {
+                    y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: 'power3.out',
+                    scrollTrigger: { trigger: '.finale-section', start: 'top 70%' },
+                }
+            );
+        }, root);
+
+        // Recalculate positions after fonts/images settle
+        const t = setTimeout(() => ScrollTrigger.refresh(), 600);
+        return () => { clearTimeout(t); ctx.revert(); };
+    }, []);
 
     return (
-        <div className="min-h-screen bg-black text-white overflow-x-hidden relative selection:bg-red-500/30">
-            {/* Ambient Background */}
-            <div className="absolute inset-0 z-0 pointer-events-none bg-black overflow-hidden relative">
-                {/* Cinematic Letterbox - Top */}
-                <div className="absolute top-0 left-0 w-full h-[12vh] bg-black z-20 shadow-[0_20px_50px_rgba(0,0,0,1)]" />
-
-                <div 
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
-                    dangerouslySetInnerHTML={{
-                        __html: `
-                        <video
-                            autoplay
-                            loop
-                            muted
-                            playsinline
-                            class="w-full h-full object-cover contrast-125 saturate-150 brightness-75"
-                        >
-                            <source src="/site/core_engine.mp4" type="video/mp4" />
-                        </video>
-                        `
-                    }}
-                />
-
-                {/* Cinematic Letterbox - Bottom */}
-                <div className="absolute bottom-0 left-0 w-full h-[12vh] bg-black z-20 shadow-[0_-20px_50px_rgba(0,0,0,1)] flex items-end justify-center pb-4">
-                     <span className="font-mono text-[10px] text-gray-800 tracking-widest uppercase hidden md:block">System Link Established</span>
-                </div>
-            </div>
-
-            {/* Fog / Grain Overlay */}
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZmlsdGVyIGlkPSJub2lzZUZpbHRlciI+CiAgICA8ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42NSIgbnVtT2N0YXZlcz0iMyIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPgogIDwvZmlsdGVyPgogIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZUZpbHRlcikiIG9wYWNpdHk9IjAuMDgiLz4KPC9zdmc+')] z-10 pointer-events-none opacity-30" />
-
+        <div ref={root} className="min-h-screen bg-ink-950 text-ink-50 overflow-x-hidden relative">
             <MarketingNav />
 
-            <main className="relative z-20 flex flex-col items-center justify-center min-h-screen px-4 text-center">
-                
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
-                    className="flex flex-col items-center mt-24 mb-16"
-                >
-                    <div className="mb-6 flex items-center justify-center space-x-3">
-                        <div className="w-12 h-12 border border-red-500/30 rounded-lg flex items-center justify-center bg-black/40 backdrop-blur-md shadow-[0_0_15px_rgba(220,38,38,0.2)]">
-                            <img src="/site/favicon.png" alt="Engine Logo" className="w-8 h-8 object-contain" />
-                        </div>
-                        <span className="font-mono text-[10px] tracking-[0.3em] text-red-500 uppercase font-bold border border-red-900/50 px-3 py-1 bg-red-900/10 rounded-full">
-                            System Live
+            {/* ============ HERO ============ */}
+            <section className="relative h-[100svh] min-h-[640px] grain overflow-hidden">
+                {/* 3D scene */}
+                <div className="absolute inset-0 md:left-[28%] z-0 opacity-80 md:opacity-100">
+                    <VinylScene />
+                </div>
+                {/* Cinematic gradients over the scene */}
+                <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-r from-ink-950 via-ink-950/70 to-transparent md:via-ink-950/40" />
+                <div className="absolute inset-x-0 bottom-0 h-40 z-[1] pointer-events-none bg-gradient-to-t from-ink-950 to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-24 z-[1] pointer-events-none bg-gradient-to-b from-ink-950/90 to-transparent" />
+
+                {/* Copy */}
+                <div className="relative z-10 h-full max-w-7xl mx-auto px-6 md:px-10 flex flex-col justify-center">
+                    <div className="hero-fade mb-8 flex items-center gap-3">
+                        <span className="inline-flex h-2 w-2 rounded-full bg-ember-500 animate-pulse" />
+                        <span className="font-mono text-[10px] tracking-[0.35em] text-ink-400 uppercase">
+                            Sovereign Protocol · v3 · Live
                         </span>
                     </div>
 
-                    <h1 className="font-cinzel text-5xl md:text-8xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)] mb-2">
-                        THE ARTIST
+                    <h1 className="text-cinema text-[clamp(3.2rem,9.5vw,8.5rem)] text-ink-50 max-w-5xl">
+                        <span className="block overflow-hidden pb-1">
+                            <span className="hero-word inline-block">The&nbsp;operating</span>
+                        </span>
+                        <span className="block overflow-hidden pb-1">
+                            <span className="hero-word inline-block">system&nbsp;for</span>
+                        </span>
+                        <span className="block overflow-hidden pb-2">
+                            <span className="hero-word inline-block text-transparent bg-clip-text bg-gradient-to-br from-ember-400 via-ember-500 to-ember-600">
+                                sovereign&nbsp;artists.
+                            </span>
+                        </span>
                     </h1>
-                    <h2 className="font-mono text-2xl md:text-4xl text-red-600 tracking-[0.5em] font-bold drop-shadow-[0_0_15px_rgba(220,38,38,0.6)] mb-8">
-                        ENGINE.OS
-                    </h2>
 
-                    <p className="font-mono text-xs md:text-sm text-gray-400 max-w-2xl leading-relaxed tracking-widest uppercase mb-12 border-l-2 border-r-2 border-red-900/30 px-8 py-2">
-                        The fully autonomous operational framework for sovereign creators. 
-                        Targeting routing, secure communications, and acoustic mastering in a single tactical dashboard.
+                    <p className="hero-fade mt-8 max-w-xl text-ink-200 text-base md:text-lg font-light leading-relaxed">
+                        Master your records. Find real rooms. Counter every offer.
+                        Kill predatory contracts. One engine — no middlemen.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="hero-fade mt-10 flex flex-col sm:flex-row gap-4">
                         <button
                             onClick={() => navigate('/engine')}
-                            className="group relative px-6 py-4 md:px-8 bg-transparent overflow-hidden rounded-sm border border-red-500/50 hover:border-red-400 transition-colors"
+                            className="group relative overflow-hidden rounded-full bg-ember-600 hover:bg-ember-500 transition-colors px-8 py-4 halo-ember"
                         >
-                            <div className="absolute inset-0 bg-red-600/10 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
-                            <div className="relative flex items-center justify-center gap-3 font-mono tracking-widest text-xs md:text-sm text-red-50 font-bold uppercase drop-shadow-md">
-                                Enter The Engine <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                            </div>
+                            <span className="relative flex items-center justify-center gap-3 font-display font-medium tracking-wide text-white">
+                                Enter the Engine
+                                <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+                            </span>
                         </button>
-
                         <button
                             onClick={() => navigate('/features')}
-                            className="px-6 py-4 md:px-8 bg-transparent border border-gray-700 hover:border-gray-500 transition-colors rounded-sm font-mono tracking-widest text-xs md:text-sm text-gray-300 hover:text-white uppercase flex items-center justify-center"
+                            className="rounded-full border hairline hover:border-ink-400/60 transition-colors px-8 py-4 font-display font-medium tracking-wide text-ink-200 hover:text-white"
                         >
                             View Architecture
                         </button>
                     </div>
-                </motion.div>
+                </div>
 
-                {/* Tactical Features Strip */}
-                <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1, duration: 1 }}
-                    className="w-full max-w-5xl px-2 grid grid-cols-3 gap-2 md:gap-8 pb-12 mt-auto"
-                >
-                    <div className="flex flex-col items-center text-center opacity-60 hover:opacity-100 transition-opacity">
-                        <Target className="text-red-500 mb-1 md:mb-2 w-5 h-5 md:w-6 md:h-6" />
-                        <span className="font-mono text-[8px] md:text-[9px] tracking-wider md:tracking-[0.2em] text-gray-400 uppercase">Gig Radar</span>
+                {/* Scroll cue */}
+                <div className="hero-fade absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-ink-400">
+                    <span className="font-mono text-[9px] tracking-[0.3em] uppercase">Scroll</span>
+                    <ArrowDown size={14} className="animate-bounce" />
+                </div>
+            </section>
+
+            {/* ============ MARQUEE ============ */}
+            <section className="relative border-y hairline bg-ink-900/60 py-5 overflow-hidden">
+                <div className="marquee-track">
+                    {[0, 1].map((dup) => (
+                        <div key={dup} className="flex items-center shrink-0">
+                            {Array.from({ length: 4 }).flatMap((_, rep) =>
+                                MARQUEE.map((word, i) => (
+                                    <span key={`${dup}-${rep}-${i}`} className="flex items-center">
+                                        <span className="font-display font-semibold text-2xl md:text-3xl tracking-tight text-ink-50/90 px-6">
+                                            {word}
+                                        </span>
+                                        <span className="text-ember-600 text-xl">✦</span>
+                                    </span>
+                                ))
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* ============ PILLARS ============ */}
+            <section className="relative max-w-7xl mx-auto px-6 md:px-10 pt-28 pb-8">
+                <p className="font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-4">The four pillars</p>
+                <h2 className="text-cinema text-4xl md:text-6xl max-w-3xl">
+                    An entire back office,<br />running autonomously.
+                </h2>
+            </section>
+
+            {PILLARS.map((p, idx) => {
+                const Icon = p.icon;
+                const flip = idx % 2 === 1;
+                return (
+                    <section key={p.id} className="pillar-section relative max-w-7xl mx-auto px-6 md:px-10 py-20 md:py-28">
+                        <div className={`grid md:grid-cols-2 gap-10 md:gap-16 items-center ${flip ? 'md:[direction:rtl]' : ''}`}>
+                            {/* Copy */}
+                            <div className="[direction:ltr]">
+                                <div className="pillar-reveal flex items-center gap-4 mb-6">
+                                    <span className="font-mono text-xs text-ink-400">{p.id}</span>
+                                    <span className="h-px w-10" style={{ backgroundColor: p.accent }} />
+                                    <span className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color: p.accent }}>
+                                        {p.name}
+                                    </span>
+                                </div>
+                                <h3 className="pillar-reveal text-cinema text-3xl md:text-5xl mb-6">{p.headline}</h3>
+                                <p className="pillar-reveal text-ink-200 font-light leading-relaxed max-w-lg mb-8">{p.copy}</p>
+                                <ul className="pillar-reveal space-y-3">
+                                    {p.bullets.map((b) => (
+                                        <li key={b} className="flex items-center gap-3 text-sm text-ink-200">
+                                            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: p.accent }} />
+                                            {b}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* Visual */}
+                            <div className="[direction:ltr] pillar-reveal">
+                                {p.image ? (
+                                    <div className="pillar-visual glass-obsidian glass-obsidian-hover rounded-2xl overflow-hidden p-2">
+                                        <img
+                                            src={p.image}
+                                            alt={p.name}
+                                            loading="lazy"
+                                            className="rounded-xl w-full object-cover"
+                                        />
+                                    </div>
+                                ) : (
+                                    /* Shark Protocol — live terminal card */
+                                    <div className="pillar-visual glass-obsidian glass-obsidian-hover rounded-2xl p-6 font-mono text-xs leading-relaxed">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <span className="h-2.5 w-2.5 rounded-full bg-ember-600" />
+                                            <span className="h-2.5 w-2.5 rounded-full bg-ink-700" />
+                                            <span className="h-2.5 w-2.5 rounded-full bg-ink-700" />
+                                            <span className="ml-3 text-ink-400 tracking-widest uppercase text-[9px]">shark_protocol.exe</span>
+                                        </div>
+                                        <p className="text-ink-400">&gt; OFFER RECEIVED — “$150 flat, 90-min set, merch cut 30%”</p>
+                                        <p className="text-ember-400 mt-3">&gt; ANALYSIS: below market for verified 450-cap room.</p>
+                                        <p className="text-ember-400">&gt; LEVERAGE: Thursday cancellation. They need you.</p>
+                                        <p className="text-ink-50 mt-3">&gt; COUNTER DRAFTED: $400 guarantee + door split after 200
+                                            <span className="inline-block w-2 h-4 bg-ember-500 ml-1 animate-pulse align-middle" />
+                                        </p>
+                                        <div className="mt-6 flex items-center justify-between border-t hairline pt-4">
+                                            <div className="flex items-center gap-2 text-ink-400 text-[10px] tracking-widest uppercase">
+                                                <Icon size={13} style={{ color: p.accent }} /> Negotiation Core
+                                            </div>
+                                            <span className="text-[10px] text-ember-500 tracking-widest uppercase">Armed</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </section>
+                );
+            })}
+
+            {/* ============ STATS ============ */}
+            <section className="relative border-y hairline bg-ink-900/60">
+                <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 grid grid-cols-2 md:grid-cols-4 gap-10">
+                    {STATS.map((s) => (
+                        <div key={s.label} className="text-center md:text-left">
+                            <div className="font-display font-semibold text-4xl md:text-5xl text-ink-50 tracking-tight">
+                                <span className="stat-num" data-value={s.value}>0</span>
+                                <span className="text-ember-500">{s.suffix}</span>
+                            </div>
+                            <p className="mt-2 font-mono text-[10px] tracking-[0.25em] uppercase text-ink-400">{s.label}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* ============ FINALE ============ */}
+            <section className="finale-section relative py-32 md:py-44 grain overflow-hidden">
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-ember-600/10 blur-[120px] pointer-events-none" />
+                <div className="relative max-w-4xl mx-auto px-6 text-center">
+                    <p className="finale-reveal font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-6">
+                        No label. No leash.
+                    </p>
+                    <h2 className="finale-reveal text-cinema text-5xl md:text-7xl mb-10">
+                        Run your empire<br />from one engine.
+                    </h2>
+                    <div className="finale-reveal flex flex-col sm:flex-row justify-center gap-4">
+                        <button
+                            onClick={() => navigate('/engine')}
+                            className="group relative overflow-hidden rounded-full bg-ember-600 hover:bg-ember-500 transition-colors px-10 py-5 halo-ember"
+                        >
+                            <span className="relative flex items-center justify-center gap-3 font-display font-medium tracking-wide text-white text-lg">
+                                Enter the Engine
+                                <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform" />
+                            </span>
+                        </button>
                     </div>
-                    <div className="flex flex-col items-center text-center opacity-60 hover:opacity-100 transition-opacity">
-                        <Shield className="text-purple-500 mb-1 md:mb-2 w-5 h-5 md:w-6 md:h-6" />
-                        <span className="font-mono text-[8px] md:text-[9px] tracking-wider md:tracking-[0.2em] text-gray-400 uppercase">Zion Protocol</span>
+                </div>
+            </section>
+
+            {/* ============ FOOTER ============ */}
+            <footer className="border-t hairline py-8">
+                <div className="max-w-7xl mx-auto px-6 md:px-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <img src="/site/favicon.png" alt="Logo" className="w-6 h-6 object-contain" />
+                        <span className="font-display font-medium tracking-wide text-ink-200">THE ARTIST ENGINE</span>
                     </div>
-                    <div className="flex flex-col items-center text-center opacity-60 hover:opacity-100 transition-opacity">
-                        <Zap className="text-cyan-500 mb-1 md:mb-2 w-5 h-5 md:w-6 md:h-6" />
-                        <span className="font-mono text-[8px] md:text-[9px] tracking-wider md:tracking-[0.2em] text-gray-400 uppercase">Neural Audio</span>
-                    </div>
-                </motion.div>
-            </main>
+                    <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-ink-400">
+                        © 2026 · Sovereign Protocol · All rights reserved
+                    </p>
+                </div>
+            </footer>
         </div>
     );
 }

@@ -22,6 +22,9 @@ from dotenv import load_dotenv
 # Load Environment Variables from local .env
 load_dotenv(dotenv_path=".env")
 
+from agent_memory import AgentMemory
+from gig_sources import ticketmaster_available, fetch_ticketmaster_venues
+
 # Google GenAI Integration
 try:
     from google import genai
@@ -56,6 +59,10 @@ app.mount("/api/temp", StaticFiles(directory="temp"), name="temp")
 def get_api_key() -> Optional[str]:
     """Secure extraction of the Gemini API Key."""
     return os.getenv("GEMINI_API_KEY")
+
+# Central model config — override with GEMINI_MODEL in .env if Google retires
+# this one (they retired gemini-2.5-flash for new API projects).
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
 
 def get_genai_client():
     api_key = get_api_key()
@@ -116,6 +123,12 @@ class DraftPitchRequest(BaseModel):
     agent_social: Optional[str] = None
     outreach_type: str = "email" # email, call_script, dm
 
+class AddMemoryRequest(BaseModel):
+    text: str
+
+class SearchMemoryRequest(BaseModel):
+    query: str
+
 # ---------------------------------------------------------------------------
 # SYSTEM ROUTES
 # ---------------------------------------------------------------------------
@@ -130,17 +143,111 @@ async def system_status():
     }
 
 # ---------------------------------------------------------------------------
+# PILLAR 1.5: AGENT MEMORY (Cognee Graph DB — optional subsystem)
+# ---------------------------------------------------------------------------
+
+@app.post("/api/memory/add")
+async def memory_add(req: AddMemoryRequest):
+    return await AgentMemory.add_document(req.text)
+
+@app.post("/api/memory/cognify")
+async def memory_cognify():
+    return await AgentMemory.cognify_data()
+
+@app.post("/api/memory/search")
+async def memory_search(req: SearchMemoryRequest):
+    return await AgentMemory.search_memory(req.query)
+
+# ---------------------------------------------------------------------------
 # PILLAR 2: WAR ROOM (Gig Radar Array)
 # ---------------------------------------------------------------------------
 
+def _enrich_prompt(request: ScoutRequest, real_venues: list) -> str:
+    """Build a Gemini prompt that turns REAL Ticketmaster venues into full
+    strategic intel, forbidding invented venue names."""
+    venue_json = json.dumps(real_venues, indent=2)
+    return f'''
+    You are a music-booking strategist. Below is a list of REAL, VERIFIED venues
+    returned by the Ticketmaster live events API for {request.city}. Each already
+    has confirmed upcoming events, so they are proven-active bookers.
+
+    REAL VENUES (do NOT invent new venues, do NOT rename these — enrich only these):
+    {venue_json}
+
+    For EACH real venue above, produce a strategic intelligence record for a
+    "{request.genre}" artist targeting the "{request.tier}" tier, timeframe "{request.timeframe}".
+    Use the real name, city, website_url, and upcoming_events exactly as given.
+    Infer the strategic fields (payout_model, reputation, leverage, contact_persona)
+    from the venue's real profile and industry norms — clearly best-guess where unknown.
+
+    Required JSON Structure:
+    {{
+        "venues": [
+            {{
+                "name": "EXACT real venue name from the list",
+                "tier": "{request.tier}",
+                "contact": "Best-known booking email/phone/contact for this real venue, else the website_url",
+                "contact_persona": "Name or Title of the likely talent buyer/booker",
+                "contact_source": "Ticketmaster (verified) + inferred booking channel",
+                "website_url": "The real website_url from the list (keep as-is), else null",
+                "social_media_url": "Best-guess official social profile URL, else null",
+                "similar_acts": ["Real recent/upcoming act at this venue if known", "..."],
+                "payout_model": "Best-guess payout structure (Door Deal, Guarantee, Split, Unknown) for this venue tier",
+                "lead_time": "Estimated booking lead time (e.g. '2 months OUT')",
+                "reputation_score": "Integer 0-100 for artist fairness",
+                "reputation_explanation": "1-2 sentences on WHY this score",
+                "capacity": "Integer best-estimate room capacity",
+                "avg_ticket_price_usd": "Integer average ticket price for this genre",
+                "gross_potential_usd": "Integer (capacity * avg_ticket_price_usd)",
+                "leverage_point": "One sentence pitch angle, ideally referencing a real upcoming event/gap",
+                "active_search_signal": true,
+                "verified_live": true
+            }}
+        ]
+    }}
+    Return strict JSON only. Include EVERY venue from the real list, no missing fields.
+    '''
+
+
 @app.post("/api/scout")
 async def scout_gigs(request: ScoutRequest):
-    import httpx
-    logs = ["[GIG RADAR] Initiating Multi-Vector Google Grounding Search (REST Mode)..."]
+    logs = ["[GIG RADAR] Initiating Multi-Vector Intercept..."]
     api_key = get_api_key()
     if not api_key:
          return {"status": "error", "error": "GEMINI_API_KEY is not configured.", "log": "\n".join(logs)}
-    
+
+    # ---- PRIMARY SOURCE: Ticketmaster live events (real, verified venues) ----
+    if ticketmaster_available():
+        logs.append("[GIG RADAR] Ticketmaster live grid ONLINE. Pulling verified active venues...")
+        try:
+            real_venues = await fetch_ticketmaster_venues(
+                city=request.city, genre=request.genre,
+                radius=request.radius, timeframe=request.timeframe
+            )
+            if real_venues:
+                logs.append(f"[GIG RADAR] {len(real_venues)} verified live venues intercepted. Enriching with strategic AI...")
+                client = get_genai_client()
+                enrich_resp = await client.aio.models.generate_content(
+                    model=GEMINI_MODEL,
+                    contents=_enrich_prompt(request, real_venues),
+                    config=types.GenerateContentConfig(
+                        temperature=0.5,
+                        response_mime_type="application/json"
+                    )
+                )
+                data = json.loads(enrich_resp.text)
+                if data.get("venues"):
+                    logs.append(f"[GIG RADAR] {len(data['venues'])} live targets locked (Ticketmaster-verified + AI intel).")
+                    return {"status": "success", "gigs": data, "source": "ticketmaster_live", "log": "\n".join(logs)}
+                logs.append("[GIG RADAR] Enrichment returned empty; falling back to grounded search.")
+            else:
+                logs.append("[GIG RADAR] No Ticketmaster events for this query; falling back to grounded search.")
+        except Exception as tm_err:
+            logs.append(f"[GIG RADAR] Ticketmaster path error ({str(tm_err)}); falling back to grounded search.")
+    else:
+        logs.append("[GIG RADAR] Ticketmaster key not set — using Google-grounded search. (Add TICKETMASTER_API_KEY for live venue data.)")
+
+
     cities_knowledge = """
     US States and Capitals Knowledge Base:
     AL: Montgomery, AK: Juneau, AZ: Phoenix, AR: Little Rock, CA: Sacramento,
@@ -194,7 +301,7 @@ async def scout_gigs(request: ScoutRequest):
     try:
         client = get_genai_client()
         response = await client.aio.models.generate_content(
-            model='gemini-2.5-flash',
+            model=GEMINI_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=cities_knowledge,
@@ -229,7 +336,7 @@ async def scout_gigs(request: ScoutRequest):
             Use internal world knowledge. Respond in strict JSON only, same schema as before (including contact_persona, contact_source, website_url, social_media_url, payout_model, lead_time, similar_acts, reputation_score, reputation_explanation, capacity, avg_ticket_price_usd, gross_potential_usd, leverage_point, and active_search_signal). Ensure NO missing fields.
             '''
             fb_response = await client.aio.models.generate_content(
-                model='gemini-2.5-flash',
+                model=GEMINI_MODEL,
                 contents=fallback_prompt,
                 config=types.GenerateContentConfig(
                     system_instruction=cities_knowledge,
@@ -283,7 +390,7 @@ async def draft_pitch(request: DraftPitchRequest):
     '''
     try:
         response = await client.aio.models.generate_content(
-            model='gemini-2.5-flash',
+            model=GEMINI_MODEL,
             contents=prompt,
             config={'temperature': 0.7}
         )
@@ -382,7 +489,7 @@ async def analyze_contract(
         logs.append("[ZION SHARK PROTOCOL] Executing Multi-Modal Flash Extraction with Codex Injection...")
         
         response = await client.aio.models.generate_content(
-            model='gemini-2.5-flash',
+            model=GEMINI_MODEL,
             contents=contents,
             config={
                 'system_instruction': system_instruction,
@@ -472,7 +579,7 @@ async def master_audio(
         AudioSegment.from_file(mastered_wav_path).export(final_output_path, format=output_format.lower())
         
     # Cleanup task
-    files_to_cleanup = [raw_target_path, raw_ref_path, wav_target_path, wav_ref_path, mastered_wav_path, final_output_path]
+    files_to_cleanup = [wav_target_path, wav_ref_path, mastered_wav_path, final_output_path]
     background_tasks.add_task(cleanup_audio_files, files_to_cleanup)
     
     media_type = "audio/wav"
@@ -531,7 +638,7 @@ async def oracle_analysis(
         '''
         print("[ORACLE ENGINE] Extracting topology signatures via Gemini 2.5 Flash...")
         response = await client.aio.models.generate_content(
-            model='gemini-2.5-flash',
+            model=GEMINI_MODEL,
             contents=[uploaded_file, prompt],
             config={
                 'system_instruction': system_instruction,
