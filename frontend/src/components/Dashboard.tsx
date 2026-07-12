@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
     Activity, Mic2, Radar as RadarIcon, Send, ShieldAlert, FileWarning,
     ArrowRight, Radio, CheckCircle2, Trash2, Wifi, WifiOff, Cpu
 } from 'lucide-react';
 import { useEngine, relTime, type Lead, type LeadStage } from '../lib/engineState';
+import { PageHeader } from './ui/Shell';
 
 interface DashboardProps {
     onNavigate: (view: string) => void;
@@ -65,27 +65,13 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     return (
         <div className="space-y-6">
 
-            {/* ===== Header ===== */}
-            <div className="flex items-end justify-between border-b border-white/10 pb-4">
-                <div>
-                    <h2 className="font-display text-3xl font-bold text-red-500 tracking-widest text-glow">COMMAND CENTER</h2>
-                    <p className="font-mono text-xs text-ink-400 tracking-widest uppercase mt-1">
-                        Live operations · every metric is real
-                    </p>
-                </div>
-                <div className="hidden md:flex items-center gap-3">
-                    <div className="flex items-end gap-[2px] h-6 opacity-70">
-                        {[40, 70, 30, 90, 50, 80].map((h, idx) => (
-                            <motion.div
-                                key={idx}
-                                animate={{ height: [`${h}%`, `${h * 0.4}%`, `${h * 1.2}%`, `${h}%`] }}
-                                transition={{ duration: 1.5 + idx * 0.2, repeat: Infinity, ease: 'easeInOut' }}
-                                className="w-1 bg-red-600 rounded-t-sm"
-                            />
-                        ))}
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                view="dashboard"
+                accent="#ef4444"
+                module="Command Center"
+                title="Dashboard"
+                desc="Your operation at a glance — every number here is something you actually did."
+            />
 
             {/* ===== Stat row (real counters) ===== */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
