@@ -76,7 +76,7 @@ function EngineCoreInner() {
     };
 
     return (
-        <div className="flex h-screen w-full bg-ink-950 overflow-hidden relative">
+        <div className="flex h-screen w-full bg-ink-950 overflow-hidden relative engine-fluid">
 
             {/* Static cinematic background (gradient + grain) */}
             <div className="absolute inset-0 z-0 pointer-events-none grain bg-[radial-gradient(ellipse_at_top,_#12070a_0%,_#08080a_45%,_#060607_100%)]" />
@@ -192,10 +192,10 @@ function EngineCoreInner() {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeView}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                             className="max-w-7xl mx-auto w-full"
                         >
                             <div className={DESKTOP_ONLY.includes(activeView) ? 'hidden md:block' : 'block'}>

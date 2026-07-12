@@ -6,24 +6,23 @@ import { type ReactNode, useEffect, useRef, useState } from 'react';
    Cinematic video lives in PageHeader bands, never as wallpaper.
    ============================================================ */
 
-/* ---- PageHeader: cinematic ambient band ---- */
-const HEADER_VIDEO: Record<string, string | null> = {
-    dashboard: '/site/soverein_server.mp4',
-    radar: '/gig-radar.mp4',
-    studio: '/audio-core.mp4',
-    legal: '/legal-war.mp4',
-    profile: null, // uses a still image instead
+/* ---- PageHeader: cinematic ambient band (themed engine videos) ---- */
+const HEADER_MEDIA: Record<string, { video: string | null; poster: string | null }> = {
+    dashboard: { video: '/site/header-dashboard.mp4', poster: '/site/header-dashboard.jpg' },
+    radar: { video: '/site/header-radar.mp4', poster: '/site/header-radar.jpg' },
+    studio: { video: '/site/header-studio.mp4', poster: '/site/header-studio.jpg' },
+    legal: { video: '/site/header-legal.mp4', poster: '/site/header-legal.jpg' },
+    profile: { video: null, poster: '/site/light_abstract_bg_1773233140940.png' },
 };
 
-/** Lazy-load header video only when visible — saves 4–6MB on first paint. */
-function LazyHeaderVideo({ src }: { src: string }) {
+/** Lazy-load header video only when visible — poster paints instantly. */
+function LazyHeaderVideo({ src, poster }: { src: string; poster?: string | null }) {
     const ref = useRef<HTMLDivElement>(null);
     const [active, setActive] = useState(false);
 
     useEffect(() => {
         const el = ref.current;
         if (!el) return;
-        // If IntersectionObserver is unavailable, load immediately.
         if (typeof IntersectionObserver === 'undefined') {
             setActive(true);
             return;
@@ -35,7 +34,7 @@ function LazyHeaderVideo({ src }: { src: string }) {
                     io.disconnect();
                 }
             },
-            { rootMargin: '80px' }
+            { rootMargin: '120px' }
         );
         io.observe(el);
         return () => io.disconnect();
@@ -43,63 +42,81 @@ function LazyHeaderVideo({ src }: { src: string }) {
 
     return (
         <div ref={ref} className="absolute inset-0">
-            {active ? (
+            {poster && (
+                <div
+                    className="absolute inset-0 bg-cover bg-center opacity-40 scale-105"
+                    style={{ backgroundImage: `url('${poster}')` }}
+                />
+            )}
+            {active && (
                 <video
                     autoPlay
                     loop
                     muted
                     playsInline
-                    preload="none"
-                    className="absolute inset-0 w-full h-full object-cover opacity-35"
+                    preload="metadata"
+                    poster={poster || undefined}
+                    className="absolute inset-0 w-full h-full object-cover opacity-45 motion-safe:animate-none"
                 >
                     <source src={src} type="video/mp4" />
                 </video>
-            ) : (
-                <div className="absolute inset-0 bg-ink-900 opacity-40" />
             )}
+            {!active && !poster && <div className="absolute inset-0 bg-ink-900 opacity-40" />}
         </div>
     );
 }
 
 export function PageHeader({
-    view, accent, module, title, desc, children,
+    view, accent, module, title, desc, children, speedHint,
 }: {
-    view: keyof typeof HEADER_VIDEO;
+    view: keyof typeof HEADER_MEDIA;
     accent: string;
     module: string;
     title: string;
     desc: string;
     children?: ReactNode;
+    /** Optional live-speed chip, e.g. "~8s venue scan" */
+    speedHint?: string;
 }) {
-    const video = HEADER_VIDEO[view];
+    const media = HEADER_MEDIA[view] || { video: null, poster: null };
     return (
-        <div className="hud-corners relative overflow-hidden rounded-2xl border border-white/10 mb-8 h-[140px] md:h-[180px]">
-            {video ? (
-                <LazyHeaderVideo src={video} />
+        <div className="hud-corners relative overflow-hidden rounded-2xl border border-white/10 mb-8 h-[148px] md:h-[188px] group">
+            {media.video ? (
+                <LazyHeaderVideo src={media.video} poster={media.poster} />
             ) : (
                 <div
-                    className="absolute inset-0 bg-cover bg-center opacity-20"
-                    style={{ backgroundImage: "url('/site/light_abstract_bg_1773233140940.png')" }}
+                    className="absolute inset-0 bg-cover bg-center opacity-25 transition-transform duration-700 group-hover:scale-[1.03]"
+                    style={{ backgroundImage: `url('${media.poster || '/site/light_abstract_bg_1773233140940.png'}')` }}
                 />
             )}
             {/* Cinematic masking */}
-            <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/80 to-ink-950/30" />
-            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-ink-950 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/85 to-ink-950/35" />
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950 to-transparent" />
 
             <div className="relative z-10 h-full flex items-end justify-between p-6 md:p-8 gap-4">
                 <div className="min-w-0">
-                    <p className="font-mono text-[10px] tracking-[0.3em] uppercase mb-2" style={{ color: accent }}>
-                        {module}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <p className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color: accent }}>
+                            {module}
+                        </p>
+                        {speedHint && (
+                            <span
+                                className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full border"
+                                style={{ color: accent, borderColor: `${accent}55`, backgroundColor: `${accent}14` }}
+                            >
+                                {speedHint}
+                            </span>
+                        )}
+                    </div>
                     <h1 className="font-display text-3xl md:text-4xl font-semibold text-ink-50 tracking-tight">{title}</h1>
-                    <p className="text-ink-200 font-light text-sm mt-1.5 max-w-xl">{desc}</p>
+                    <p className="text-ink-200 font-light text-sm mt-1.5 max-w-xl leading-relaxed">{desc}</p>
                 </div>
                 {children && <div className="shrink-0 hidden sm:block">{children}</div>}
             </div>
 
             {/* HUD meter line */}
             <div className="absolute bottom-0 inset-x-0 h-px bg-white/10 z-10">
-                <div className="h-full w-1/5" style={{ backgroundColor: accent }} />
+                <div className="h-full w-1/5 transition-all duration-700 group-hover:w-2/5" style={{ backgroundColor: accent }} />
             </div>
         </div>
     );

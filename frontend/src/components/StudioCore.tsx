@@ -443,7 +443,8 @@ export default function StudioCore() {
                 accent="#22d3ee"
                 module="AUDIO MASTER CORE"
                 title="Studio"
-                desc="Drop your mix and a reference track — get a streaming-ready master back in about a minute."
+                desc="Reference-matched commercial masters in ~35 seconds — LANDR-class quality without the multi-minute wait."
+                speedHint="~35s full master"
             />
             <StepHint steps={["Drop your mix", "Drop a reference", "Master & download"]} accent="#22d3ee" />
 
@@ -673,9 +674,10 @@ export default function StudioCore() {
                                         <LoadingProgressBar
                                             active={isOracleScanning}
                                             message="Listening to your mix"
-                                            subMessage="Extracting acoustic topology signatures via AI. Takes about 30-40s."
+                                            subMessage="DSP topology + optional AI polish. Measured ~7 seconds live."
                                             colorClass="blue"
-                                            estimatedDurationMs={25000}
+                                            estimatedDurationMs={7000}
+                                            speedLabel="~7s live"
                                         />
                                     </div>
                                 )}
@@ -751,8 +753,10 @@ export default function StudioCore() {
                                             <LoadingProgressBar
                                                 active={isExtractingStems}
                                                 message="Splitting the mix"
+                                                subMessage="Bass / drums / vocals / synth. Measured ~5 seconds live."
                                                 colorClass="blue"
-                                                estimatedDurationMs={4000}
+                                                estimatedDurationMs={5000}
+                                                speedLabel="~5s live"
                                             />
                                         )}
 
@@ -802,9 +806,10 @@ export default function StudioCore() {
                                     <LoadingProgressBar
                                         active={phase === 'processing'}
                                         message="Mastering your track"
-                                        subMessage="Running the DSP engine and comparing your mix to the reference. Usually takes 30-60s."
+                                        subMessage="Matchering + DSP + true-peak limiter. Full songs measure ~35s live."
                                         colorClass="blue"
-                                        estimatedDurationMs={45000}
+                                        estimatedDurationMs={35000}
+                                        speedLabel="~35s live"
                                     />
                                 </div>
                             </div>

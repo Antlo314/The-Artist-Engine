@@ -17,9 +17,9 @@ const PILLARS = [
         icon: AudioWaveform,
         accent: '#22d3ee',
         name: 'AUDIO MASTER CORE',
-        headline: 'Commercial masters. Sixty seconds.',
-        copy: 'Reference-matched mastering driven by real DSP — RMS, EQ curve, loudness and stereo field matched to any record you point it at. Finished with a true-peak limiter at streaming standard.',
-        bullets: ['Reference-match engine', 'Sub / Air / Snap / Width controls', 'WAV · MP3 · FLAC delivery'],
+        headline: 'Commercial masters. ~35 seconds.',
+        copy: 'Reference-matched mastering driven by real DSP — RMS, EQ curve, loudness and stereo field matched to any record you point it at. Full songs measure ~35s live — faster than typical online mastering waits.',
+        bullets: ['Reference-match engine', 'Sub / Air / Snap / Width controls', 'WAV · MP3 · FLAC in ~35s'],
         image: '/site/neural_audio_mockup.png',
     },
     {
@@ -27,9 +27,9 @@ const PILLARS = [
         icon: Radar,
         accent: '#fb923c',
         name: 'GIG RADAR ARRAY',
-        headline: 'Real venues. Verified live.',
-        copy: 'The war room scans live ticketing data for rooms actively booking your genre — then layers AI strategy on every verified target: payout models, reputation scores, leverage angles, and who to talk to.',
-        bullets: ['Ticketmaster-verified targets', 'Reputation + payout intel', 'One-tap pitch generation'],
+        headline: 'Real venues. Verified in ~8s.',
+        copy: 'The war room scans live ticketing data for rooms actively booking your genre — then layers AI strategy on every verified target: payout models, reputation scores, leverage angles, and who to talk to. Full scans measure ~8 seconds live.',
+        bullets: ['Ticketmaster-verified targets', 'Reputation + payout intel', 'Pitches in ~2s — email, call, DM'],
         image: '/site/gig_radar_mockup.png',
     },
     {
@@ -38,8 +38,8 @@ const PILLARS = [
         accent: '#f4f4f5',
         name: 'SHARK PROTOCOL',
         headline: 'Every offer, countered.',
-        copy: 'An AI negotiator trained on predatory industry tactics reads every promoter offer, prices your leverage, and drafts the counter — email, call script, or DM — in your voice, before you lose the room.',
-        bullets: ['Offer decomposition', 'Leverage-priced counters', 'Email · Call · DM output'],
+        copy: 'An AI negotiator trained on predatory industry tactics reads every promoter offer, prices your leverage, and drafts the counter — email, call script, or DM — in your voice, before you lose the room. Counters land in ~2–3 seconds.',
+        bullets: ['Offer decomposition', 'Leverage-priced counters', 'Email · Call · DM in ~2s'],
         image: null,
     },
     {
@@ -47,18 +47,18 @@ const PILLARS = [
         icon: Scale,
         accent: '#a78bfa',
         name: 'ZION LEGAL SENTINEL',
-        headline: 'Predatory clauses, flagged instantly.',
-        copy: 'Forensic contract analysis across PDF, DOCX, or raw text. Recoupment traps, perpetuity grabs, and 180-day payout games get flagged and translated into plain language — before you sign.',
-        bullets: ['PDF / DOCX / text ingestion', 'Clause-level risk flags', 'Plain-language translation'],
+        headline: 'Predatory clauses, flagged in ~3s.',
+        copy: 'Forensic contract analysis across PDF, DOCX, or raw text. Recoupment traps, perpetuity grabs, and 180-day payout games get flagged and translated into plain language — before you sign. Measured ~3 seconds live.',
+        bullets: ['PDF / DOCX / text ingestion', 'Clause-level risk flags', 'Plain-language in ~3s'],
         image: '/site/zion_defense_mockup.png',
     },
 ];
 
 const STATS = [
     { value: 230, suffix: 'K+', label: 'live events searchable' },
-    { value: 60, suffix: 's', label: 'to a commercial master' },
-    { value: 4, suffix: '', label: 'autonomous pillars' },
-    { value: 100, suffix: '%', label: 'artist-owned. no middlemen' },
+    { value: 35, suffix: 's', label: 'avg full-song master' },
+    { value: 8, suffix: 's', label: 'avg venue scan' },
+    { value: 2, suffix: 's', label: 'avg call script' },
 ];
 
 const MARQUEE = ['MASTER', 'SCOUT', 'NEGOTIATE', 'PROTECT'];

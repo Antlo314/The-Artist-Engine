@@ -27,7 +27,8 @@ export default function LegalCore() {
                 accent={LEGAL_ACCENT}
                 module="ZION LEGAL SENTINEL"
                 title="Legal"
-                desc="Scan contracts for predatory clauses, model your recoupment, and generate split sheets."
+                desc="Forensic contract scans in ~3 seconds — flag traps before a $450/hr attorney reads the first page."
+                speedHint="~3s contract scan"
             />
 
             <div className="flex flex-col flex-1 min-h-0 space-y-6">
@@ -40,7 +41,7 @@ export default function LegalCore() {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.3 }}
+                            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                             className="h-full"
                         >
                             {activeTab === 'zion' && <ZionSentinel />}

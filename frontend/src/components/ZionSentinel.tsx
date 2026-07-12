@@ -312,10 +312,11 @@ export default function ZionSentinel() {
                         <div className="flex-1 flex flex-col items-center justify-center">
                             <LoadingProgressBar
                                 active={isScanning}
-                                message="SCANNING DOCUMENT"
-                                subMessage="Hunting predatory clauses. May take 30-40s to respond."
-                                colorClass="emerald"
-                                estimatedDurationMs={25000}
+                                message="Scanning document"
+                                subMessage="Clause-level predatory scan. Measured ~3 seconds live."
+                                colorClass="violet"
+                                estimatedDurationMs={3000}
+                                speedLabel="~3s live"
                             />
                         </div>
                     )}

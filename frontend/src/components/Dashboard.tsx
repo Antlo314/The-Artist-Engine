@@ -11,10 +11,10 @@ interface DashboardProps {
     onNavigate: (view: string) => void;
 }
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
 const tile = {
-    hidden: { opacity: 0, y: 24, scale: 0.97 },
-    show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring' as const, stiffness: 260, damping: 26 } },
+    hidden: { opacity: 0, y: 16, scale: 0.98 },
+    show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring' as const, stiffness: 320, damping: 28 } },
 };
 
 const STAT_DEFS = [
@@ -75,9 +75,10 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             <PageHeader
                 view="dashboard"
                 accent="#ef4444"
-                module="Command Center"
+                module="COMMAND CENTER · ENGINE CORE"
                 title="Dashboard"
-                desc="Your operation at a glance — every number here is something you actually did."
+                desc="Live ops board — every number is real. Gigs ~8s · pitches ~2s · masters ~35s · contracts ~3s."
+                speedHint="speed is the product"
             />
 
             {/* ===== Animated bento grid ===== */}

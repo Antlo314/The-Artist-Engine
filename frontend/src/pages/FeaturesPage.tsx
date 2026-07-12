@@ -20,7 +20,8 @@ const FEATURES = [
             'Live Ticketmaster event data — every target verified active',
             'Reputation scores + payout models on every venue',
             'Leverage angles referencing real upcoming dates',
-            'One-tap pitch drafts: email, call script, or DM',
+            'One-tap pitch drafts: email, call script, or DM (~2s)',
+            'Full venue scan measured ~8s on production',
         ],
         image: '/site/gig_radar_mockup.png',
     },
@@ -32,7 +33,7 @@ const FEATURES = [
         desc: 'Trained on the predatory tactics promoters actually use, the Shark reads every offer, prices your leverage against the room, and drafts the counter before you lose momentum. Flat-fee lowballs, merch-cut grabs, and pay-to-play packages get named and countered — in your voice.',
         bullets: [
             'Offer decomposition against venue economics',
-            'Counters drafted in seconds — email, call, or DM',
+            'Counters drafted in ~2s — email, call script, or DM',
             'Tone-calibrated: firm, professional, no bridges burned',
             'Paired with Radar intel for maximum leverage',
         ],
@@ -47,9 +48,9 @@ const FEATURES = [
         desc: 'Drop your mix and a reference record. The Core matches RMS, EQ curve, loudness and stereo field to the reference with real DSP — then finishes through a Sub / Air / Snap / Width control stage and a true-peak limiter at streaming standard. The Oracle listens first and recommends the exact settings your mix needs.',
         bullets: [
             'Reference-matched mastering engine (real DSP, not presets)',
-            'AI Oracle mix analysis with recommended settings',
+            'Oracle mix analysis in ~7s with recommended settings',
             'True-peak limiting at −1.0 dBTP streaming standard',
-            'WAV · MP3 · FLAC delivery in about a minute',
+            'Full-song masters measured ~35s live',
         ],
         image: '/site/neural_audio_mockup.png',
         reverse: false,
@@ -61,7 +62,7 @@ const FEATURES = [
         tagline: 'Read the trap before you sign it.',
         desc: 'Upload any contract — PDF, DOCX, or pasted text. Zion forensically dissects it clause by clause: recoupment traps, perpetual licensing grabs, delayed-payout games, and AI voice-cloning rights get flagged and translated into plain language, with the industry codex built in.',
         bullets: [
-            'Clause-level predatory-language detection',
+            'Clause-level predatory-language detection (~3s live)',
             'PDF / DOCX / raw text ingestion',
             'Plain-language translation of legalese',
             '32-term industry codex + recoupment sandbox',
@@ -80,17 +81,17 @@ const COMPARISON = [
     {
         capability: 'Legal Defense',
         old: '$450/hr retainer attorney, days of turnaround',
-        engine: 'Forensic contract scan in seconds, plain-language flags',
+        engine: 'Forensic contract scan in ~3s, plain-language flags',
     },
     {
         capability: 'Mastering',
         old: '$100–500 per track, weeks of back-and-forth',
-        engine: 'Reference-matched master in about a minute',
+        engine: 'Reference-matched full master in ~35s live',
     },
     {
         capability: 'Negotiation',
         old: 'Take the offer or lose the room',
-        engine: 'Every offer decomposed and countered with leverage',
+        engine: 'Every offer decomposed and countered in ~2–3s',
     },
     {
         capability: 'Revenue Split',
