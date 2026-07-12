@@ -3,7 +3,7 @@ import { AlertTriangle, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Panel, Field } from './ui/Shell';
 
-const ACCENT = '#a78bfa';
+const ACCENT = 'var(--color-zion)';
 
 export default function RecoupmentSandbox() {
     // Standard Deal Terms
@@ -106,7 +106,7 @@ export default function RecoupmentSandbox() {
                     <Panel
                         title="100% Recoupable Debt"
                         sub="HIDDEN DEBT ENGINE"
-                        accent="#ef4444"
+                        accent="var(--color-ember-500)"
                         actions={<AlertTriangle size={16} className="text-red-400" />}
                     >
                         <div className="space-y-4">

@@ -255,7 +255,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
         <div className="space-y-4 md:space-y-8">
             <PageHeader
                 view="radar"
-                accent="#fb923c"
+                accent="var(--color-radar)"
                 module="GIG RADAR"
                 title="Find Gigs"
                 desc="Live venues + payout intel. Scans measure ~8 seconds."
@@ -263,10 +263,10 @@ export default function GigRadar({ profile }: GigRadarProps) {
             />
 
             <div className="hidden md:block">
-                <StepHint steps={['Set your search', 'Review verified venues', 'Send the pitch']} accent="#fb923c" />
+                <StepHint steps={['Set your search', 'Review verified venues', 'Send the pitch']} accent="var(--color-radar)" />
             </div>
 
-            <Panel title="Search" accent="#fb923c">
+            <Panel title="Search" accent="var(--color-radar)">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
                     <Field label="City">
                         <div className="relative">
@@ -332,7 +332,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 </div>
 
                 <div className="mt-4 md:mt-5 flex md:justify-end">
-                    <Btn variant="accent" accent="#fb923c" onClick={handleScout} disabled={isScouting} className="w-full md:w-auto min-h-[48px]">
+                    <Btn variant="accent" accent="var(--color-radar)" onClick={handleScout} disabled={isScouting} className="w-full md:w-auto min-h-[48px]">
                         {isScouting ? (
                             <><Activity size={16} className="animate-spin" /> Scanning venues…</>
                         ) : (
@@ -357,7 +357,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             options={SORT_OPTIONS}
                             value={sortMode}
                             onChange={setSortMode}
-                            accent="#fb923c"
+                            accent="var(--color-radar)"
                         />
                         <button
                             onClick={() => setVerifiedOnly((v) => !v)}
@@ -535,7 +535,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                     {/* Footer */}
                                     <Btn
                                         variant="accent"
-                                        accent="#fb923c"
+                                        accent="var(--color-radar)"
                                         onClick={() => handleEngageShark(gig)}
                                         disabled={gig.pipeline_status === 'PITCHED'}
                                         className="w-full"
@@ -597,7 +597,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                                 options={OUTREACH_OPTIONS}
                                                 value={outreachType}
                                                 onChange={(v) => handleEngageShark(pitchModal, v)}
-                                                accent="#fb923c"
+                                                accent="var(--color-radar)"
                                             />
 
                                             <Field label="Sending to">
@@ -625,7 +625,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 {!isDrafting && (
                                     <div className="p-4 border-t border-white/10 flex justify-end gap-3">
                                         <Btn variant="ghost" onClick={() => setPitchModal(null)}>Cancel</Btn>
-                                        <Btn variant="accent" accent="#fb923c" onClick={() => handleDeployPitch(gigs.indexOf(pitchModal))}>
+                                        <Btn variant="accent" accent="var(--color-radar)" onClick={() => handleDeployPitch(gigs.indexOf(pitchModal))}>
                                             <Send size={14} /> Send pitch
                                         </Btn>
                                     </div>

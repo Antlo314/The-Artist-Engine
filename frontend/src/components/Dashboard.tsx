@@ -18,11 +18,11 @@ const tile = {
 };
 
 const STAT_DEFS = [
-    { key: 'mastersCompleted', label: 'Masters', icon: Mic2, accent: '#22d3ee' },
-    { key: 'venuesScouted', label: 'Venues Scouted', icon: RadarIcon, accent: '#fb923c' },
-    { key: 'pitchesDrafted', label: 'Pitches', icon: Send, accent: '#f4f4f5' },
-    { key: 'contractsScanned', label: 'Contracts Scanned', icon: FileWarning, accent: '#a78bfa' },
-    { key: 'threatsFlagged', label: 'Threats Flagged', icon: ShieldAlert, accent: '#ef4444' },
+    { key: 'mastersCompleted', label: 'Masters', icon: Mic2, accent: 'var(--color-audio)' },
+    { key: 'venuesScouted', label: 'Venues Scouted', icon: RadarIcon, accent: 'var(--color-radar)' },
+    { key: 'pitchesDrafted', label: 'Pitches', icon: Send, accent: 'var(--color-shark)' },
+    { key: 'contractsScanned', label: 'Contracts Scanned', icon: FileWarning, accent: 'var(--color-zion)' },
+    { key: 'threatsFlagged', label: 'Threats Flagged', icon: ShieldAlert, accent: 'var(--color-ember-500)' },
 ] as const;
 
 const STAGES: { key: LeadStage; label: string }[] = [
@@ -41,7 +41,11 @@ const NEXT: Record<LeadStage, LeadStage | null> = {
 };
 
 const ACCENT_HEX: Record<string, string> = {
-    audio: '#22d3ee', radar: '#fb923c', zion: '#a78bfa', shark: '#f4f4f5', ember: '#ef4444',
+    audio: 'var(--color-audio)',
+    radar: 'var(--color-radar)',
+    zion: 'var(--color-zion)',
+    shark: 'var(--color-shark)',
+    ember: 'var(--color-ember-500)',
 };
 
 export default function Dashboard({ onNavigate }: DashboardProps) {
@@ -74,7 +78,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
             <PageHeader
                 view="dashboard"
-                accent="#ef4444"
+                accent="var(--color-ember-500)"
                 module="COMMAND CENTER"
                 title="Dashboard"
                 desc="Live ops board — real numbers only. Gigs ~8s · pitches ~2s · masters ~35s."
@@ -84,8 +88,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             {/* Quick actions — always useful; emphasized on small screens */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                    { id: 'radar', label: 'Find Gigs', sub: 'Scan live venues · ~8s', accent: '#fb923c' },
-                    { id: 'legal', label: 'Scan a contract', sub: 'Flag predatory clauses · ~3s', accent: '#a78bfa' },
+                    { id: 'radar', label: 'Find Gigs', sub: 'Scan live venues · ~8s', accent: 'var(--color-radar)' },
+                    { id: 'legal', label: 'Scan a contract', sub: 'Flag predatory clauses · ~3s', accent: 'var(--color-zion)' },
                 ].map((a) => (
                     <button
                         key={a.id}
@@ -120,13 +124,13 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                             className="glass-obsidian sheen rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex flex-col justify-between min-h-[88px]"
                         >
                             <div className="flex items-center justify-between">
-                                <Icon size={16} style={{ color: isThreat ? '#ef4444' : '#8a8a93' }} />
-                                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: empty ? '#333' : isThreat ? '#ef4444' : '#8a8a93' }} />
+                                <Icon size={16} style={{ color: isThreat ? 'var(--color-ember-500)' : 'var(--color-ink-400)' }} />
+                                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: empty ? 'var(--color-ink-700)' : isThreat ? 'var(--color-ember-500)' : 'var(--color-ink-400)' }} />
                             </div>
                             <div>
                                 <div
                                     className="font-display font-bold text-2xl sm:text-3xl tracking-tight tabular-nums leading-none"
-                                    style={{ color: empty ? '#55555e' : isThreat ? '#f87171' : '#f4f4f5' }}
+                                    style={{ color: empty ? 'var(--color-ink-700)' : isThreat ? 'var(--color-ember-400)' : 'var(--color-ink-50)' }}
                                 >
                                     {empty ? '—' : value.toLocaleString()}
                                 </div>
@@ -147,12 +151,12 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                     <div className="flex items-center gap-2">
                         <span
                             className={`h-2 w-2 rounded-full ${sys === 'online' ? 'dot-breathe' : ''}`}
-                            style={{ backgroundColor: sys === 'online' ? '#4ade80' : sys === 'offline' ? '#f87171' : '#8a8a93' }}
+                            style={{ backgroundColor: sys === 'online' ? '#16a34a' : sys === 'offline' ? 'var(--color-ember-400)' : 'var(--color-ink-400)' }}
                         />
                         <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">System</span>
                     </div>
                     <div className="space-y-1.5">
-                        <div className="text-sm font-medium" style={{ color: sys === 'online' ? '#f4f4f5' : sys === 'offline' ? '#f87171' : '#8a8a93' }}>
+                        <div className="text-sm font-medium" style={{ color: sys === 'online' ? 'var(--color-ink-50)' : sys === 'offline' ? 'var(--color-ember-400)' : 'var(--color-ink-400)' }}>
                             {sys === 'checking' ? 'Checking…' : sys === 'online' ? 'Engine online' : 'Offline'}
                         </div>
                         <div className="flex items-center gap-1.5 font-mono text-[9px] tracking-wide text-ink-400">

@@ -13,8 +13,10 @@
     --color-ink-950: #060607;   /* page void */
     --color-ink-900: #0a0a0c;   /* base surface */
     --color-ink-800: #101014;   /* raised surface */
-    --color-ink-700: #1a1a20;   /* borders / wells */
+    --color-ink-700: #1a1a20;   /* deep wells / tertiary chrome */
+    --color-ink-500: #6b6b76;   /* quiet labels / meta */
     --color-ink-400: #8a8a93;   /* muted text */
+    --color-ink-300: #b0b0b8;   /* soft secondary (rare) */
     --color-ink-200: #d6d6da;   /* secondary text */
     --color-ink-50:  #f4f4f5;   /* primary text */
 
@@ -37,26 +39,32 @@
 }
 
 /* ============================================================
-   LIGHT THEME — polar inverse of the dark HUD, still legible
+   LIGHT THEME — polar surfaces, WCAG-minded type (not pure invert)
    Applied via <html data-theme="light">
+   Note: ink-700 is dual-use (tertiary text + chrome). In light mode
+   it must stay dark enough for text-ink-700 / placeholders.
    ============================================================ */
 html[data-theme="light"] {
-    --color-ink-950: #f3f3f5;   /* page canvas (was void) */
+    --color-ink-950: #f2f3f6;   /* page canvas */
     --color-ink-900: #ffffff;   /* primary surface */
-    --color-ink-800: #eef0f4;   /* raised / inputs */
-    --color-ink-700: #d0d4dc;   /* borders */
-    --color-ink-400: #5c6370;   /* muted text */
-    --color-ink-200: #2a2f3a;   /* secondary text */
-    --color-ink-50:  #0c0e12;   /* primary text (near black) */
+    --color-ink-800: #e8eaef;   /* raised / inputs */
+    /* Tertiary labels, icons, placeholders — must pass ~4.5:1 on white */
+    --color-ink-700: #3d4450;
+    --color-ink-500: #3a4150;   /* meta / quiet actions */
+    --color-ink-400: #2f3540;   /* muted body / mono labels */
+    --color-ink-300: #4a5160;   /* soft secondary */
+    --color-ink-200: #1c212b;   /* secondary text */
+    --color-ink-50:  #0a0c10;   /* primary text */
 
-    --color-ember-600: #b91c1c;
-    --color-ember-500: #dc2626;
-    --color-ember-400: #ef4444;
+    /* Ember must clear ~4.5:1 on white (400 was 3.4, 500 was 4.3) */
+    --color-ember-600: #991b1b;
+    --color-ember-500: #b91c1c;
+    --color-ember-400: #b91c1c;
 
-    --color-radar: #ea580c;
-    --color-zion: #7c3aed;
-    --color-audio: #0891b2;
-    --color-shark: #18181b;
+    --color-radar: #c2410c;     /* orange-700 — readable on white */
+    --color-zion: #6d28d9;      /* violet-700 */
+    --color-audio: #0e7490;     /* cyan-700 */
+    --color-shark: #18181b;    /* near-black (was bone on dark) */
 }
 
 html[data-theme="light"] body {
@@ -67,7 +75,56 @@ html[data-theme="light"] body {
 html[data-theme="light"] body::selection,
 html[data-theme="light"] ::selection {
     background-color: rgba(185, 28, 28, 0.22);
-    color: #0c0e12;
+    color: #0a0c10;
+}
+
+/*
+ * Pastel Tailwind accent text (*-300 / *-400) is tuned for dark UIs.
+ * Remap to 600–700 weight hues so status chips and metrics stay legible.
+ */
+html[data-theme="light"] .text-orange-300,
+html[data-theme="light"] .text-orange-400 { color: #c2410c; }
+html[data-theme="light"] .text-orange-400\/80 { color: rgba(194, 65, 12, 0.92); }
+html[data-theme="light"] .hover\:text-orange-400:hover,
+html[data-theme="light"] .hover\:text-orange-300:hover { color: #9a3412; }
+
+html[data-theme="light"] .text-amber-300,
+html[data-theme="light"] .text-amber-400 { color: #b45309; }
+html[data-theme="light"] .text-yellow-400,
+html[data-theme="light"] .text-yellow-500 { color: #a16207; }
+html[data-theme="light"] .text-yellow-500\/50 { color: rgba(161, 98, 7, 0.7); }
+html[data-theme="light"] .group:hover .group-hover\:text-yellow-400 { color: #854d0e; }
+
+html[data-theme="light"] .text-cyan-300,
+html[data-theme="light"] .text-cyan-400 { color: #0e7490; }
+html[data-theme="light"] .hover\:text-cyan-400:hover { color: #155e75; }
+
+html[data-theme="light"] .text-emerald-300,
+html[data-theme="light"] .text-emerald-400 { color: #047857; }
+html[data-theme="light"] .text-emerald-400\/80 { color: rgba(4, 120, 87, 0.92); }
+html[data-theme="light"] .hover\:text-emerald-300:hover { color: #065f46; }
+html[data-theme="light"] .text-green-400 { color: #15803d; }
+
+html[data-theme="light"] .text-red-300,
+html[data-theme="light"] .text-red-400 { color: #b91c1c; }
+html[data-theme="light"] .hover\:text-red-400:hover,
+html[data-theme="light"] .hover\:text-red-300:hover,
+html[data-theme="light"] .hover\:text-red-500:hover { color: #991b1b; }
+
+html[data-theme="light"] .text-purple-300,
+html[data-theme="light"] .text-purple-400 { color: #6d28d9; }
+html[data-theme="light"] .hover\:text-purple-300:hover,
+html[data-theme="light"] .hover\:text-purple-400:hover { color: #5b21b6; }
+html[data-theme="light"] .text-violet-400 { color: #6d28d9; }
+html[data-theme="light"] .text-fuchsia-400 { color: #a21caf; }
+
+html[data-theme="light"] .text-gray-400 { color: #3f4654; }
+html[data-theme="light"] .hover\:text-white:hover { color: var(--color-ink-50); }
+
+/* Placeholders inherit ink-700; force opacity so they never wash out */
+html[data-theme="light"] ::placeholder {
+    color: var(--color-ink-700);
+    opacity: 1;
 }
 
 @layer base {

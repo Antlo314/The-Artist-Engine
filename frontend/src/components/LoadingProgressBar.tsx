@@ -63,13 +63,13 @@ export default function LoadingProgressBar({
     const elapsedSec = (elapsedMs / 1000).toFixed(1);
     const targetSec = Math.round(estimatedDurationMs / 1000);
 
-    // Tailwind-safe solid colors (dynamic class names don't purge well).
+    // Theme tokens so light mode keeps readable accent contrast.
     const accent =
-        colorClass === 'orange' ? '#fb923c'
-        : colorClass === 'blue' || colorClass === 'cyan' ? '#22d3ee'
-        : colorClass === 'purple' || colorClass === 'violet' ? '#a78bfa'
-        : colorClass === 'red' || colorClass === 'ember' ? '#ef4444'
-        : '#a78bfa';
+        colorClass === 'orange' ? 'var(--color-radar)'
+        : colorClass === 'blue' || colorClass === 'cyan' ? 'var(--color-audio)'
+        : colorClass === 'purple' || colorClass === 'violet' ? 'var(--color-zion)'
+        : colorClass === 'red' || colorClass === 'ember' ? 'var(--color-ember-500)'
+        : 'var(--color-zion)';
 
     return (
         <AnimatePresence>

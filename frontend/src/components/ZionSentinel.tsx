@@ -8,7 +8,7 @@ import { apiFetch } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Panel, Btn, Segmented, EmptyState } from './ui/Shell';
 
-const ACCENT = '#a78bfa';
+const ACCENT = 'var(--color-zion)';
 
 const SCAN_TYPE_OPTIONS: { value: 'contract' | 'offer'; label: string }[] = [
     { value: 'contract', label: 'Contract' },
@@ -143,7 +143,7 @@ export default function ZionSentinel() {
 
     const ScoreGauge = ({ score }: { score: number }) => {
         const color = score > 75 ? 'emerald' : score > 40 ? 'yellow' : 'red';
-        const strokeColor = score > 75 ? '#10b981' : score > 40 ? '#eab308' : '#ef4444';
+        const strokeColor = score > 75 ? '#047857' : score > 40 ? '#a16207' : 'var(--color-ember-500)';
         return (
             <div className="relative flex flex-col items-center justify-center p-6 glass-obsidian rounded-xl border border-white/10">
                 <svg viewBox="0 0 100 50" className="w-32 h-16 overflow-visible mb-4">
@@ -239,7 +239,7 @@ export default function ZionSentinel() {
                     options={SCAN_TYPE_OPTIONS}
                     value={scanType}
                     onChange={setScanType}
-                    accent={scanType === 'offer' ? '#ef4444' : ACCENT}
+                    accent={scanType === 'offer' ? 'var(--color-ember-500)' : ACCENT}
                 />
             </div>
 
@@ -294,7 +294,7 @@ export default function ZionSentinel() {
                         </Btn>
                         <Btn
                             variant="accent"
-                            accent={scanType === 'offer' ? '#ef4444' : ACCENT}
+                            accent={scanType === 'offer' ? 'var(--color-ember-500)' : ACCENT}
                             onClick={handleScan}
                             disabled={(!contractText && !file) || isScanning}
                         >
@@ -358,7 +358,7 @@ export default function ZionSentinel() {
                             {analysis.red_flags && analysis.red_flags.length > 0 && (
                                 <Panel
                                     title={`Threats detected: ${analysis.red_flags.length}`}
-                                    accent="#ef4444"
+                                    accent="var(--color-ember-500)"
                                     actions={<ShieldAlert className="text-red-400" size={18} />}
                                 >
                                     <div className="space-y-4 -m-1">

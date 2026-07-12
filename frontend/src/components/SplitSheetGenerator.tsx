@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { FileSignature, Plus, Trash2, Download, AlertCircle, Building2 } from 'lucide-react';
 import { Panel, Field, Btn, inputCls } from './ui/Shell';
 
-const ACCENT = '#a78bfa';
+const ACCENT = 'var(--color-zion)';
 
 interface Writer {
     name: string;
@@ -199,7 +199,7 @@ export default function SplitSheetGenerator() {
                             <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
                         </div>
                         <div className="font-mono text-[10px] text-ink-400 tracking-widest">split_sheet_preview.pdf</div>
-                        <Btn variant="accent" accent="#22d3ee" size="sm" disabled={totalSplit !== 100 || !songTitle}>
+                        <Btn variant="accent" accent="var(--color-audio)" size="sm" disabled={totalSplit !== 100 || !songTitle}>
                             <Download size={12} /> Export
                         </Btn>
                     </div>

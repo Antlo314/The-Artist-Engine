@@ -15,7 +15,7 @@ const PILLARS = [
     {
         id: '01',
         icon: AudioWaveform,
-        accent: '#22d3ee',
+        accent: 'var(--color-audio)',
         name: 'AUDIO MASTER CORE',
         headline: 'Commercial masters. ~35 seconds.',
         copy: 'Reference-matched mastering driven by real DSP — RMS, EQ curve, loudness and stereo field matched to any record you point it at. Full songs measure ~35s live — faster than typical online mastering waits.',
@@ -25,7 +25,7 @@ const PILLARS = [
     {
         id: '02',
         icon: Radar,
-        accent: '#fb923c',
+        accent: 'var(--color-radar)',
         name: 'GIG RADAR ARRAY',
         headline: 'Real venues. Verified in ~8s.',
         copy: 'The war room scans live ticketing data for rooms actively booking your genre — then layers AI strategy on every verified target: payout models, reputation scores, leverage angles, and who to talk to. Full scans measure ~8 seconds live.',
@@ -35,7 +35,7 @@ const PILLARS = [
     {
         id: '03',
         icon: Swords,
-        accent: '#f4f4f5',
+        accent: 'var(--color-shark)',
         name: 'SHARK PROTOCOL',
         headline: 'Every offer, countered.',
         copy: 'An AI negotiator trained on predatory industry tactics reads every promoter offer, prices your leverage, and drafts the counter — email, call script, or DM — in your voice, before you lose the room. Counters land in ~2–3 seconds.',
@@ -45,7 +45,7 @@ const PILLARS = [
     {
         id: '04',
         icon: Scale,
-        accent: '#a78bfa',
+        accent: 'var(--color-zion)',
         name: 'ZION LEGAL SENTINEL',
         headline: 'Predatory clauses, flagged in ~3s.',
         copy: 'Forensic contract analysis across PDF, DOCX, or raw text. Recoupment traps, perpetuity grabs, and 180-day payout games get flagged and translated into plain language — before you sign. Measured ~3 seconds live.',

@@ -459,13 +459,13 @@ export default function StudioCore() {
         <div className="space-y-6">
             <PageHeader
                 view="studio"
-                accent="#22d3ee"
+                accent="var(--color-audio)"
                 module="AUDIO MASTER CORE"
                 title="Studio"
                 desc="Reference-matched commercial masters in ~35 seconds — LANDR-class quality without the multi-minute wait."
                 speedHint="~35s full master"
             />
-            <StepHint steps={["Drop your mix", "Drop a reference", "Master & download"]} accent="#22d3ee" />
+            <StepHint steps={["Drop your mix", "Drop a reference", "Master & download"]} accent="var(--color-audio)" />
 
             <AnimatePresence mode="wait">
                 {phase === 'dropzone' && (
@@ -586,7 +586,7 @@ export default function StudioCore() {
                                 <div className="mt-6 flex flex-col items-center gap-2 relative z-10 w-full">
                                     <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">Master profile</span>
                                     <Segmented
-                                        accent="#22d3ee"
+                                        accent="var(--color-audio)"
                                         value={masterProfile}
                                         onChange={setMasterProfile}
                                         options={[
@@ -702,7 +702,7 @@ export default function StudioCore() {
                                 )}
 
                                 {targetFile && !oracleData && !isOracleScanning && (
-                                    <Btn variant="accent" accent="#22d3ee" onClick={handleOracleScan} className="w-full shrink-0">
+                                    <Btn variant="accent" accent="var(--color-audio)" onClick={handleOracleScan} className="w-full shrink-0">
                                         Analyze my mix
                                     </Btn>
                                 )}
@@ -725,7 +725,7 @@ export default function StudioCore() {
                                         </div>
                                         <Btn
                                             variant="accent"
-                                            accent="#22d3ee"
+                                            accent="var(--color-audio)"
                                             className="w-full shrink-0"
                                             onClick={() => {
                                                 setKnobs(oracleData.knobs);
@@ -844,7 +844,7 @@ export default function StudioCore() {
                         className="flex flex-col gap-6"
                     >
                         {/* Player & Toggle */}
-                        <Panel title="Result" sub="Preview, A/B test, and export" accent="#22d3ee">
+                        <Panel title="Result" sub="Preview, A/B test, and export" accent="var(--color-audio)">
                             <div className="flex items-center justify-between flex-wrap gap-6">
                                 <div className="flex items-center gap-6">
                                     {masterAudioUrl && (
@@ -903,7 +903,7 @@ export default function StudioCore() {
                         </Panel>
 
                         {/* Fine-Tuning Console */}
-                        <Panel title="Master controls" sub="Nudge these to taste — the Oracle already got you close" accent="#22d3ee" className="relative overflow-hidden">
+                        <Panel title="Master controls" sub="Nudge these to taste — the Oracle already got you close" accent="var(--color-audio)" className="relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
                                 <Settings2 size={200} className="text-cyan-400" />
                             </div>

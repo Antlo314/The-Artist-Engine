@@ -6,7 +6,7 @@ import RecoupmentSandbox from './RecoupmentSandbox';
 import SplitSheetGenerator from './SplitSheetGenerator';
 import { PageHeader, Segmented } from './ui/Shell';
 
-const LEGAL_ACCENT = '#a78bfa';
+const LEGAL_ACCENT = 'var(--color-zion)';
 
 type LegalTab = 'zion' | 'codex' | 'recoupment' | 'splits';
 

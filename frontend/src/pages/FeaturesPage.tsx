@@ -12,7 +12,7 @@ import { useSmoothScroll } from '../lib/useSmoothScroll';
 const FEATURES = [
     {
         icon: Radar,
-        accent: '#fb923c',
+        accent: 'var(--color-radar)',
         title: 'GIG RADAR ARRAY',
         tagline: 'Verified rooms. Not rumors.',
         desc: 'The Radar pulls live ticketing data to find venues actively booking your genre — real rooms with real upcoming shows, not scraped lists or stale directories. An AI strategy layer then prices every target: payout structure, artist-fairness reputation, booking lead time, and the leverage angle for your pitch.',
@@ -27,7 +27,7 @@ const FEATURES = [
     },
     {
         icon: Swords,
-        accent: '#f4f4f5',
+        accent: 'var(--color-shark)',
         title: 'SHARK PROTOCOL',
         tagline: 'Your negotiator never sleeps.',
         desc: 'Trained on the predatory tactics promoters actually use, the Shark reads every offer, prices your leverage against the room, and drafts the counter before you lose momentum. Flat-fee lowballs, merch-cut grabs, and pay-to-play packages get named and countered — in your voice.',
@@ -42,7 +42,7 @@ const FEATURES = [
     },
     {
         icon: AudioWaveform,
-        accent: '#22d3ee',
+        accent: 'var(--color-audio)',
         title: 'AUDIO MASTER CORE',
         tagline: 'Platinum fidelity on command.',
         desc: 'Drop your mix and a reference record. The Core matches RMS, EQ curve, loudness and stereo field to the reference with real DSP — then finishes through a Sub / Air / Snap / Width control stage and a true-peak limiter at streaming standard. The Oracle listens first and recommends the exact settings your mix needs.',
@@ -57,7 +57,7 @@ const FEATURES = [
     },
     {
         icon: Scale,
-        accent: '#a78bfa',
+        accent: 'var(--color-zion)',
         title: 'ZION LEGAL SENTINEL',
         tagline: 'Read the trap before you sign it.',
         desc: 'Upload any contract — PDF, DOCX, or pasted text. Zion forensically dissects it clause by clause: recoupment traps, perpetual licensing grabs, delayed-payout games, and AI voice-cloning rights get flagged and translated into plain language, with the industry codex built in.',
