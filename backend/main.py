@@ -190,6 +190,147 @@ def _oracle_safe_fallback(reason: str) -> dict:
         ),
         "knobs": {"sub": 55, "air": 62, "snap": 48, "width": 58},
         "fallback": True,
+        "source": "safe_fallback",
+    }
+
+
+def _oracle_dsp_analyze(path: str) -> dict:
+    """Local spectral / dynamics analysis → Studio knobs. No AI, sub-second, always works.
+
+    Maps band energy + crest factor + stereo correlation onto the same 0–100
+    knob space the UI expects (50 = neutral).
+    """
+    import numpy as np
+
+    try:
+        import soundfile as sf
+        audio, sr = sf.read(path, always_2d=True)
+    except Exception:
+        # Decode via pydub/ffmpeg when soundfile can't read the container.
+        seg = AudioSegment.from_file(path)
+        sr = seg.frame_rate
+        samples = np.array(seg.get_array_of_samples(), dtype=np.float32)
+        if seg.channels > 1:
+            samples = samples.reshape((-1, seg.channels))
+        else:
+            samples = samples.reshape((-1, 1))
+        peak = float(1 << (8 * seg.sample_width - 1))
+        audio = samples / peak
+
+    if audio.size == 0:
+        return _oracle_safe_fallback("empty audio")
+
+    # Mono mix for spectral bands; keep stereo for width.
+    mono = audio.mean(axis=1).astype(np.float64)
+    # Cap work on long songs (first 90s is enough for mix topology).
+    max_samples = int(sr * 90)
+    if mono.shape[0] > max_samples:
+        mono = mono[:max_samples]
+        audio = audio[:max_samples]
+
+    # Light high-pass to ignore DC.
+    mono = mono - np.mean(mono)
+    n = mono.shape[0]
+    # Real FFT magnitude spectrum (average of short frames would be better,
+    # but a single rFFT is plenty for knob guidance and stays fast on 2GB).
+    win = np.hanning(n)
+    spec = np.abs(np.fft.rfft(mono * win))
+    freqs = np.fft.rfftfreq(n, d=1.0 / sr)
+    # Avoid log(0)
+    power = np.square(spec) + 1e-12
+
+    def band_energy(lo, hi):
+        mask = (freqs >= lo) & (freqs < hi)
+        if not np.any(mask):
+            return 0.0
+        return float(np.sum(power[mask]))
+
+    e_sub = band_energy(20, 120)
+    e_lowmid = band_energy(120, 500)
+    e_mid = band_energy(500, 4000)
+    e_air = band_energy(6000, min(16000, sr / 2 - 1))
+    total = e_sub + e_lowmid + e_mid + e_air + 1e-12
+
+    p_sub, p_lowmid, p_mid, p_air = e_sub / total, e_lowmid / total, e_mid / total, e_air / total
+
+    # Crest factor (peak / RMS) → transient punch cue.
+    rms = float(np.sqrt(np.mean(mono ** 2)) + 1e-12)
+    peak = float(np.max(np.abs(mono)) + 1e-12)
+    crest_db = 20.0 * np.log10(peak / rms)
+
+    # Stereo width via mid/side correlation when 2ch available.
+    if audio.shape[1] >= 2:
+        L = audio[:, 0].astype(np.float64)
+        R = audio[:, 1].astype(np.float64)
+        if L.shape[0] > max_samples:
+            L, R = L[:max_samples], R[:max_samples]
+        corr = float(np.corrcoef(L, R)[0, 1]) if L.std() > 1e-9 and R.std() > 1e-9 else 1.0
+        if np.isnan(corr):
+            corr = 1.0
+    else:
+        corr = 1.0  # mono source
+
+    def clamp_knob(v):
+        return int(max(0, min(100, round(v))))
+
+    # Knob heuristics (50 neutral):
+    # thin sub → boost; muddy low-mid → cut sub slightly / leave; weak air → boost
+    sub = 50 + (0.18 - p_sub) * 180          # target ~18% sub share
+    if p_lowmid > 0.35:
+        sub -= 8  # mud: don't pile more low end
+    air = 50 + (0.12 - p_air) * 200          # target ~12% air
+    # Low crest (squashed) → add snap; very spiky → ease snap
+    snap = 50 + (12.0 - crest_db) * 2.5
+    # High L/R correlation (narrow) → widen; already wide → ease
+    width = 50 + (corr - 0.35) * -55         # corr 1.0 → ~14 widen; corr 0 → narrow a bit
+
+    knobs = {
+        "sub": clamp_knob(sub),
+        "air": clamp_knob(air),
+        "snap": clamp_knob(snap),
+        "width": clamp_knob(width),
+    }
+
+    notes = []
+    if p_sub < 0.10:
+        notes.append("Sub-bass foundation is thin relative to the rest of the spectrum.")
+    elif p_sub > 0.28:
+        notes.append("Low end is heavy; watch for boom masking the kick/body.")
+    else:
+        notes.append("Low-end weight is in a workable range.")
+
+    if p_lowmid > 0.35:
+        notes.append("Low-mids are congested (boxy/mud risk around 120–500 Hz).")
+    if p_air < 0.06:
+        notes.append("Top end lacks air; a gentle high shelf will open the mix.")
+    elif p_air > 0.22:
+        notes.append("Highs are already forward — avoid harsh air boosts.")
+
+    if crest_db < 8:
+        notes.append(f"Dynamics are compressed (crest ~{crest_db:.1f} dB); snap can restore punch.")
+    elif crest_db > 16:
+        notes.append(f"Transients are peaky (crest ~{crest_db:.1f} dB); ease snap if it clips.")
+
+    if corr > 0.85:
+        notes.append("Stereo field is narrow/mono-leaning; width will open the sides.")
+    elif corr < 0.25:
+        notes.append("Image is already very wide; keep width near neutral to avoid phase haze.")
+
+    analysis = " ".join(notes[:3]) if notes else "Mix topology measured locally. Knobs set from spectral balance."
+    return {
+        "analysis": analysis,
+        "knobs": knobs,
+        "source": "dsp",
+        "metrics": {
+            "band_share": {
+                "sub": round(p_sub, 3),
+                "lowmid": round(p_lowmid, 3),
+                "mid": round(p_mid, 3),
+                "air": round(p_air, 3),
+            },
+            "crest_db": round(crest_db, 2),
+            "stereo_corr": round(corr, 3),
+        },
     }
 
 # ---------------------------------------------------------------------------
@@ -801,89 +942,89 @@ async def oracle_analysis(
     background_tasks: BackgroundTasks,
     target: UploadFile = File(...)
 ):
+    """Oracle: local DSP first (fast + reliable), optional Gemini polish.
+
+    Studio only needs analysis text + four knobs. DSP always supplies that in
+    well under a second. Gemini may refine the write-up/knobs when it returns
+    valid JSON; broken model output never 500s the request.
+    """
     print(f"[ORACLE ENGINE] Intercepting unmastered payload for AI analysis: {target.filename}")
-    client = get_genai_client()
     os.makedirs("temp", exist_ok=True)
     job_id = str(uuid.uuid4())
 
     ext = target.filename.split('.')[-1] if '.' in target.filename else 'wav'
     temp_path = f"temp/oracle_{job_id}.{ext}"
     uploaded_file = None
+    client = None
 
     try:
         with open(temp_path, "wb") as f:
             f.write(await target.read())
 
-        print("[ORACLE ENGINE] Uploading payload to Gemini Multi-Modal Core...")
-        uploaded_file = client.files.upload(file=temp_path)
+        # ---- Layer 1: deterministic DSP (always succeeds or soft-falls) ----
+        try:
+            dsp_oracle = _oracle_dsp_analyze(temp_path)
+            print(f"[ORACLE ENGINE] DSP knobs: {dsp_oracle.get('knobs')}")
+        except Exception as dsp_err:
+            print(f"[ORACLE ENGINE] DSP path failed: {dsp_err}")
+            traceback.print_exc()
+            dsp_oracle = _oracle_safe_fallback(f"dsp: {str(dsp_err)[:80]}")
 
-        system_instruction = (
-            "You are The Oracle, a multi-platinum mastering engineer. "
-            "Respond with a single valid JSON object only. No markdown, no prose outside JSON."
-        )
+        oracle = dsp_oracle
 
-        prompt = '''
-Listen to this unmastered target track (NOT a reference). Return ONLY this JSON shape:
-{
-  "analysis": "2-3 technical sentences on lows/mids/highs, transients, stereo, dynamics. No invented flaws if the mix is already solid.",
-  "knobs": { "sub": 0-100, "air": 0-100, "snap": 0-100, "width": 0-100 }
-}
-Rules: knobs are integers. 50 = neutral, <50 reduces, >50 boosts.
-'''
-        retry_prompt = '''
-Re-emit valid JSON only for this mix. No markdown fences. Exact keys:
-{"analysis":"...","knobs":{"sub":55,"air":60,"snap":50,"width":55}}
-'''
-
-        oracle = None
-        last_parse_err = None
-        # Attempt 1: preferred multimodal model. Attempt 2: stricter retry / other model pool.
-        for attempt, (prompt_text, temp, prefer_fast) in enumerate(
-            (
-                (prompt, 0.2, False),
-                (retry_prompt, 0.0, False),
-                (retry_prompt, 0.0, True),  # flash-lite last resort
-            ),
-            start=1,
-        ):
+        # ---- Layer 2: optional Gemini multimodal polish (single attempt) ----
+        # Skip AI polish when ORACLE_AI=0 (useful for demos / quota protection).
+        use_ai = os.getenv("ORACLE_AI", "1").strip() not in ("0", "false", "False", "no")
+        if use_ai and get_api_key():
             try:
-                print(f"[ORACLE ENGINE] Multimodal pass {attempt}...")
+                client = get_genai_client()
+                print("[ORACLE ENGINE] Optional Gemini polish…")
+                uploaded_file = client.files.upload(file=temp_path)
+                system_instruction = (
+                    "You are The Oracle, a multi-platinum mastering engineer. "
+                    "Respond with one valid JSON object only. No markdown."
+                )
+                prompt = f'''
+Listen to this unmastered track. Return ONLY JSON:
+{{"analysis":"2 technical sentences","knobs":{{"sub":0-100,"air":0-100,"snap":0-100,"width":0-100}}}}
+50=neutral. Keep analysis under 60 words.
+DSP baseline knobs (you may refine): {json.dumps(dsp_oracle.get("knobs", {}))}
+'''
                 response = await _generate_fast(
                     client,
-                    contents=[uploaded_file, prompt_text],
+                    contents=[uploaded_file, prompt],
                     config=types.GenerateContentConfig(
                         system_instruction=system_instruction,
-                        temperature=temp,
+                        temperature=0.15,
                         response_mime_type="application/json",
-                        max_output_tokens=1024,
+                        max_output_tokens=400,
                     ),
-                    prefer_fast=prefer_fast,
+                    prefer_fast=False,
                 )
                 raw = _response_text(response)
-                print(f"[ORACLE ENGINE] Pass {attempt} raw head: {raw[:160]!r}")
-                parsed = _extract_json_object(raw)
-                oracle = _normalize_oracle_payload(parsed)
-                break
-            except Exception as attempt_err:
-                last_parse_err = attempt_err
-                print(f"[ORACLE ENGINE] Pass {attempt} failed: {attempt_err}")
-                continue
+                print(f"[ORACLE ENGINE] AI raw head: {raw[:160]!r}")
+                polished = _normalize_oracle_payload(_extract_json_object(raw))
+                polished["source"] = "gemini+dsp"
+                polished["dsp_knobs"] = dsp_oracle.get("knobs")
+                oracle = polished
+                print("[ORACLE ENGINE] AI polish accepted.")
+            except Exception as ai_err:
+                # Keep DSP result — this is the reliability win.
+                print(f"[ORACLE ENGINE] AI polish skipped: {ai_err}")
+                oracle = dsp_oracle
+                oracle["ai_error"] = str(ai_err)[:160]
+        else:
+            print("[ORACLE ENGINE] AI polish disabled or no key — DSP only.")
 
-        if oracle is None:
-            reason = str(last_parse_err)[:120] if last_parse_err else "empty response"
-            print(f"[ORACLE ENGINE] Using safe fallback after parse failures: {reason}")
-            oracle = _oracle_safe_fallback(reason)
-
-        print("[ORACLE ENGINE] Analysis complete. Returning tactical data.")
+        print("[ORACLE ENGINE] Analysis complete.")
         return {"status": "success", "oracle": oracle}
 
     except Exception as e:
-        # Upload/network hard failure — still return usable knobs so Studio never 500s.
         print(f"[ORACLE ENGINE] Fatal Error (soft-fail): {str(e)}")
         traceback.print_exc()
         return {"status": "success", "oracle": _oracle_safe_fallback(str(e)[:120])}
     finally:
-        if uploaded_file is not None:
+        if uploaded_file is not None and client is not None:
             try:
                 client.files.delete(name=uploaded_file.name)
             except Exception:
