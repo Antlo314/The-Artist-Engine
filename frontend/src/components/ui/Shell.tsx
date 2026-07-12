@@ -27,7 +27,7 @@ export function PageHeader({
 }) {
     const video = HEADER_VIDEO[view];
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 mb-8 h-[140px] md:h-[180px]">
+        <div className="hud-corners relative overflow-hidden rounded-2xl border border-white/10 mb-8 h-[140px] md:h-[180px]">
             {video ? (
                 <video
                     autoPlay
@@ -58,23 +58,30 @@ export function PageHeader({
                 </div>
                 {children && <div className="shrink-0 hidden sm:block">{children}</div>}
             </div>
+
+            {/* HUD meter line */}
+            <div className="absolute bottom-0 inset-x-0 h-px bg-white/10 z-10">
+                <div className="h-full w-1/5" style={{ backgroundColor: accent }} />
+            </div>
         </div>
     );
 }
 
 /* ---- Panel: the one card ---- */
 export function Panel({
-    title, sub, accent, actions, className = '', children,
+    title, sub, accent, actions, hud = false, sheen = true, className = '', children,
 }: {
     title?: string;
     sub?: string;
     accent?: string;
     actions?: ReactNode;
+    hud?: boolean;
+    sheen?: boolean;
     className?: string;
     children: ReactNode;
 }) {
     return (
-        <div className={`glass-obsidian rounded-xl border border-white/10 ${className}`}>
+        <div className={`glass-obsidian rounded-2xl border border-white/10 ${sheen ? 'sheen' : ''} ${hud ? 'hud-corners' : ''} ${className}`}>
             {(title || actions) && (
                 <div className="flex items-center justify-between gap-3 px-5 md:px-6 pt-5 pb-4 border-b border-white/10">
                     <div className="min-w-0">

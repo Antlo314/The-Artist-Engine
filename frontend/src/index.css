@@ -74,13 +74,71 @@
 
 @layer utilities {
 
-    /* ====== V2 dark glass (marketing surfaces) ====== */
+    /* ====== V4 liquid glass (HUD surfaces) ====== */
     .glass-obsidian {
-        background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255,255,255,0.08);
-        box-shadow: 0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+        position: relative;
+        background: linear-gradient(150deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02) 38%, rgba(255,255,255,0.05));
+        backdrop-filter: blur(28px) saturate(1.4);
+        -webkit-backdrop-filter: blur(28px) saturate(1.4);
+        border: 1px solid rgba(255,255,255,0.10);
+        box-shadow:
+            0 24px 60px rgba(0,0,0,0.55),
+            inset 0 1px 0 rgba(255,255,255,0.12),
+            inset 0 -1px 0 rgba(255,255,255,0.03);
+    }
+
+    /* Liquid sheen sweep on hover */
+    .sheen {
+        position: relative;
+        overflow: hidden;
+    }
+    .sheen::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 60%;
+        height: 100%;
+        pointer-events: none;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,0.06) 50%, transparent);
+        transform: skewX(-18deg);
+        transition: left 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sheen:hover::before {
+        left: 150%;
+    }
+
+    /* HUD corner brackets */
+    .hud-corners::before,
+    .hud-corners::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        pointer-events: none;
+        z-index: 2;
+    }
+    .hud-corners::before {
+        top: 8px;
+        left: 8px;
+        border-top: 1px solid rgba(255,255,255,0.25);
+        border-left: 1px solid rgba(255,255,255,0.25);
+    }
+    .hud-corners::after {
+        bottom: 8px;
+        right: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.25);
+        border-right: 1px solid rgba(255,255,255,0.25);
+    }
+
+    /* Breathing status dot */
+    .dot-breathe {
+        animation: dot-breathe 2.4s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sheen::before { transition: none; }
+        .dot-breathe { animation: none; }
     }
 
     .glass-obsidian-hover {
@@ -225,4 +283,9 @@
 @keyframes marquee-scroll {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
+}
+
+@keyframes dot-breathe {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50%      { transform: scale(1.35); opacity: 1; }
 }

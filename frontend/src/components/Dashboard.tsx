@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
     Activity, Mic2, Radar as RadarIcon, Send, ShieldAlert, FileWarning,
-    ArrowRight, Radio, CheckCircle2, Trash2, Wifi, WifiOff, Cpu
+    ArrowRight, Radio, CheckCircle2, Trash2, Cpu
 } from 'lucide-react';
 import { useEngine, relTime, type Lead, type LeadStage } from '../lib/engineState';
 import { PageHeader } from './ui/Shell';
@@ -9,6 +10,12 @@ import { PageHeader } from './ui/Shell';
 interface DashboardProps {
     onNavigate: (view: string) => void;
 }
+
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const tile = {
+    hidden: { opacity: 0, y: 24, scale: 0.97 },
+    show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring' as const, stiffness: 260, damping: 26 } },
+};
 
 const STAT_DEFS = [
     { key: 'mastersCompleted', label: 'Masters', icon: Mic2, accent: '#22d3ee' },
@@ -73,37 +80,75 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 desc="Your operation at a glance — every number here is something you actually did."
             />
 
-            {/* ===== Stat row (real counters) ===== */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {/* ===== Animated bento grid ===== */}
+            <motion.div
+                variants={container}
+                initial="hidden"
+                animate="show"
+                className="grid grid-cols-2 lg:grid-cols-6 gap-4 auto-rows-[minmax(104px,auto)]"
+            >
+                {/* Row 1 — 5 stat tiles */}
                 {STAT_DEFS.map((s) => {
                     const value = stats[s.key];
                     const Icon = s.icon;
                     const empty = value === 0;
                     const isThreat = s.key === 'threatsFlagged' && value > 0;
                     return (
-                        <div key={s.key} className="glass-obsidian glass-obsidian-hover p-5 rounded-xl relative overflow-hidden">
-                            <div className="flex items-center justify-between mb-3">
-                                <Icon size={18} style={{ color: isThreat ? '#ef4444' : s.accent }} />
-                                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: empty ? '#333' : s.accent }} />
+                        <motion.div
+                            key={s.key}
+                            variants={tile}
+                            whileHover={{ y: -4 }}
+                            className="glass-obsidian sheen rounded-2xl p-5 flex flex-col justify-between"
+                        >
+                            <div className="flex items-center justify-between">
+                                <Icon size={18} style={{ color: isThreat ? '#ef4444' : '#8a8a93' }} />
+                                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: empty ? '#333' : isThreat ? '#ef4444' : '#8a8a93' }} />
                             </div>
-                            <div
-                                className="font-display font-bold text-3xl tracking-tight tabular-nums"
-                                style={{ color: empty ? '#55555e' : isThreat ? '#f87171' : '#f4f4f5' }}
-                            >
-                                {empty ? '—' : value.toLocaleString()}
+                            <div>
+                                <div
+                                    className="font-display font-bold text-3xl tracking-tight tabular-nums leading-none"
+                                    style={{ color: empty ? '#55555e' : isThreat ? '#f87171' : '#f4f4f5' }}
+                                >
+                                    {empty ? '—' : value.toLocaleString()}
+                                </div>
+                                <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400 mt-1.5">{s.label}</div>
+                                {empty && <div className="font-mono text-[9px] text-ink-700 mt-0.5">awaiting first op</div>}
                             </div>
-                            <div className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400 mt-1">{s.label}</div>
-                            {empty && <div className="font-mono text-[9px] text-ink-700 mt-0.5">awaiting first op</div>}
-                        </div>
+                        </motion.div>
                     );
                 })}
-            </div>
 
-            {/* ===== Pipeline + Activity ===== */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Row 1 — System tile */}
+                <motion.div
+                    variants={tile}
+                    whileHover={{ y: -4 }}
+                    className="glass-obsidian sheen hud-corners rounded-2xl p-5 flex flex-col justify-between"
+                >
+                    <div className="flex items-center gap-2">
+                        <span
+                            className={`h-2 w-2 rounded-full ${sys === 'online' ? 'dot-breathe' : ''}`}
+                            style={{ backgroundColor: sys === 'online' ? '#4ade80' : sys === 'offline' ? '#f87171' : '#8a8a93' }}
+                        />
+                        <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">System</span>
+                    </div>
+                    <div className="space-y-1.5">
+                        <div className="text-sm font-medium" style={{ color: sys === 'online' ? '#f4f4f5' : sys === 'offline' ? '#f87171' : '#8a8a93' }}>
+                            {sys === 'checking' ? 'Checking…' : sys === 'online' ? 'Engine online' : 'Offline'}
+                        </div>
+                        <div className="flex items-center gap-1.5 font-mono text-[9px] tracking-wide text-ink-400">
+                            <Cpu size={10} /> AI {sys !== 'online' ? '—' : keyVerified ? 'ready' : 'no key'}
+                        </div>
+                        <div className="flex items-center gap-1.5 font-mono text-[9px] tracking-wide" style={{ color: tmLive ? '#4ade80' : '#8a8a93' }}>
+                            <RadarIcon size={10} /> Ticketmaster {tmLive ? 'live' : 'standby'}
+                        </div>
+                    </div>
+                </motion.div>
 
-                {/* Booking Pipeline board */}
-                <div className="lg:col-span-2 glass-obsidian rounded-xl p-5 border border-white/10">
+                {/* Rows 2-3 — Pipeline hero */}
+                <motion.div
+                    variants={tile}
+                    className="col-span-2 lg:col-span-4 lg:row-span-2 glass-obsidian sheen hud-corners rounded-2xl p-5 flex flex-col"
+                >
                     <div className="flex items-center justify-between mb-5">
                         <div>
                             <h3 className="font-display text-lg text-ink-50 tracking-wide">Booking Pipeline</h3>
@@ -115,7 +160,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                     </div>
 
                     {activeLeads.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center text-center py-14 border border-dashed border-white/10 rounded-lg">
+                        <div className="flex-1 flex flex-col items-center justify-center text-center py-14 border border-dashed border-white/10 rounded-lg">
                             <RadarIcon size={30} className="text-ink-700 mb-4" />
                             <p className="text-ink-400 text-sm mb-1">Pipeline empty</p>
                             <p className="font-mono text-[10px] text-ink-700 tracking-widest uppercase mb-5">Run a scout to populate real leads</p>
@@ -147,10 +192,13 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                             })}
                         </div>
                     )}
-                </div>
+                </motion.div>
 
-                {/* Activity feed */}
-                <div className="glass-obsidian rounded-xl p-5 border border-white/10 flex flex-col">
+                {/* Rows 2-3 — Activity feed */}
+                <motion.div
+                    variants={tile}
+                    className="col-span-2 lg:row-span-2 glass-obsidian sheen rounded-2xl p-5 flex flex-col"
+                >
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <Activity size={15} className="text-red-500" />
@@ -172,7 +220,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                             <p className="font-mono text-[10px] text-ink-700 tracking-widest uppercase">No operations logged yet</p>
                         </div>
                     ) : (
-                        <div className="space-y-3 overflow-y-auto max-h-[360px] pr-1 custom-scrollbar">
+                        <div className="space-y-3 overflow-y-auto max-h-[420px] pr-1 custom-scrollbar">
                             {activity.map((ev) => (
                                 <div key={ev.id} className="flex gap-3">
                                     <span
@@ -189,30 +237,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                             ))}
                         </div>
                     )}
-                </div>
-            </div>
-
-            {/* ===== System telemetry strip ===== */}
-            <div className="glass-obsidian rounded-xl px-5 py-4 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8">
-                <TelemetryItem
-                    icon={sys === 'online' ? Wifi : WifiOff}
-                    label="Engine Core"
-                    value={sys === 'checking' ? 'Checking…' : sys === 'online' ? 'Online' : 'Offline — cold start likely, retry in 60s'}
-                    tone={sys === 'online' ? 'good' : sys === 'offline' ? 'bad' : 'idle'}
-                />
-                <TelemetryItem
-                    icon={Cpu}
-                    label="AI Core"
-                    value={sys !== 'online' ? '—' : keyVerified ? 'Key verified' : 'Key missing'}
-                    tone={sys !== 'online' ? 'idle' : keyVerified ? 'good' : 'bad'}
-                />
-                <TelemetryItem
-                    icon={RadarIcon}
-                    label="Ticketmaster Grid"
-                    value={tmLive ? 'Live — verified venues returned' : 'Standby'}
-                    tone={tmLive ? 'good' : 'idle'}
-                />
-            </div>
+                </motion.div>
+            </motion.div>
         </div>
     );
 }
@@ -267,17 +293,3 @@ function LeadCard({ lead, onMove }: { lead: Lead; onMove: (id: string, stage: Le
     );
 }
 
-function TelemetryItem({
-    icon: Icon, label, value, tone,
-}: { icon: any; label: string; value: string; tone: 'good' | 'bad' | 'idle' }) {
-    const color = tone === 'good' ? '#4ade80' : tone === 'bad' ? '#f87171' : '#8a8a93';
-    return (
-        <div className="flex items-center gap-3">
-            <Icon size={16} style={{ color }} />
-            <div>
-                <div className="font-mono text-[9px] tracking-widest uppercase text-ink-400">{label}</div>
-                <div className="text-[13px]" style={{ color }}>{value}</div>
-            </div>
-        </div>
-    );
-}
