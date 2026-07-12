@@ -5,7 +5,7 @@
     "rewrites": [
         {
             "source": "/api/:path*",
-            "destination": "https://the-artist-engine.onrender.com/api/:path*"
+            "destination": "https://the-artist-engine-zbl1.onrender.com/api/:path*"
         },
         {
             "source": "/(.*)",
