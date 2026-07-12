@@ -407,9 +407,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             <LoadingProgressBar
                                 active={isScouting}
                                 message="Scanning for venues"
-                                subMessage="Checking booking calendars and payout data. This can take 30-60s on the free tier."
+                                subMessage="Checking live ticketing + payout intel. Usually 8–15 seconds."
                                 colorClass="orange"
-                                estimatedDurationMs={40000}
+                                estimatedDurationMs={12000}
                             />
                         </div>
                     )}
@@ -597,9 +597,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                             <LoadingProgressBar
                                                 active={isDrafting}
                                                 message={`Writing your ${outreachType === 'call_script' ? 'call script' : outreachType === 'dm' ? 'DM' : 'email'}`}
-                                                subMessage="Matching the pitch to this venue's tier and contact. Can take up to 30-40s."
+                                                subMessage="Matching the pitch to this venue's tier and contact. Usually under 5 seconds."
                                                 colorClass="orange"
-                                                estimatedDurationMs={20000}
+                                                estimatedDurationMs={4000}
                                             />
                                         </div>
                                     ) : (

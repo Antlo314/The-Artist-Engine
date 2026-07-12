@@ -46,7 +46,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://the-artist-engine-lime.vercel.app"
+        "http://127.0.0.1:5173",
+        "https://the-artist-engine-lime.vercel.app",
+        "https://artist-engine.vercel.app",
+        "https://theartistengine.com",
+        "https://www.theartistengine.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -63,15 +67,44 @@ def get_api_key() -> Optional[str]:
 # Central model config — override with GEMINI_MODEL in .env if Google retires
 # this one (they retired gemini-2.5-flash for new API projects).
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
-# Fast model for latency-sensitive structured tasks (venue enrichment).
-# flash-lite is ~10x faster than flash on structured JSON. Override if quality dips.
+# Fast model for latency-sensitive structured tasks (venue enrichment, pitches).
+# flash-lite is ~5–10x faster than flash on short text/JSON. Override if quality dips.
 GEMINI_FAST_MODEL = os.getenv("GEMINI_FAST_MODEL", "gemini-flash-lite-latest")
+# Hard caps keep free-tier latency + cost predictable.
+SCOUT_VENUE_CAP = int(os.getenv("SCOUT_VENUE_CAP", "10"))
+PITCH_MAX_OUTPUT_TOKENS = int(os.getenv("PITCH_MAX_OUTPUT_TOKENS", "700"))
 
 def get_genai_client():
     api_key = get_api_key()
     if not api_key:
          raise HTTPException(status_code=500, detail="GEMINI_API_KEY is not configured in the environment.")
     return genai.Client(api_key=api_key)
+
+
+async def _generate_fast(client, *, contents, config=None, prefer_fast=True):
+    """Call the fast model first; fall back to GEMINI_MODEL on hard failures.
+
+    Pitch / scout / contract structured tasks should almost always use
+    flash-lite. Full multimodal audio (Oracle) should pass prefer_fast=False.
+    """
+    models = [GEMINI_FAST_MODEL, GEMINI_MODEL] if prefer_fast else [GEMINI_MODEL, GEMINI_FAST_MODEL]
+    last_err = None
+    for model in models:
+        try:
+            return await client.aio.models.generate_content(
+                model=model,
+                contents=contents,
+                config=config or {},
+            )
+        except Exception as err:
+            last_err = err
+            # Rate-limit / quota → try the other model immediately.
+            msg = str(err).lower()
+            if "429" in msg or "resource_exhausted" in msg or "quota" in msg:
+                continue
+            # Non-quota failures on the preferred model: still try the fallback once.
+            continue
+    raise last_err if last_err else RuntimeError("Gemini generation failed with no error detail")
 
 # ---------------------------------------------------------------------------
 # GLOBAL LOGGING AND STARTUP
@@ -228,17 +261,18 @@ async def scout_gigs(request: ScoutRequest):
                 radius=request.radius, timeframe=request.timeframe
             )
             # Cap enriched venues to keep the AI step fast (fewer output tokens).
-            real_venues = real_venues[:15]
+            real_venues = real_venues[:SCOUT_VENUE_CAP]
             if real_venues:
                 logs.append(f"[GIG RADAR] {len(real_venues)} verified live venues intercepted. Enriching with strategic AI...")
                 client = get_genai_client()
-                enrich_resp = await client.aio.models.generate_content(
-                    model=GEMINI_FAST_MODEL,
+                enrich_resp = await _generate_fast(
+                    client,
                     contents=_enrich_prompt(request, real_venues),
                     config=types.GenerateContentConfig(
-                        temperature=0.5,
-                        response_mime_type="application/json"
-                    )
+                        temperature=0.4,
+                        response_mime_type="application/json",
+                        max_output_tokens=4096,
+                    ),
                 )
                 data = json.loads(enrich_resp.text)
                 if data.get("venues"):
@@ -305,15 +339,18 @@ async def scout_gigs(request: ScoutRequest):
     
     try:
         client = get_genai_client()
-        response = await client.aio.models.generate_content(
-            model=GEMINI_MODEL,
+        # Grounded search needs a tool-capable model; prefer full model, fall back to fast.
+        response = await _generate_fast(
+            client,
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=cities_knowledge,
                 tools=[{"google_search": {}}],
                 temperature=0.6,
-                response_mime_type="application/json"
-            )
+                response_mime_type="application/json",
+                max_output_tokens=4096,
+            ),
+            prefer_fast=False,
         )
         raw_text = response.text.strip()
         if raw_text.startswith("```json"):
@@ -340,13 +377,14 @@ async def scout_gigs(request: ScoutRequest):
             Timeframe target: {request.timeframe}.
             Use internal world knowledge. Respond in strict JSON only, same schema as before (including contact_persona, contact_source, website_url, social_media_url, payout_model, lead_time, similar_acts, reputation_score, reputation_explanation, capacity, avg_ticket_price_usd, gross_potential_usd, leverage_point, and active_search_signal). Ensure NO missing fields.
             '''
-            fb_response = await client.aio.models.generate_content(
-                model=GEMINI_MODEL,
+            fb_response = await _generate_fast(
+                client,
                 contents=fallback_prompt,
                 config=types.GenerateContentConfig(
                     system_instruction=cities_knowledge,
-                    response_mime_type="application/json"
-                )
+                    response_mime_type="application/json",
+                    max_output_tokens=4096,
+                ),
             )
             data = json.loads(fb_response.text)
             
@@ -376,30 +414,50 @@ async def draft_pitch(request: DraftPitchRequest):
             sign_off += f"Web: {request.agent_social}\\n"
 
     format_instructions = ""
+    max_tokens = PITCH_MAX_OUTPUT_TOKENS
     if request.outreach_type == "email":
-        format_instructions = f"Draft a professional but edgy email. Sign off exactly with:\\n{sign_off}"
+        format_instructions = (
+            f"Draft a professional but edgy email under 180 words. "
+            f"Sign off exactly with:\\n{sign_off}"
+        )
+        max_tokens = min(max_tokens, 500)
     elif request.outreach_type == "call_script":
-        format_instructions = "Draft a conversational, high-energy phone script for leaving a voicemail or speaking to a gatekeeper. Include cues like [Pause] or [Enthusiastic]. End with the agent noting they will follow up via email."
+        format_instructions = (
+            "Draft a tight 45–60 second phone script (voicemail OR live gatekeeper). "
+            "Use short spoken lines and cues like [Pause] or [Enthusiastic]. "
+            "Max 140 words. End with a note that you will follow up via email."
+        )
+        max_tokens = min(max_tokens, 450)
     elif request.outreach_type == "dm":
-        format_instructions = f"Draft a concise, punchy direct message for Instagram/Twitter. Needs to be very short, impactful, and easy to read on mobile. Sign off briefly with: {request.agent_name} / {request.artist_name}."
+        format_instructions = (
+            f"Draft a concise Instagram/Twitter DM under 60 words. Punchy, mobile-first. "
+            f"Sign off briefly with: {request.agent_name} / {request.artist_name}."
+        )
+        max_tokens = min(max_tokens, 220)
 
     prompt = f'''
     You are '{request.agent_name}', a shark music manager representing the emerging {request.genre} artist "{request.artist_name}".
     Write a pitch targeting the booking buyer: "{request.contact_persona}" at the venue: "{request.venue_name}".
-    
+
     CONTEXT:
     Venue Tier: {request.venue_tier}
     Expected Payout Model: {request.payout_model}
-    
+
     {format_instructions}
+    Return ONLY the outreach text — no preamble, no markdown fences.
     '''
     try:
-        response = await client.aio.models.generate_content(
-            model=GEMINI_MODEL,
+        # flash-lite: pitch text is short/creative — measured ~15–18s on full flash,
+        # target <4s on lite. Separate quota pool from gemini-3.5-flash free tier.
+        response = await _generate_fast(
+            client,
             contents=prompt,
-            config={'temperature': 0.7}
+            config=types.GenerateContentConfig(
+                temperature=0.65,
+                max_output_tokens=max_tokens,
+            ),
         )
-        logs.append("[GIG RADAR] Auto-Pitch crafted to OMEGA standards.")
+        logs.append("[GIG RADAR] Auto-Pitch crafted (fast path).")
         return {"status": "success", "pitch": response.text.strip(), "log": "\\n".join(logs)}
     except Exception as e:
         logs.append(f"[GIG RADAR] Pitch Generation Error: {str(e)}")
@@ -491,16 +549,18 @@ async def analyze_contract(
 
         contents.append(prompt + "\n" + codex_injection)
         
-        logs.append("[ZION SHARK PROTOCOL] Executing Multi-Modal Flash Extraction with Codex Injection...")
+        logs.append("[ZION SHARK PROTOCOL] Executing Fast Flash Extraction with Codex Injection...")
         
-        response = await client.aio.models.generate_content(
-            model=GEMINI_MODEL,
+        # Structured legal JSON is a strong fit for flash-lite (faster + separate free-tier pool).
+        response = await _generate_fast(
+            client,
             contents=contents,
-            config={
-                'system_instruction': system_instruction,
-                'temperature': 0.2,
-                'response_mime_type': 'application/json'
-            }
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.2,
+                response_mime_type="application/json",
+                max_output_tokens=2048,
+            ),
         )
         
         data = json.loads(response.text)
@@ -694,15 +754,18 @@ async def oracle_analysis(
             }
         }
         '''
-        print("[ORACLE ENGINE] Extracting topology signatures via Gemini 2.5 Flash...")
-        response = await client.aio.models.generate_content(
-            model=GEMINI_MODEL,
+        print("[ORACLE ENGINE] Extracting topology signatures via Gemini multimodal...")
+        # Prefer full model for audio understanding; fall back if quota-exhausted.
+        response = await _generate_fast(
+            client,
             contents=[uploaded_file, prompt],
-            config={
-                'system_instruction': system_instruction,
-                'temperature': 0.2,
-                'response_mime_type': 'application/json'
-            }
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.2,
+                response_mime_type="application/json",
+                max_output_tokens=512,
+            ),
+            prefer_fast=False,
         )
         
         data = json.loads(response.text)

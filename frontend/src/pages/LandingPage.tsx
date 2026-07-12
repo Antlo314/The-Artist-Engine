@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowDown, Radar, Scale, AudioWaveform, Swords } from 'lucide-react';
 import MarketingNav from '../components/MarketingNav';
-import VinylScene from '../components/three/VinylScene';
+// Three.js vinyl is heavy — load after first paint so LCP isn't blocked.
+const VinylScene = lazy(() => import('../components/three/VinylScene'));
 import { useSmoothScroll, gsap, ScrollTrigger } from '../lib/useSmoothScroll';
 
 /* ============================================================
@@ -134,7 +135,9 @@ export default function LandingPage() {
             <section className="relative h-[100svh] min-h-[640px] grain overflow-hidden">
                 {/* 3D scene */}
                 <div className="absolute inset-0 md:left-[28%] z-0 opacity-80 md:opacity-100">
-                    <VinylScene />
+                    <Suspense fallback={<div className="absolute inset-0 bg-ink-950" />}>
+                        <VinylScene />
+                    </Suspense>
                 </div>
                 {/* Cinematic gradients over the scene */}
                 <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-r from-ink-950 via-ink-950/70 to-transparent md:via-ink-950/40" />

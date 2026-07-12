@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Mic2, Scale, Radio, BarChart2, Monitor } from 'lucide-react';
 
-import Dashboard from '../components/Dashboard';
-import GigRadar from '../components/GigRadar';
-import StudioCore from '../components/StudioCore';
-import LegalCore from '../components/LegalCore';
-import ArtistProfile from '../components/ArtistProfile';
+// View-level code split: opening Dashboard no longer parses WaveSurfer / Studio / Legal.
+const Dashboard = lazy(() => import('../components/Dashboard'));
+const GigRadar = lazy(() => import('../components/GigRadar'));
+const StudioCore = lazy(() => import('../components/StudioCore'));
+const LegalCore = lazy(() => import('../components/LegalCore'));
+const ArtistProfile = lazy(() => import('../components/ArtistProfile'));
 import { EngineProvider } from '../lib/engineState';
 
 const NAV = [
@@ -51,14 +52,27 @@ function EngineCoreInner() {
     const avatar = localStorage.getItem('sovereign_avatar');
 
     const renderActiveView = () => {
-        switch (activeView) {
-            case 'dashboard': return <Dashboard onNavigate={setActiveView} />;
-            case 'radar': return <GigRadar profile={profile} />;
-            case 'legal': return <LegalCore />;
-            case 'studio': return <StudioCore />;
-            case 'profile': return <ArtistProfile profile={profile} setProfile={setProfile} />;
-            default: return <Dashboard onNavigate={setActiveView} />;
-        }
+        const view = (() => {
+            switch (activeView) {
+                case 'dashboard': return <Dashboard onNavigate={setActiveView} />;
+                case 'radar': return <GigRadar profile={profile} />;
+                case 'legal': return <LegalCore />;
+                case 'studio': return <StudioCore />;
+                case 'profile': return <ArtistProfile profile={profile} setProfile={setProfile} />;
+                default: return <Dashboard onNavigate={setActiveView} />;
+            }
+        })();
+        return (
+            <Suspense
+                fallback={
+                    <div className="py-24 text-center font-mono text-[11px] tracking-[0.3em] uppercase text-ink-400 animate-pulse">
+                        Loading module…
+                    </div>
+                }
+            >
+                {view}
+            </Suspense>
+        );
     };
 
     return (

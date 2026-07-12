@@ -2,14 +2,28 @@
     "buildCommand": "cd frontend && npm install && npm run build",
     "outputDirectory": "frontend/dist",
     "framework": "vite",
+    "headers": [
+        {
+            "source": "/assets/(.*)",
+            "headers": [
+                { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+            ]
+        },
+        {
+            "source": "/(.*)\\.(js|css|woff2|png|jpg|jpeg|webp|svg|mp4)",
+            "headers": [
+                { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
+            ]
+        }
+    ],
     "rewrites": [
         {
             "source": "/api/:path*",
             "destination": "https://the-artist-engine-zbl1.onrender.com/api/:path*"
         },
         {
-            "source": "/(.*)",
-            "destination": "/"
+            "source": "/((?!api/).*)",
+            "destination": "/index.html"
         }
     ]
 }

@@ -10,6 +10,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
+      workbox: {
+        // Don't precache multi-MB marketing videos — they thrash the SW cache.
+        globPatterns: ['**/*.{js,css,html,ico,svg,woff2,webmanifest}'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+      },
       manifest: {
         name: 'The Artist Engine.OS',
         short_name: 'Engine.OS',
@@ -33,6 +38,25 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    target: 'es2020',
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        // Keep heavy optional deps out of the first-paint bundle.
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('three') || id.includes('@react-three')) return 'three';
+            if (id.includes('wavesurfer')) return 'wavesurfer';
+            if (id.includes('gsap') || id.includes('lenis')) return 'motion-scroll';
+            if (id.includes('framer-motion')) return 'framer';
+            if (id.includes('lucide-react')) return 'icons';
+            if (id.includes('react-dom') || id.includes('react-router') || id.includes('/react/')) return 'react-vendor';
+          }
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': {

@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 
 /* ============================================================
    Engine UI v3 — "Clarity Protocol" shared primitives.
@@ -15,6 +15,52 @@ const HEADER_VIDEO: Record<string, string | null> = {
     profile: null, // uses a still image instead
 };
 
+/** Lazy-load header video only when visible — saves 4–6MB on first paint. */
+function LazyHeaderVideo({ src }: { src: string }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [active, setActive] = useState(false);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        // If IntersectionObserver is unavailable, load immediately.
+        if (typeof IntersectionObserver === 'undefined') {
+            setActive(true);
+            return;
+        }
+        const io = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setActive(true);
+                    io.disconnect();
+                }
+            },
+            { rootMargin: '80px' }
+        );
+        io.observe(el);
+        return () => io.disconnect();
+    }, []);
+
+    return (
+        <div ref={ref} className="absolute inset-0">
+            {active ? (
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="none"
+                    className="absolute inset-0 w-full h-full object-cover opacity-35"
+                >
+                    <source src={src} type="video/mp4" />
+                </video>
+            ) : (
+                <div className="absolute inset-0 bg-ink-900 opacity-40" />
+            )}
+        </div>
+    );
+}
+
 export function PageHeader({
     view, accent, module, title, desc, children,
 }: {
@@ -29,15 +75,7 @@ export function PageHeader({
     return (
         <div className="hud-corners relative overflow-hidden rounded-2xl border border-white/10 mb-8 h-[140px] md:h-[180px]">
             {video ? (
-                <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover opacity-35"
-                >
-                    <source src={video} type="video/mp4" />
-                </video>
+                <LazyHeaderVideo src={video} />
             ) : (
                 <div
                     className="absolute inset-0 bg-cover bg-center opacity-20"
