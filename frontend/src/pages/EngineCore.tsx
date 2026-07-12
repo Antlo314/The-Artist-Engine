@@ -8,6 +8,7 @@ const StudioCore = lazy(() => import('../components/StudioCore'));
 const LegalCore = lazy(() => import('../components/LegalCore'));
 const ArtistProfile = lazy(() => import('../components/ArtistProfile'));
 import FoundingBadge from '../components/FoundingBadge';
+import ThemeToggle from '../components/ThemeToggle';
 import { EngineProvider } from '../lib/engineState';
 
 type ViewId = 'dashboard' | 'radar' | 'studio' | 'legal' | 'profile';
@@ -153,32 +154,35 @@ function EngineCoreInner() {
                     className="shrink-0 border-b border-white/10 bg-ink-950/95 backdrop-blur-md z-20"
                     style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
                 >
-                    <div className="h-14 flex items-center justify-between px-4 gap-3">
+                    <div className="h-14 flex items-center justify-between px-4 gap-2">
                         <div className="flex items-center gap-2.5 min-w-0">
                             <div className="h-8 w-8 rounded-lg bg-ink-800 border border-white/10 overflow-hidden shrink-0">
                                 <img src="/site/favicon.png" alt="" className="w-full h-full object-cover" />
                             </div>
                             <div className="min-w-0">
-                                <div className="font-display text-sm font-semibold tracking-widest text-white leading-none">
+                                <div className="font-display text-sm font-semibold tracking-widest text-ink-50 leading-none">
                                     ENGINE.OS
                                 </div>
                                 <div className="text-xs text-ink-400 mt-0.5 truncate">{current.label}</div>
                             </div>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setActiveView('profile')}
-                            className="h-9 w-9 rounded-full bg-ink-800 border border-white/15 overflow-hidden shrink-0"
-                            aria-label="Open profile"
-                        >
-                            {avatar ? (
-                                <img src={avatar} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="flex h-full w-full items-center justify-center font-display text-[10px] text-ink-200">
-                                    {(profile.artistAlias || profile.agentName || 'AE').substring(0, 2).toUpperCase()}
-                                </span>
-                            )}
-                        </button>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            <ThemeToggle />
+                            <button
+                                type="button"
+                                onClick={() => setActiveView('profile')}
+                                className="h-9 w-9 rounded-full bg-ink-800 border border-white/15 overflow-hidden"
+                                aria-label="Open profile"
+                            >
+                                {avatar ? (
+                                    <img src={avatar} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="flex h-full w-full items-center justify-center font-display text-[10px] text-ink-200">
+                                        {(profile.artistAlias || profile.agentName || 'AE').substring(0, 2).toUpperCase()}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </header>
 
@@ -294,7 +298,8 @@ function EngineCoreInner() {
                     <div className="font-mono text-[11px] text-ink-400 tracking-widest">
                         Engine / {current.label}
                     </div>
-                    <div className="flex items-center gap-4 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <ThemeToggle />
                         <FoundingBadge />
                     </div>
                 </header>

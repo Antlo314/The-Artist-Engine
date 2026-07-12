@@ -140,9 +140,9 @@ export default function LandingPage() {
                     </Suspense>
                 </div>
                 {/* Mobile: static ember gradient instead of 3D */}
-                <div className="absolute inset-0 z-0 md:hidden bg-[radial-gradient(ellipse_at_70%_20%,_#3f0a0a_0%,_#08080a_55%,_#060607_100%)]" />
+                <div className="theme-hero-mobile absolute inset-0 z-0 md:hidden bg-[radial-gradient(ellipse_at_70%_20%,_#3f0a0a_0%,_#08080a_55%,_#060607_100%)]" />
                 {/* Cinematic gradients over the scene */}
-                <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-r from-ink-950 via-ink-950/80 to-ink-950/50 md:via-ink-950/40 md:to-transparent" />
+                <div className="theme-hero-scrim absolute inset-0 z-[1] pointer-events-none bg-gradient-to-r from-ink-950 via-ink-950/80 to-ink-950/50 md:via-ink-950/40 md:to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 h-40 z-[1] pointer-events-none bg-gradient-to-t from-ink-950 to-transparent" />
                 <div className="absolute inset-x-0 top-0 h-24 z-[1] pointer-events-none bg-gradient-to-b from-ink-950/90 to-transparent" />
 
@@ -192,7 +192,7 @@ export default function LandingPage() {
                         </button>
                         <button
                             onClick={() => navigate('/features')}
-                            className="rounded-full border hairline hover:border-ink-400/60 transition-colors px-8 py-4 font-display font-medium tracking-wide text-ink-200 hover:text-white w-full sm:w-auto"
+                            className="rounded-full border hairline hover:border-ink-400/60 transition-colors px-8 py-4 font-display font-medium tracking-wide text-ink-200 hover:text-ink-50 w-full sm:w-auto"
                         >
                             View Architecture
                         </button>

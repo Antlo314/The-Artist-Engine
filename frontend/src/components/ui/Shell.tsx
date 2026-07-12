@@ -34,17 +34,17 @@ function LazyHeaderVideo({ src, poster }: { src: string; poster?: string | null 
                     io.disconnect();
                 }
             },
-            { rootMargin: '120px' }
+            { rootMargin: '160px' }
         );
         io.observe(el);
         return () => io.disconnect();
     }, []);
 
     return (
-        <div ref={ref} className="absolute inset-0">
+        <div ref={ref} className="absolute inset-0 theme-header-media">
             {poster && (
                 <div
-                    className="absolute inset-0 bg-cover bg-center opacity-40 scale-105"
+                    className="absolute inset-0 bg-cover bg-center opacity-50 md:opacity-40 scale-105"
                     style={{ backgroundImage: `url('${poster}')` }}
                 />
             )}
@@ -56,7 +56,7 @@ function LazyHeaderVideo({ src, poster }: { src: string; poster?: string | null 
                     playsInline
                     preload="metadata"
                     poster={poster || undefined}
-                    className="absolute inset-0 w-full h-full object-cover opacity-45 motion-safe:animate-none"
+                    className="absolute inset-0 w-full h-full object-cover object-center opacity-55 md:opacity-45"
                 >
                     <source src={src} type="video/mp4" />
                 </video>
@@ -80,68 +80,51 @@ export function PageHeader({
 }) {
     const media = HEADER_MEDIA[view] || { video: null, poster: null };
     return (
-        <>
-            {/* Mobile: compact text header (no video) — stops the “scrunched banner” problem */}
-            <div className="md:hidden mb-4">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <p className="font-mono text-[10px] tracking-[0.2em] uppercase" style={{ color: accent }}>
-                        {module}
-                    </p>
-                    {speedHint && (
-                        <span
-                            className="font-mono text-[9px] tracking-wide uppercase px-2 py-0.5 rounded-full border"
-                            style={{ color: accent, borderColor: `${accent}44`, backgroundColor: `${accent}12` }}
+        <div className="theme-page-header hud-corners relative overflow-hidden rounded-xl md:rounded-2xl border border-white/10 mb-4 md:mb-8 h-[156px] sm:h-[168px] md:h-[188px] group">
+            {media.video ? (
+                <LazyHeaderVideo src={media.video} poster={media.poster} />
+            ) : (
+                <div
+                    className="absolute inset-0 bg-cover bg-center opacity-35 md:opacity-28"
+                    style={{ backgroundImage: `url('${media.poster || '/site/light_abstract_bg_1773233140940.png'}')` }}
+                />
+            )}
+            {/* Legible scrim — theme-aware; stronger on mobile so type stays readable over video */}
+            <div className="theme-header-scrim absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/90 to-ink-950/45 md:via-ink-950/85 md:to-ink-950/35" />
+            <div className="theme-header-fade absolute inset-x-0 bottom-0 h-20 md:h-24 bg-gradient-to-t from-ink-950 to-transparent" />
+
+            <div className="relative z-10 h-full flex items-end justify-between p-4 sm:p-6 md:p-8 gap-3">
+                <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1 sm:mb-2">
+                        <p
+                            className="font-mono text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.3em] uppercase truncate"
+                            style={{ color: accent }}
                         >
-                            {speedHint}
-                        </span>
-                    )}
-                </div>
-                <h1 className="font-display text-[1.65rem] font-semibold text-ink-50 tracking-tight leading-tight">
-                    {title}
-                </h1>
-                <p className="text-ink-300 text-sm mt-1.5 leading-relaxed">{desc}</p>
-                {children && <div className="mt-3">{children}</div>}
-            </div>
-
-            {/* Desktop / tablet: cinematic video band */}
-            <div className="hidden md:block hud-corners relative overflow-hidden rounded-2xl border border-white/10 mb-8 h-[188px] group">
-                {media.video ? (
-                    <LazyHeaderVideo src={media.video} poster={media.poster} />
-                ) : (
-                    <div
-                        className="absolute inset-0 bg-cover bg-center opacity-25 transition-transform duration-700 group-hover:scale-[1.03]"
-                        style={{ backgroundImage: `url('${media.poster || '/site/light_abstract_bg_1773233140940.png'}')` }}
-                    />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/85 to-ink-950/35" />
-                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950 to-transparent" />
-
-                <div className="relative z-10 h-full flex items-end justify-between p-8 gap-4">
-                    <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <p className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color: accent }}>
-                                {module}
-                            </p>
-                            {speedHint && (
-                                <span
-                                    className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full border shrink-0"
-                                    style={{ color: accent, borderColor: `${accent}55`, backgroundColor: `${accent}14` }}
-                                >
-                                    {speedHint}
-                                </span>
-                            )}
-                        </div>
-                        <h1 className="font-display text-4xl font-semibold text-ink-50 tracking-tight">{title}</h1>
-                        <p className="text-ink-200 font-light text-sm mt-1.5 max-w-xl leading-relaxed">{desc}</p>
+                            {module}
+                        </p>
+                        {speedHint && (
+                            <span
+                                className="font-mono text-[8px] sm:text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full border shrink-0"
+                                style={{ color: accent, borderColor: `${accent}55`, backgroundColor: `${accent}14` }}
+                            >
+                                {speedHint}
+                            </span>
+                        )}
                     </div>
-                    {children && <div className="shrink-0">{children}</div>}
+                    <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-ink-50 tracking-tight leading-tight">
+                        {title}
+                    </h1>
+                    <p className="text-ink-200 font-light text-xs sm:text-sm mt-1 max-w-xl leading-relaxed line-clamp-2 md:line-clamp-none">
+                        {desc}
+                    </p>
                 </div>
-
-                <div className="absolute bottom-0 inset-x-0 h-px bg-white/10 z-10">
-                    <div className="h-full w-1/5 transition-all duration-700 group-hover:w-2/5" style={{ backgroundColor: accent }} />
-                </div>
+                {children && <div className="shrink-0 hidden sm:block">{children}</div>}
             </div>
-        </>
+
+            <div className="absolute bottom-0 inset-x-0 h-px bg-white/10 z-10">
+                <div className="h-full w-1/5 transition-all duration-700 group-hover:w-2/5" style={{ backgroundColor: accent }} />
+            </div>
+        </div>
     );
 }
 

@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../lib/auth';
 import { ApiError } from '../lib/api';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function LoginPage() {
     const { ready, isSignedIn, canUseEngine, login, register } = useAuth();
@@ -59,9 +60,12 @@ export default function LoginPage() {
                     </div>
                     <span className="font-display tracking-widest text-sm">THE ARTIST ENGINE</span>
                 </Link>
-                <Link to="/" className="font-mono text-[10px] tracking-widest uppercase text-ink-400 hover:text-ink-50">
-                    ← Back
-                </Link>
+                <div className="flex items-center gap-2">
+                    <ThemeToggle />
+                    <Link to="/" className="font-mono text-[10px] tracking-widest uppercase text-ink-400 hover:text-ink-50">
+                        ← Back
+                    </Link>
+                </div>
             </header>
 
             <main className="relative z-10 flex-1 flex items-center justify-center p-6">
