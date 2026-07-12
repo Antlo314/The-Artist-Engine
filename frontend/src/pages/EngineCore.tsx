@@ -11,15 +11,21 @@ const ArtistProfile = lazy(() => import('../components/ArtistProfile'));
 import FoundingBadge from '../components/FoundingBadge';
 import { EngineProvider } from '../lib/engineState';
 
+/**
+ * Feature surface by device:
+ * - Mobile: Dashboard, Find Gigs, Legal (scan/codex), Profile
+ * - Desktop: + Studio (waveforms / mastering / stems need width + CPU)
+ */
 const NAV = [
-    { id: 'dashboard', label: 'Dashboard', short: 'Home', desc: 'Overview & pipeline', icon: BarChart2 },
-    { id: 'radar', label: 'Find Gigs', short: 'Gigs', desc: 'Live venue scouting', icon: Radio },
-    { id: 'studio', label: 'Studio', short: 'Studio', desc: 'Mastering & analysis', icon: Mic2 },
-    { id: 'legal', label: 'Legal', short: 'Legal', desc: 'Contracts & splits', icon: Scale },
-    { id: 'profile', label: 'Profile', short: 'Profile', desc: 'Identity & settings', icon: ShieldCheck },
-];
+    { id: 'dashboard', label: 'Dashboard', short: 'Home', desc: 'Overview & pipeline', icon: BarChart2, mobile: true },
+    { id: 'radar', label: 'Find Gigs', short: 'Gigs', desc: 'Live venue scouting', icon: Radio, mobile: true },
+    { id: 'studio', label: 'Studio', short: 'Studio', desc: 'Mastering & analysis', icon: Mic2, mobile: false },
+    { id: 'legal', label: 'Legal', short: 'Legal', desc: 'Contracts & splits', icon: Scale, mobile: true },
+    { id: 'profile', label: 'Profile', short: 'Profile', desc: 'Identity & settings', icon: ShieldCheck, mobile: true },
+] as const;
 
 const DESKTOP_ONLY = ['studio'];
+const MOBILE_NAV = NAV.filter((n) => n.mobile);
 
 export default function EngineCore() {
     return (
@@ -83,25 +89,27 @@ function EngineCoreInner() {
             <div className="absolute inset-0 z-0 pointer-events-none grain bg-[radial-gradient(ellipse_at_top,_#12070a_0%,_#08080a_45%,_#060607_100%)]" />
 
             {/* ===== Mobile header ===== */}
-            <div className="md:hidden fixed top-0 w-full glass-obsidian z-50 flex items-center justify-between px-4 py-3 border-b border-white/10">
-                <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveView('dashboard')}>
-                    <div className="h-7 w-7 rounded bg-ink-800 border border-white/10 overflow-hidden">
+            <div className="md:hidden fixed top-0 w-full glass-obsidian z-50 flex items-center justify-between px-4 py-3 border-b border-white/10 safe-top">
+                <div className="flex items-center gap-2 cursor-pointer min-w-0" onClick={() => setActiveView('dashboard')}>
+                    <div className="h-7 w-7 rounded bg-ink-800 border border-white/10 overflow-hidden shrink-0">
                         <img src="/site/favicon.png" alt="Logo" className="w-full h-full object-cover" />
                     </div>
                     <span className="font-display text-sm font-semibold tracking-widest text-ink-50">ENGINE.OS</span>
                 </div>
-                <span className="font-mono text-[9px] tracking-widest text-ink-400 uppercase">{current.label}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                    <FoundingBadge compact />
+                </div>
             </div>
 
-            {/* ===== Mobile bottom nav ===== */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 border-t border-white/10 flex justify-between px-1 pb-3 pt-1 glass-obsidian">
-                {NAV.map((item) => {
+            {/* ===== Mobile bottom nav (no Studio — desktop-only) ===== */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 border-t border-white/10 flex justify-around px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 glass-obsidian">
+                {MOBILE_NAV.map((item) => {
                     const active = activeView === item.id;
                     return (
                         <button
                             key={item.id}
                             onClick={() => setActiveView(item.id)}
-                            className={`flex flex-col items-center justify-center gap-1 py-2 w-1/5 transition-colors relative ${active ? 'text-ember-500' : 'text-ink-400'}`}
+                            className={`flex flex-col items-center justify-center gap-1 py-2 px-3 min-w-[4.25rem] transition-colors relative ${active ? 'text-ember-500' : 'text-ink-400'}`}
                         >
                             <item.icon size={20} />
                             <span className="text-[9px] font-mono tracking-wider uppercase">{item.short}</span>
@@ -211,11 +219,17 @@ function EngineCoreInner() {
                                 <div className="md:hidden flex flex-col items-center justify-center min-h-[50vh] text-center px-4 mt-8">
                                     <div className="glass-obsidian p-8 rounded-2xl border border-white/10 flex flex-col items-center w-full max-w-sm">
                                         <Monitor size={40} className="text-ember-500 mb-5" />
-                                        <h2 className="font-display text-xl text-ink-50 font-semibold mb-2">Studio needs a bigger screen</h2>
-                                        <p className="text-sm text-ink-200 leading-relaxed">
-                                            Waveform analysis and mastering controls are desktop-only for now.
-                                            Everything else works great here.
+                                        <h2 className="font-display text-xl text-ink-50 font-semibold mb-2">Studio is desktop-only</h2>
+                                        <p className="text-sm text-ink-200 leading-relaxed mb-5">
+                                            Mastering, waveforms, and stems need a larger screen and more CPU.
+                                            On mobile you still get Gigs, Legal, Dashboard, and Profile.
                                         </p>
+                                        <button
+                                            onClick={() => setActiveView('radar')}
+                                            className="rounded-full bg-ember-600 text-white font-mono text-[10px] tracking-widest uppercase px-5 py-2.5"
+                                        >
+                                            Open Find Gigs
+                                        </button>
                                     </div>
                                 </div>
                             )}

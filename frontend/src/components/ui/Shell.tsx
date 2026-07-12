@@ -80,7 +80,7 @@ export function PageHeader({
 }) {
     const media = HEADER_MEDIA[view] || { video: null, poster: null };
     return (
-        <div className="hud-corners relative overflow-hidden rounded-2xl border border-white/10 mb-8 h-[148px] md:h-[188px] group">
+        <div className="hud-corners relative overflow-hidden rounded-2xl border border-white/10 mb-5 md:mb-8 h-[120px] sm:h-[148px] md:h-[188px] group">
             {media.video ? (
                 <LazyHeaderVideo src={media.video} poster={media.poster} />
             ) : (
@@ -93,23 +93,23 @@ export function PageHeader({
             <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/85 to-ink-950/35" />
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950 to-transparent" />
 
-            <div className="relative z-10 h-full flex items-end justify-between p-6 md:p-8 gap-4">
+            <div className="relative z-10 h-full flex items-end justify-between p-4 sm:p-6 md:p-8 gap-3">
                 <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <p className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color: accent }}>
+                    <div className="flex flex-wrap items-center gap-2 mb-1 sm:mb-2">
+                        <p className="font-mono text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.3em] uppercase truncate" style={{ color: accent }}>
                             {module}
                         </p>
                         {speedHint && (
                             <span
-                                className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full border"
+                                className="font-mono text-[8px] sm:text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full border shrink-0"
                                 style={{ color: accent, borderColor: `${accent}55`, backgroundColor: `${accent}14` }}
                             >
                                 {speedHint}
                             </span>
                         )}
                     </div>
-                    <h1 className="font-display text-3xl md:text-4xl font-semibold text-ink-50 tracking-tight">{title}</h1>
-                    <p className="text-ink-200 font-light text-sm mt-1.5 max-w-xl leading-relaxed">{desc}</p>
+                    <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-ink-50 tracking-tight">{title}</h1>
+                    <p className="text-ink-200 font-light text-xs sm:text-sm mt-1 max-w-xl leading-relaxed line-clamp-2 md:line-clamp-none">{desc}</p>
                 </div>
                 {children && <div className="shrink-0 hidden sm:block">{children}</div>}
             </div>

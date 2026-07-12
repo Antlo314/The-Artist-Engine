@@ -72,8 +72,8 @@ export default function LandingPage() {
         const ctx = gsap.context(() => {
             // Hero entrance — staggered word reveal
             gsap.fromTo('.hero-word',
-                { yPercent: 110, opacity: 0 },
-                { yPercent: 0, opacity: 1, duration: 1.1, stagger: 0.08, ease: 'power4.out', delay: 0.15 }
+                { yPercent: 40, opacity: 0 },
+                { yPercent: 0, opacity: 1, duration: 0.9, stagger: 0.07, ease: 'power3.out', delay: 0.12 }
             );
             gsap.fromTo('.hero-fade',
                 { y: 24, opacity: 0 },
@@ -132,71 +132,89 @@ export default function LandingPage() {
             <MarketingNav />
 
             {/* ============ HERO ============ */}
-            <section className="relative h-[100svh] min-h-[640px] grain overflow-hidden">
-                {/* 3D scene */}
-                <div className="absolute inset-0 md:left-[28%] z-0 opacity-80 md:opacity-100">
+            <section className="relative min-h-[100svh] min-h-[100dvh] grain overflow-x-hidden pt-20 pb-16 md:pb-10">
+                {/* 3D scene — desktop only (heavy WebGL hurts mobile LCP) */}
+                <div className="absolute inset-0 md:left-[28%] z-0 opacity-0 md:opacity-100 pointer-events-none hidden md:block">
                     <Suspense fallback={<div className="absolute inset-0 bg-ink-950" />}>
                         <VinylScene />
                     </Suspense>
                 </div>
+                {/* Mobile: static ember gradient instead of 3D */}
+                <div className="absolute inset-0 z-0 md:hidden bg-[radial-gradient(ellipse_at_70%_20%,_#3f0a0a_0%,_#08080a_55%,_#060607_100%)]" />
                 {/* Cinematic gradients over the scene */}
-                <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-r from-ink-950 via-ink-950/70 to-transparent md:via-ink-950/40" />
+                <div className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-r from-ink-950 via-ink-950/80 to-ink-950/50 md:via-ink-950/40 md:to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 h-40 z-[1] pointer-events-none bg-gradient-to-t from-ink-950 to-transparent" />
                 <div className="absolute inset-x-0 top-0 h-24 z-[1] pointer-events-none bg-gradient-to-b from-ink-950/90 to-transparent" />
 
                 {/* Copy */}
-                <div className="relative z-10 h-full max-w-7xl mx-auto px-6 md:px-10 flex flex-col justify-center">
-                    <div className="hero-fade mb-8 flex items-center gap-3">
+                <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 md:px-10 flex flex-col justify-center min-h-[calc(100svh-5rem)]">
+                    <div className="hero-fade mb-5 md:mb-8 flex items-center gap-3">
                         <span className="inline-flex h-2 w-2 rounded-full bg-ember-500 animate-pulse" />
-                        <span className="font-mono text-[10px] tracking-[0.35em] text-ink-400 uppercase">
-                            Sovereign Protocol · v3 · Live
+                        <span className="font-mono text-[10px] tracking-[0.25em] md:tracking-[0.35em] text-ink-400 uppercase">
+                            Sovereign Protocol · Live
                         </span>
                     </div>
 
-                    <h1 className="text-cinema text-[clamp(3.2rem,9.5vw,8.5rem)] text-ink-50 max-w-5xl">
-                        <span className="block overflow-hidden pb-1">
+                    {/* line-height + padding fix: overflow-hidden + tight cinema tracking was clipping "artists" */}
+                    <h1 className="font-display font-semibold tracking-[-0.03em] text-ink-50 max-w-5xl text-[clamp(2.35rem,8.5vw,8rem)] leading-[1.05] md:leading-[1.02]">
+                        <span className="block overflow-visible pb-[0.12em]">
                             <span className="hero-word inline-block">The&nbsp;operating</span>
                         </span>
-                        <span className="block overflow-hidden pb-1">
+                        <span className="block overflow-visible pb-[0.12em]">
                             <span className="hero-word inline-block">system&nbsp;for</span>
                         </span>
-                        <span className="block overflow-hidden pb-2">
+                        <span className="block overflow-visible pb-[0.18em]">
                             <span className="hero-word inline-block text-transparent bg-clip-text bg-gradient-to-br from-ember-400 via-ember-500 to-ember-600">
-                                sovereign&nbsp;artists.
+                                sovereign
+                            </span>
+                        </span>
+                        <span className="block overflow-visible pb-[0.2em]">
+                            <span className="hero-word inline-block text-transparent bg-clip-text bg-gradient-to-br from-ember-400 via-ember-500 to-ember-600">
+                                artists.
                             </span>
                         </span>
                     </h1>
 
-                    <p className="hero-fade mt-8 max-w-xl text-ink-200 text-base md:text-lg font-light leading-relaxed">
+                    <p className="hero-fade mt-6 md:mt-8 max-w-xl text-ink-200 text-[15px] md:text-lg font-light leading-relaxed">
                         Master your records. Find real rooms. Counter every offer.
                         Kill predatory contracts. One engine — no middlemen.
                     </p>
 
-                    <div className="hero-fade mt-10 flex flex-col sm:flex-row gap-4">
+                    <div className="hero-fade mt-8 md:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <button
                             onClick={() => navigate('/login')}
-                            className="group relative overflow-hidden rounded-full bg-ember-600 hover:bg-ember-500 transition-colors px-8 py-4 halo-ember"
+                            className="group relative overflow-hidden rounded-full bg-ember-600 hover:bg-ember-500 transition-colors px-8 py-4 halo-ember w-full sm:w-auto"
                         >
                             <span className="relative flex items-center justify-center gap-3 font-display font-medium tracking-wide text-white">
-                                Enter the Engine
+                                Log in / Sign up
                                 <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
                             </span>
                         </button>
                         <button
                             onClick={() => navigate('/features')}
-                            className="rounded-full border hairline hover:border-ink-400/60 transition-colors px-8 py-4 font-display font-medium tracking-wide text-ink-200 hover:text-white"
+                            className="rounded-full border hairline hover:border-ink-400/60 transition-colors px-8 py-4 font-display font-medium tracking-wide text-ink-200 hover:text-white w-full sm:w-auto"
                         >
                             View Architecture
                         </button>
                     </div>
                 </div>
 
-                {/* Scroll cue */}
-                <div className="hero-fade absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-ink-400">
+                {/* Scroll cue — hide on short phones to avoid covering CTAs */}
+                <div className="hero-fade absolute bottom-6 left-1/2 -translate-x-1/2 z-10 hidden sm:flex flex-col items-center gap-2 text-ink-400">
                     <span className="font-mono text-[9px] tracking-[0.3em] uppercase">Scroll</span>
                     <ArrowDown size={14} className="animate-bounce" />
                 </div>
             </section>
+
+            {/* Mobile sticky login CTA */}
+            <div className="md:hidden fixed bottom-0 inset-x-0 z-40 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pointer-events-none">
+                <button
+                    onClick={() => navigate('/login')}
+                    className="pointer-events-auto w-full rounded-full bg-ember-600 text-white font-display font-medium py-3.5 shadow-[0_8px_40px_rgba(220,38,38,0.45)] border border-ember-400/30"
+                >
+                    Log in / Sign up →
+                </button>
+            </div>
 
             {/* ============ MARQUEE ============ */}
             <section className="relative border-y hairline bg-ink-900/60 py-5 overflow-hidden">
@@ -309,7 +327,7 @@ export default function LandingPage() {
             </section>
 
             {/* ============ FINALE ============ */}
-            <section className="finale-section relative py-32 md:py-44 grain overflow-hidden">
+            <section className="finale-section relative py-28 md:py-44 grain overflow-hidden pb-28 md:pb-44">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-ember-600/10 blur-[120px] pointer-events-none" />
                 <div className="relative max-w-4xl mx-auto px-6 text-center">
                     <p className="finale-reveal font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-6">
@@ -324,7 +342,7 @@ export default function LandingPage() {
                             className="group relative overflow-hidden rounded-full bg-ember-600 hover:bg-ember-500 transition-colors px-10 py-5 halo-ember"
                         >
                             <span className="relative flex items-center justify-center gap-3 font-display font-medium tracking-wide text-white text-lg">
-                                Enter the Engine
+                                Log in / Sign up
                                 <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform" />
                             </span>
                         </button>

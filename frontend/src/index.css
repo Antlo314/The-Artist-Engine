@@ -165,12 +165,20 @@
         border-color: rgba(255,255,255,0.08);
     }
 
-    /* Cinematic display text: tight, confident */
+    /* Cinematic display text: tight, but not so tight that descenders clip */
     .text-cinema {
         font-family: var(--font-display);
         letter-spacing: -0.03em;
-        line-height: 0.94;
+        line-height: 1.05;
         font-weight: 600;
+    }
+    @media (min-width: 768px) {
+        .text-cinema { line-height: 1.02; }
+    }
+
+    /* iOS safe areas */
+    .safe-top {
+        padding-top: max(0.5rem, env(safe-area-inset-top));
     }
 
     /* Soft ember halo behind elements */
