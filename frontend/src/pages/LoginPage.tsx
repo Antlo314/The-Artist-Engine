@@ -1,10 +1,17 @@
+import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { SignIn, SignedIn, SignedOut } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
-import { useAuth, isAuthEnabled } from '../lib/auth';
+import { useAuth } from '../lib/auth';
+import { ApiError } from '../lib/api';
 
 export default function LoginPage() {
-    const { ready, canUseEngine, waitlisted, meError, email, authEnabled } = useAuth();
+    const { ready, isSignedIn, canUseEngine, login, register } = useAuth();
+    const [mode, setMode] = useState<'login' | 'register'>('register');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [busy, setBusy] = useState(false);
+    const [err, setErr] = useState<string | null>(null);
 
     if (!ready) {
         return (
@@ -14,10 +21,32 @@ export default function LoginPage() {
         );
     }
 
-    // No Clerk key → open engine
-    if (!authEnabled || !isAuthEnabled()) {
+    if (isSignedIn && canUseEngine) {
         return <Navigate to="/engine" replace />;
     }
+
+    const submit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setBusy(true);
+        setErr(null);
+        try {
+            if (mode === 'register') {
+                await register(name, email, password);
+            } else {
+                await login(email, password);
+            }
+        } catch (ex: any) {
+            const msg =
+                ex instanceof ApiError
+                    ? typeof ex.payload === 'string'
+                        ? ex.payload
+                        : ex.message
+                    : ex?.message || 'Sign-in failed';
+            setErr(msg);
+        } finally {
+            setBusy(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-ink-950 text-ink-50 flex flex-col relative overflow-hidden">
@@ -39,71 +68,101 @@ export default function LoginPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="w-full max-w-md"
+                    className="w-full max-w-md glass-obsidian border border-white/10 rounded-2xl p-8"
                 >
-                    <div className="mb-6 text-center">
-                        <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 mb-2">
-                            Founding access
-                        </p>
-                        <h1 className="font-display text-3xl font-semibold tracking-tight mb-2">Sign in</h1>
-                        <p className="text-sm text-ink-200">
-                            One-click Google. We remember you next time.
-                        </p>
+                    <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 mb-3">
+                        Founding access
+                    </p>
+                    <h1 className="font-display text-3xl font-semibold tracking-tight mb-2">
+                        {mode === 'register' ? 'Create your access' : 'Welcome back'}
+                    </h1>
+                    <p className="text-sm text-ink-200 leading-relaxed mb-6">
+                        Name + email + password. We save your account on the engine so you stay signed in.
+                    </p>
+
+                    <div className="flex gap-2 mb-6">
+                        <button
+                            type="button"
+                            onClick={() => setMode('register')}
+                            className={`flex-1 py-2 rounded-full font-mono text-[10px] tracking-widest uppercase border transition-colors ${
+                                mode === 'register'
+                                    ? 'bg-ember-600 border-ember-500 text-white'
+                                    : 'border-white/10 text-ink-400 hover:text-ink-50'
+                            }`}
+                        >
+                            Sign up
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setMode('login')}
+                            className={`flex-1 py-2 rounded-full font-mono text-[10px] tracking-widest uppercase border transition-colors ${
+                                mode === 'login'
+                                    ? 'bg-ember-600 border-ember-500 text-white'
+                                    : 'border-white/10 text-ink-400 hover:text-ink-50'
+                            }`}
+                        >
+                            Sign in
+                        </button>
                     </div>
 
-                    <SignedOut>
-                        <div className="flex justify-center clerk-dark">
-                            <SignIn
-                                routing="hash"
-                                fallbackRedirectUrl="/engine"
-                                forceRedirectUrl="/engine"
-                                appearance={{
-                                    variables: {
-                                        colorPrimary: '#dc2626',
-                                        colorBackground: '#0c0c0e',
-                                        colorText: '#f4f4f5',
-                                        colorInputBackground: '#18181b',
-                                        colorInputText: '#f4f4f5',
-                                        borderRadius: '0.75rem',
-                                    },
-                                    elements: {
-                                        rootBox: 'w-full',
-                                        card: 'bg-ink-950 border border-white/10 shadow-2xl',
-                                    },
-                                }}
-                            />
-                        </div>
-                    </SignedOut>
-
-                    <SignedIn>
-                        {waitlisted ? (
-                            <div className="glass-obsidian border border-amber-500/30 rounded-2xl p-6 text-sm">
-                                <p className="font-medium text-amber-200 mb-2">Signed in — not on the list yet</p>
-                                <p className="text-ink-200 text-xs leading-relaxed mb-3">
-                                    {meError ||
-                                        'Your Google account is signed in, but this email isn’t invited. Ask the team to add you to FOUNDING_EMAILS on the server.'}
-                                </p>
-                                <p className="font-mono text-[10px] text-ink-400">{email}</p>
-                                <Link
-                                    to="/engine"
-                                    className="mt-4 inline-block font-mono text-[10px] tracking-widest uppercase text-ink-500"
-                                >
-                                    Try engine anyway →
-                                </Link>
-                            </div>
-                        ) : canUseEngine ? (
-                            <Navigate to="/engine" replace />
-                        ) : (
-                            <div className="text-center">
-                                <Link
-                                    to="/engine"
-                                    className="inline-flex rounded-full bg-ember-600 px-8 py-3 font-display text-sm font-medium hover:bg-ember-500"
-                                >
-                                    Enter Engine
-                                </Link>
-                            </div>
+                    <form onSubmit={submit} className="space-y-4">
+                        {mode === 'register' && (
+                            <label className="block">
+                                <span className="font-mono text-[10px] tracking-widest uppercase text-ink-400">Name</span>
+                                <input
+                                    required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="mt-1.5 w-full bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-ink-50 focus:outline-none focus:border-white/30"
+                                    placeholder="Your artist / DJ name"
+                                    autoComplete="name"
+                                />
+                            </label>
                         )}
-                    </SignedIn>
+                        <label className="block">
+                            <span className="font-mono text-[10px] tracking-widest uppercase text-ink-400">Email</span>
+                            <input
+                                required
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="mt-1.5 w-full bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-ink-50 focus:outline-none focus:border-white/30"
+                                placeholder="you@email.com"
+                                autoComplete="email"
+                            />
+                        </label>
+                        <label className="block">
+                            <span className="font-mono text-[10px] tracking-widest uppercase text-ink-400">Password</span>
+                            <input
+                                required
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="mt-1.5 w-full bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-ink-50 focus:outline-none focus:border-white/30"
+                                placeholder={mode === 'register' ? 'At least 6 characters' : 'Your password'}
+                                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                                minLength={6}
+                            />
+                        </label>
+
+                        {err && (
+                            <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+                                {err}
+                            </p>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={busy}
+                            className="w-full rounded-full bg-ember-600 hover:bg-ember-500 text-white font-display font-medium py-3.5 transition-colors disabled:opacity-50"
+                        >
+                            {busy ? 'Working…' : mode === 'register' ? 'Create account & enter' : 'Sign in & enter'}
+                        </button>
+                    </form>
+
+                    <p className="mt-6 font-mono text-[9px] text-ink-500 tracking-wide text-center leading-relaxed">
+                        Fair-use daily limits apply after you sign in so the engine stays fast for everyone.
+                    </p>
                 </motion.div>
             </main>
         </div>

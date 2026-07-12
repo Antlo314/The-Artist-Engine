@@ -37,6 +37,11 @@ from founding_auth import (
     acquire_master_slot,
     release_master_slot,
     DAILY_LIMITS,
+    init_db,
+    register_user,
+    login_user,
+    logout_token,
+    list_users_admin,
 )
 
 # Google GenAI Integration
@@ -372,12 +377,16 @@ async def startup_event():
     else:
         system_startup_log.append("[AI CORE] FATAL: Missing GEMINI_API_KEY. Modules disabled.")
 
-    if auth_configured() and auth_required():
-        system_startup_log.append("[AUTH] Clerk sign-in ONLINE (Google/email + daily fair-use quotas).")
-    elif auth_configured():
-        system_startup_log.append("[AUTH] Clerk keys present but AUTH_REQUIRED=0 (open dev mode).")
+    try:
+        init_db()
+        system_startup_log.append("[AUTH] Simple login ONLINE (name/email/password · sessions on backend).")
+    except Exception as e:
+        system_startup_log.append(f"[AUTH] Init warning: {e}")
+
+    if auth_required():
+        system_startup_log.append("[AUTH] Engine routes require sign-in.")
     else:
-        system_startup_log.append("[AUTH] Open mode — set CLERK_SECRET_KEY + CLERK_JWT_ISSUER to require sign-in.")
+        system_startup_log.append("[AUTH] AUTH_REQUIRED=0 — open dev mode.")
 
     system_startup_log.append("[STATUS] All Sovereign Pillars (ZION, WAR ROOM, STUDIO, SHARK) Active.")
 
@@ -431,9 +440,65 @@ async def system_status():
     }
 
 
+class RegisterBody(BaseModel):
+    name: str
+    email: str
+    password: str
+
+
+class LoginBody(BaseModel):
+    email: str
+    password: str
+
+
+@app.post("/api/auth/register")
+async def auth_register(body: RegisterBody):
+    """Create account — name, email, password. Site opens after this."""
+    user, token = register_user(body.name, body.email, body.password)
+    snap = await get_usage_snapshot(user.id)
+    return {
+        "status": "success",
+        "token": token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "display_name": user.display_name,
+            "role": user.role,
+            "badge": "Admin" if user.role == "admin" else "Member",
+        },
+        **snap,
+    }
+
+
+@app.post("/api/auth/login")
+async def auth_login(body: LoginBody):
+    user, token = login_user(body.email, body.password)
+    snap = await get_usage_snapshot(user.id)
+    return {
+        "status": "success",
+        "token": token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "display_name": user.display_name,
+            "role": user.role,
+            "badge": "Admin" if user.role == "admin" else "Member",
+        },
+        **snap,
+    }
+
+
+@app.post("/api/auth/logout")
+async def auth_logout(request: Request):
+    auth = request.headers.get("authorization") or ""
+    token = auth.split(" ", 1)[1].strip() if auth.lower().startswith("bearer ") else auth.strip()
+    logout_token(token)
+    return {"status": "success"}
+
+
 @app.get("/api/me")
 async def me(user: AppUser = Depends(require_founding_user)):
-    """Founding member profile + today's remaining fair-use quotas."""
+    """Profile + today's remaining fair-use quotas."""
     snap = await get_usage_snapshot(user.id)
     return {
         "status": "success",
@@ -444,7 +509,7 @@ async def me(user: AppUser = Depends(require_founding_user)):
             "avatar_url": user.avatar_url,
             "role": user.role,
             "status": user.status,
-            "badge": "Founding Member" if user.role in ("founding_member", "admin") else user.role,
+            "badge": "Admin" if user.role == "admin" else "Member",
         },
         **snap,
     }
@@ -454,6 +519,13 @@ async def me(user: AppUser = Depends(require_founding_user)):
 async def usage(user: AppUser = Depends(require_founding_user)):
     snap = await get_usage_snapshot(user.id)
     return {"status": "success", **snap}
+
+
+@app.get("/api/admin/users")
+async def admin_users(user: AppUser = Depends(require_founding_user)):
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only.")
+    return {"status": "success", "users": list_users_admin()}
 
 # ---------------------------------------------------------------------------
 # PILLAR 1.5: AGENT MEMORY (Cognee Graph DB — optional subsystem)

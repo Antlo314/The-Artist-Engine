@@ -9,5 +9,6 @@ frontend/.env.local
 *.log
 backend/cognee_env/
 backend/temp/
+backend/data/
 __pycache__/
 *.pyc

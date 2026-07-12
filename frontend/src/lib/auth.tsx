@@ -7,27 +7,22 @@ import {
     useState,
     type ReactNode,
 } from 'react';
-import {
-    ClerkProvider,
-    useAuth as useClerkAuth,
-    useUser,
-    SignedIn,
-    SignedOut,
-} from '@clerk/clerk-react';
-import { setTokenGetter, apiJson, ApiError } from './api';
+import { apiJson, ApiError, getStoredToken, setStoredToken } from './api';
 
 export type UsageBucket = { used: number; limit: number; remaining: number };
 
+export type MeUser = {
+    id: string;
+    email: string;
+    display_name: string;
+    avatar_url?: string;
+    role: string;
+    status?: string;
+    badge: string;
+};
+
 export type MePayload = {
-    user: {
-        id: string;
-        email: string;
-        display_name: string;
-        avatar_url: string;
-        role: string;
-        status: string;
-        badge: string;
-    };
+    user: MeUser;
     usage: Record<string, UsageBucket>;
     resets_in_seconds: number;
     limits: Record<string, number>;
@@ -45,165 +40,132 @@ type AuthState = {
     displayName: string | null;
     imageUrl: string | null;
     refreshMe: () => Promise<void>;
+    login: (email: string, password: string) => Promise<void>;
+    register: (name: string, email: string, password: string) => Promise<void>;
+    signOut: () => Promise<void>;
 };
 
 const AuthCtx = createContext<AuthState | null>(null);
 
-const publishableKey = (import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined)?.trim() || '';
-
-export function isAuthEnabled(): boolean {
-    return Boolean(publishableKey);
+function persistProfile(user: MeUser) {
+    try {
+        const existing = localStorage.getItem('sovereign_identity');
+        const base = existing ? JSON.parse(existing) : {};
+        localStorage.setItem(
+            'sovereign_identity',
+            JSON.stringify({
+                ...base,
+                artistAlias: base.artistAlias || user.display_name,
+                agentName: base.agentName || user.display_name,
+                agentEmail: user.email || base.agentEmail || '',
+            })
+        );
+    } catch {
+        /* ignore */
+    }
 }
 
-function AuthBridge({ children }: { children: ReactNode }) {
-    const authEnabled = isAuthEnabled();
-    const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
-    const { user } = useUser();
+export function AuthProvider({ children }: { children: ReactNode }) {
+    const [ready, setReady] = useState(false);
     const [me, setMe] = useState<MePayload | null>(null);
     const [meError, setMeError] = useState<string | null>(null);
-    const [waitlisted, setWaitlisted] = useState(false);
-
-    // Register token getter for apiFetch
-    useEffect(() => {
-        if (!authEnabled) {
-            setTokenGetter(null);
-            return;
-        }
-        setTokenGetter(async () => {
-            try {
-                return (await getToken()) || null;
-            } catch {
-                return null;
-            }
-        });
-        return () => setTokenGetter(null);
-    }, [authEnabled, getToken]);
 
     const refreshMe = useCallback(async () => {
-        if (!authEnabled || !isSignedIn) {
+        const token = getStoredToken();
+        if (!token) {
             setMe(null);
-            setWaitlisted(false);
             setMeError(null);
             return;
         }
         try {
             const data = await apiJson<MePayload>('/api/me');
             setMe(data);
-            setWaitlisted(false);
             setMeError(null);
+            if (data.user) persistProfile(data.user);
         } catch (err) {
-            if (err instanceof ApiError && err.status === 403) {
-                const code = (err.payload as any)?.error;
-                if (code === 'not_founding_member') {
-                    setWaitlisted(true);
-                    setMe(null);
-                    setMeError(err.message);
-                    return;
-                }
-            }
-            // Backend may still be open / cold — still allow engine if Clerk session exists
-            // and no allowlist rejection.
-            if (err instanceof ApiError && err.status === 401) {
+            if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+                setStoredToken(null);
+                setMe(null);
                 setMeError(err.message);
-            } else {
-                // Soft: signed-in users can use app; meters fill when /api/me works
-                setMeError(err instanceof Error ? err.message : 'Could not load usage');
+                return;
             }
-            setMe(null);
+            setMeError(err instanceof Error ? err.message : 'Could not load session');
         }
-    }, [authEnabled, isSignedIn]);
+    }, []);
 
     useEffect(() => {
-        if (!isLoaded) return;
-        refreshMe();
-    }, [isLoaded, isSignedIn, refreshMe]);
+        (async () => {
+            await refreshMe();
+            setReady(true);
+        })();
+    }, [refreshMe]);
 
-    // Persist lightweight profile for Studio pitches when Clerk has identity
-    useEffect(() => {
-        if (!user) return;
+    const login = useCallback(async (email: string, password: string) => {
+        const data = await apiJson<any>('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+        setStoredToken(data.token);
+        setMe({
+            user: data.user,
+            usage: data.usage || {},
+            resets_in_seconds: data.resets_in_seconds || 0,
+            limits: data.limits || {},
+        });
+        persistProfile(data.user);
+        setMeError(null);
+    }, []);
+
+    const register = useCallback(async (name: string, email: string, password: string) => {
+        const data = await apiJson<any>('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password }),
+        });
+        setStoredToken(data.token);
+        setMe({
+            user: data.user,
+            usage: data.usage || {},
+            resets_in_seconds: data.resets_in_seconds || 0,
+            limits: data.limits || {},
+        });
+        persistProfile(data.user);
+        setMeError(null);
+    }, []);
+
+    const signOut = useCallback(async () => {
         try {
-            const existing = localStorage.getItem('sovereign_identity');
-            const base = existing ? JSON.parse(existing) : {};
-            const email = user.primaryEmailAddress?.emailAddress || '';
-            const name = user.fullName || user.firstName || base.artistAlias || 'Artist';
-            localStorage.setItem(
-                'sovereign_identity',
-                JSON.stringify({
-                    ...base,
-                    artistAlias: base.artistAlias || name,
-                    agentName: base.agentName || name,
-                    agentEmail: base.agentEmail || email,
-                })
-            );
-            if (user.imageUrl) {
-                localStorage.setItem('sovereign_avatar', user.imageUrl);
-            }
+            await apiJson('/api/auth/logout', { method: 'POST' });
         } catch {
             /* ignore */
         }
-    }, [user]);
+        setStoredToken(null);
+        setMe(null);
+    }, []);
 
-    const ready = !authEnabled || isLoaded;
-    const canUseEngine =
-        !authEnabled || (Boolean(isSignedIn) && !waitlisted);
-
+    const isSignedIn = Boolean(me?.user && getStoredToken());
     const value = useMemo<AuthState>(
         () => ({
             ready,
-            authEnabled,
-            isSignedIn: Boolean(isSignedIn),
-            me,
-            meError,
-            waitlisted,
-            canUseEngine,
-            email: user?.primaryEmailAddress?.emailAddress ?? null,
-            displayName: user?.fullName || user?.firstName || null,
-            imageUrl: user?.imageUrl ?? null,
-            refreshMe,
-        }),
-        [
-            ready,
-            authEnabled,
+            authEnabled: true,
             isSignedIn,
             me,
             meError,
-            waitlisted,
-            canUseEngine,
-            user,
+            waitlisted: false,
+            canUseEngine: isSignedIn,
+            email: me?.user?.email ?? null,
+            displayName: me?.user?.display_name ?? null,
+            imageUrl: null,
             refreshMe,
-        ]
+            login,
+            register,
+            signOut,
+        }),
+        [ready, isSignedIn, me, meError, refreshMe, login, register, signOut]
     );
-
-    // expose signOut via window for badge? FoundingBadge uses Clerk UserButton instead
-    void signOut;
 
     return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
-}
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-    if (!publishableKey) {
-        // Open mode — no Clerk key
-        const openValue: AuthState = {
-            ready: true,
-            authEnabled: false,
-            isSignedIn: false,
-            me: null,
-            meError: null,
-            waitlisted: false,
-            canUseEngine: true,
-            email: null,
-            displayName: null,
-            imageUrl: null,
-            refreshMe: async () => {},
-        };
-        return <AuthCtx.Provider value={openValue}>{children}</AuthCtx.Provider>;
-    }
-
-    return (
-        <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/">
-            <AuthBridge>{children}</AuthBridge>
-        </ClerkProvider>
-    );
 }
 
 export function useAuth(): AuthState {
@@ -212,4 +174,6 @@ export function useAuth(): AuthState {
     return ctx;
 }
 
-export { SignedIn, SignedOut };
+export function isAuthEnabled() {
+    return true;
+}

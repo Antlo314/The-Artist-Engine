@@ -1,82 +1,53 @@
-# Quick sign-in with Clerk (Founding access)
+# Simple login (name + email + password)
 
-Simple path: **Clerk handles Google login + remembering the user**.  
-Backend still enforces fair-use daily quotas when auth is on.
+No Google / Clerk required. Accounts live in a SQLite DB on the Render backend.
 
-## 1. Create a Clerk app (2 minutes)
+## User flow
 
-1. Go to [https://dashboard.clerk.com](https://dashboard.clerk.com) → sign up  
-2. **Create application** → name it `Artist Engine`  
-3. Enable **Google** (and optionally Email) on the social connections screen  
-4. Copy:
-   - **Publishable key** → frontend  
-   - **Secret key** → backend  
-5. Under **API Keys** / **JWT**, note your Frontend API URL  
-   (looks like `https://verb-noun-00.clerk.accounts.dev`)
+1. Open `/login`
+2. **Sign up** with name, email, password → enters Engine
+3. Next visit: **Sign in** with email + password (session remembered ~30 days)
 
-That’s it for Google — **no Google Cloud OAuth client** required for the default Clerk setup.
+## Admin
 
-## 2. Environment variables
+Seeded automatically on backend boot:
 
-### Vercel (frontend)
+| Field | Default |
+|--------|---------|
+| Email | `iamwhoiambook@gmail.com` |
+| Password | set via `ADMIN_PASSWORD` env (default bootstrap in code — **change after first login**) |
 
-```
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
-```
-
-### Render (backend)
+On Render, set (recommended):
 
 ```
-CLERK_SECRET_KEY=sk_test_...
-CLERK_JWT_ISSUER=https://YOUR-SUBDOMAIN.clerk.accounts.dev
+ADMIN_EMAIL=iamwhoiambook@gmail.com
+ADMIN_PASSWORD=your-strong-password
+ADMIN_NAME=Admin
 ```
 
-`CLERK_JWT_ISSUER` must match the Frontend API URL from Clerk (no trailing slash).
-
-Optional:
+To force-reset admin password after deploy:
 
 ```
-FOUNDING_EMAILS=you@gmail.com,dj2@gmail.com
-ADMIN_EMAILS=you@gmail.com
-AUTH_REQUIRED=1
+ADMIN_RESET=1
 ```
 
-- If **`FOUNDING_EMAILS` is empty**: any signed-in Clerk user can use the Engine.  
-- If set: only those emails get in (others see waitlist).
+(then remove `ADMIN_RESET` after one successful boot)
 
-You can **remove** the old Supabase auth vars from the login path (`SUPABASE_JWT_SECRET` etc.).  
-Supabase is optional now (only if you still want remote usage logs).
+## API
 
-## 3. Allowed origins in Clerk
+| Method | Path | Body |
+|--------|------|------|
+| POST | `/api/auth/register` | `{ name, email, password }` |
+| POST | `/api/auth/login` | `{ email, password }` |
+| POST | `/api/auth/logout` | Bearer token |
+| GET | `/api/me` | Bearer token |
+| GET | `/api/admin/users` | Admin Bearer only |
 
-**Clerk Dashboard → Configure → Domains / Paths**
+## Storage
 
-Add:
+- File: `backend/data/users.db` on the server
+- **Note:** Render free disk is ephemeral — redeploys can wipe the DB unless you attach a persistent disk. For a durable founding list, add a Render **persistent disk** mounted at `/opt/render/project/src/backend/data` or set `AUTH_DATA_DIR` to that mount.
 
-- `http://localhost:5173`
-- `https://your-app.vercel.app`
+## Fair-use (non-admin)
 
-## 4. What users experience
-
-1. Click **Founding Login** / go to `/login`  
-2. **Continue with Google** (Clerk UI)  
-3. Redirect to `/engine`  
-4. Next visit: still signed in (Clerk session)  
-5. Top bar shows **Member** + usage meters + Clerk avatar menu (sign out)
-
-Profile fields used in pitches are auto-filled from Google name/email into `localStorage` once.
-
-## 5. Daily fair-use (default)
-
-| Action | / day |
-|--------|------|
-| Masters | 15 |
-| Scouts | 15 |
-| Pitches | 40 |
-| Contracts | 15 |
-| Oracle | 20 |
-| Stems | 10 |
-
-## 6. Local open mode
-
-Without `VITE_CLERK_PUBLISHABLE_KEY`, the site stays open (no login) for local API work.
+Daily caps still apply to members (masters, scouts, pitches, etc.). Admins are unlimited.

@@ -18,10 +18,8 @@ function RouteFallback() {
 }
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-    const { ready, authEnabled, isSignedIn, canUseEngine } = useAuth();
-
+    const { ready, isSignedIn, canUseEngine } = useAuth();
     if (!ready) return <RouteFallback />;
-    if (!authEnabled) return <>{children}</>;
     if (!isSignedIn || !canUseEngine) return <Navigate to="/login" replace />;
     return <>{children}</>;
 }

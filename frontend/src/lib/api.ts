@@ -1,14 +1,24 @@
 /**
- * Authenticated fetch — attaches Clerk session token when signed in.
+ * Session token auth — token stored in localStorage after login/register.
  */
 
-type TokenGetter = () => Promise<string | null>;
+const TOKEN_KEY = 'engine_session_token';
 
-let tokenGetter: TokenGetter | null = null;
+export function getStoredToken(): string | null {
+    try {
+        return localStorage.getItem(TOKEN_KEY);
+    } catch {
+        return null;
+    }
+}
 
-/** Wired once from AuthProvider (Clerk getToken). */
-export function setTokenGetter(fn: TokenGetter | null) {
-    tokenGetter = fn;
+export function setStoredToken(token: string | null) {
+    try {
+        if (token) localStorage.setItem(TOKEN_KEY, token);
+        else localStorage.removeItem(TOKEN_KEY);
+    } catch {
+        /* ignore */
+    }
 }
 
 export class ApiError extends Error {
@@ -26,17 +36,12 @@ export class ApiError extends Error {
 }
 
 export async function getAccessToken(): Promise<string | null> {
-    if (!tokenGetter) return null;
-    try {
-        return await tokenGetter();
-    } catch {
-        return null;
-    }
+    return getStoredToken();
 }
 
 export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
     const headers = new Headers(init.headers || {});
-    const token = await getAccessToken();
+    const token = getStoredToken();
     if (token) headers.set('Authorization', `Bearer ${token}`);
     return fetch(input, { ...init, headers });
 }
