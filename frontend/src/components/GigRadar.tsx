@@ -9,6 +9,12 @@ import { useAuth } from '../lib/auth';
 import { PageHeader, Panel, Field, Btn, EmptyState, StepHint, Segmented, inputCls } from './ui/Shell';
 import { openMailto, downloadEml, cachePitch } from '../lib/exportUtils';
 import { apiJson } from '../lib/api';
+import Walkthrough from './ui/Walkthrough';
+import CoachPrompt from './ui/CoachPrompt';
+import HelpTip from './ui/HelpTip';
+import { hasSeenTour } from '../lib/onboarding';
+
+const SCOUT_CACHE_KEY = 'engine_last_scout_v1';
 
 interface GigRadarProps {
     profile: any;
@@ -52,17 +58,26 @@ const csvEscape = (val: any) => {
 export default function GigRadar({ profile }: GigRadarProps) {
     const { record } = useEngine();
     const { refreshMe } = useAuth();
-    // Search State
-    const [city, setCity] = useState(profile?.homeCity || 'Chicago');
-    const [genre, setGenre] = useState(profile?.primaryGenre || 'Deep House');
-    const [tier, setTier] = useState('Mid-Size Touring (250-1000 cap)');
-    const [radius, setRadius] = useState('50 miles');
-    const [timeframe, setTimeframe] = useState('Fall 2026');
+    // Search State — restore last scout when available
+    const cached = (() => {
+        try {
+            return JSON.parse(localStorage.getItem(SCOUT_CACHE_KEY) || 'null');
+        } catch {
+            return null;
+        }
+    })();
+    const [city, setCity] = useState(cached?.city || profile?.homeCity || 'Chicago');
+    const [genre, setGenre] = useState(cached?.genre || profile?.primaryGenre || 'Deep House');
+    const [tier, setTier] = useState(cached?.tier || 'Mid-Size Touring (250-1000 cap)');
+    const [radius, setRadius] = useState(cached?.radius || '50 miles');
+    const [timeframe, setTimeframe] = useState(cached?.timeframe || 'Fall 2026');
 
     // UI State
     const [isScouting, setIsScouting] = useState(false);
-    const [gigs, setGigs] = useState<any[]>([]);
+    const [gigs, setGigs] = useState<any[]>(() => (Array.isArray(cached?.gigs) ? cached.gigs : []));
     const [error, setError] = useState<string | null>(null);
+    const [showRadarTour, setShowRadarTour] = useState(() => !hasSeenTour('radar'));
+    const [hasContactOnly, setHasContactOnly] = useState(false);
 
     // Results toolbar state
     const [sortMode, setSortMode] = useState<SortMode>('best');
@@ -108,6 +123,14 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 const results = data.gigs.venues ? data.gigs.venues : (Array.isArray(data.gigs) ? data.gigs : []);
                 setGigs(results);
                 if (results.length) record.scout(city, genre, results);
+                try {
+                    localStorage.setItem(
+                        SCOUT_CACHE_KEY,
+                        JSON.stringify({ city, genre, tier, radius, timeframe, gigs: results, ts: Date.now() })
+                    );
+                } catch {
+                    /* ignore */
+                }
                 refreshMe();
             } else {
                 throw new Error(data.error || 'API Error');
@@ -144,6 +167,10 @@ export default function GigRadar({ profile }: GigRadarProps) {
                     agent_email: profile.agentEmail || null,
                     agent_phone: profile.agentPhone || null,
                     agent_social: profile.agentSocial || null,
+                    home_city: profile.homeCity || null,
+                    primary_genre: profile.primaryGenre || genre,
+                    artist_bio: profile.bio || profile.oneLiner || null,
+                    streaming_links: profile.spotifyUrl || profile.appleUrl || profile.youtubeUrl || null,
                     outreach_type: type
                 })
             });
@@ -155,7 +182,16 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 );
             }
             if (data.status === 'success') {
-                setGeneratedPitch(data.pitch);
+                let pitch = data.pitch || '';
+                // Append profile proof points client-side so drafts always carry EPK context
+                const extras: string[] = [];
+                if (profile?.bio || profile?.oneLiner) extras.push(`About: ${profile.bio || profile.oneLiner}`);
+                if (profile?.spotifyUrl) extras.push(`Spotify: ${profile.spotifyUrl}`);
+                if (profile?.appleUrl) extras.push(`Apple Music: ${profile.appleUrl}`);
+                if (profile?.agentSocial) extras.push(`Social: ${profile.agentSocial}`);
+                if (profile?.youtubeUrl) extras.push(`YouTube: ${profile.youtubeUrl}`);
+                if (extras.length) pitch = `${pitch}\n\n—\n${extras.join('\n')}`;
+                setGeneratedPitch(pitch);
                 refreshMe();
             } else {
                 throw new Error(data.error);
@@ -242,6 +278,12 @@ export default function GigRadar({ profile }: GigRadarProps) {
         if (verifiedOnly) {
             list = list.filter(({ gig }) => !!gig.verified_live);
         }
+        if (hasContactOnly) {
+            list = list.filter(({ gig }) => {
+                const c = gig.contact || gig.website_url || gig.social_media_url;
+                return Boolean(c && String(c).trim());
+            });
+        }
 
         if (sortMode === 'reputation') {
             list = [...list].sort((a, b) => num(b.gig.reputation_score) - num(a.gig.reputation_score));
@@ -259,7 +301,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
         }
 
         return list;
-    }, [gigs, sortMode, verifiedOnly, alphaIndex]);
+    }, [gigs, sortMode, verifiedOnly, hasContactOnly, alphaIndex]);
 
     const handleExportCsv = () => {
         const header = CSV_COLUMNS.map((c) => csvEscape(c.label)).join(',');
@@ -289,11 +331,12 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 speedHint="~8s"
             />
 
-            <div className="hidden md:block">
-                <StepHint steps={['Set your search', 'Review verified venues', 'Send the pitch']} accent="var(--color-radar)" />
-            </div>
+            <StepHint steps={['Set your search', 'Review verified venues', 'Send the pitch']} accent="var(--color-radar)" />
+            <CoachPrompt id="radar-search-tip" accent="var(--color-radar)" title="Find Gigs tip">
+                Prefill city & genre from Profile. Hit Scan, open Best odds first, then Draft pitch — your identity links are appended automatically.
+            </CoachPrompt>
 
-            <Panel title="Search" accent="var(--color-radar)">
+            <Panel title="Search" sub="Live multi-source venue scout" accent="var(--color-radar)" hud className="sheen">
                 {Object.keys(presets).length > 0 && (
                     <div className="mb-4 flex flex-wrap gap-2">
                         <span className="font-mono text-[9px] tracking-widest uppercase text-ink-400 self-center mr-1">
@@ -409,11 +452,22 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             accent="var(--color-radar)"
                         />
                         <button
+                            type="button"
                             onClick={() => setVerifiedOnly((v) => !v)}
                             className={`px-4 py-1.5 rounded-full font-mono text-[11px] tracking-widest uppercase transition-colors border ${verifiedOnly ? 'bg-orange-500/15 text-orange-400 border-orange-500/40' : 'border-white/10 text-ink-400 hover:text-ink-50 hover:border-white/25'}`}
                         >
                             Verified only
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setHasContactOnly((v) => !v)}
+                            className={`px-4 py-1.5 rounded-full font-mono text-[11px] tracking-widest uppercase transition-colors border ${hasContactOnly ? 'bg-orange-500/15 text-orange-400 border-orange-500/40' : 'border-white/10 text-ink-400 hover:text-ink-50 hover:border-white/25'}`}
+                        >
+                            Has contact
+                        </button>
+                        <span className="inline-flex items-center gap-1 text-ink-500">
+                            <HelpTip text="Best odds ranks by reputation + live booking signals. Verified filters to venues with a live ticketing presence when available." />
+                        </span>
                     </div>
                     <Btn variant="ghost" size="sm" onClick={handleExportCsv}>
                         <Download size={14} /> Export CSV
@@ -428,13 +482,21 @@ export default function GigRadar({ profile }: GigRadarProps) {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="col-span-full"
+                            className="col-span-full space-y-3"
                         >
                             <EmptyState
                                 icon={<Search size={40} />}
                                 title="No venues yet"
                                 hint="Run a search above to find venues booking your genre."
+                                cta={
+                                    <Btn variant="accent" accent="var(--color-radar)" size="sm" onClick={handleScout} disabled={isScouting}>
+                                        <Target size={14} /> Run a scan
+                                    </Btn>
+                                }
                             />
+                            <CoachPrompt id="radar-empty-tip" accent="var(--color-radar)" title="No results?">
+                                Widen radius, try another city, or switch timeframe. Cold hosts can return empty on first try — scan again after ~30s.
+                            </CoachPrompt>
                         </motion.div>
                     )}
 
@@ -475,7 +537,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ delay: Math.min(idx * 0.04, 0.35), type: 'spring', stiffness: 320, damping: 28 }}
                                     whileHover={{ y: -2 }}
-                                    className={`glass-obsidian rounded-xl border p-5 md:p-6 flex flex-col gap-5 group transition-colors ${gig.pipeline_status === 'PITCHED' ? 'border-white/10 opacity-70' : isAlpha ? 'border-orange-500/40 ring-1 ring-orange-500/40' : 'border-white/10 hover:border-orange-500/30'}`}
+                                    className={`glass-obsidian sheen rounded-2xl border p-5 md:p-6 flex flex-col gap-5 group transition-colors ${gig.pipeline_status === 'PITCHED' ? 'border-white/10 opacity-70' : isAlpha ? 'border-orange-500/40 ring-1 ring-orange-500/30' : 'border-white/10 hover:border-white/20'}`}
                                 >
                                     {/* Header */}
                                     <div className="flex items-start justify-between gap-3">
@@ -738,6 +800,31 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 </AnimatePresence>,
                 document.body
             )}
+
+            <Walkthrough
+                tourId="radar"
+                open={showRadarTour}
+                accent="var(--color-radar)"
+                onClose={() => setShowRadarTour(false)}
+                primaryLabel="Start scouting"
+                steps={[
+                    {
+                        title: 'Set your market',
+                        body: 'City, genre, tier, radius, and timeframe drive the scout. Profile home city & genre pre-fill for you.',
+                        bullets: ['Use free presets for common packages', 'Last search is restored next visit'],
+                    },
+                    {
+                        title: 'Read the cards',
+                        body: 'Best odds is your alpha target. Check payout, lead time, and contact before pitching.',
+                        bullets: ['Filter Verified or Has contact', 'Export CSV for your team'],
+                    },
+                    {
+                        title: 'Draft & send',
+                        body: 'Draft pitch opens a venue-specific email, call script, or DM. Your bio and links from Profile are appended.',
+                        bullets: ['mailto / .eml / copy', 'Pitched venues mark in your pipeline'],
+                    },
+                ]}
+            />
         </div>
     );
 }

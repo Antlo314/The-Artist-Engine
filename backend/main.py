@@ -469,6 +469,8 @@ class SearchMemoryRequest(BaseModel):
 @app.get("/api/system-status")
 async def system_status():
     stack = free_stack_manifest()
+    # Match the constant used by /api/master (defined later in module load order via default).
+    max_upload = int(os.getenv("MAX_MASTER_UPLOAD_BYTES", str(80 * 1024 * 1024)))
     return {
         "status": "OMEGA-TIER ACTIVE",
         "engine": "The Source Engine v3.0 — thesourceengine.com",
@@ -476,6 +478,12 @@ async def system_status():
         "auth_required": auth_required(),
         "auth_configured": auth_configured(),
         "founding_limits": DAILY_LIMITS,
+        "mastering": {
+            "stack": "matchering + pedalboard + ffmpeg loudnorm",
+            "max_upload_mb": max_upload // (1024 * 1024),
+            "max_duration_min": 15,
+            "note": "Reference match is memory-heavy; long songs may fall back to Pure mode on small hosts.",
+        },
         "free_data": {
             "ticketmaster": ticketmaster_available(),
             "bandsintown": bandsintown_available(),
@@ -1117,6 +1125,56 @@ def cleanup_audio_files(paths: list):
         except Exception as e:
             print(f"Cleanup Error for {path}: {str(e)}")
 
+# Practical cloud limits — free-tier Render OOM and laptop browsers fail above this.
+MAX_MASTER_UPLOAD_BYTES = int(os.getenv("MAX_MASTER_UPLOAD_BYTES", str(80 * 1024 * 1024)))
+
+
+def _validate_audio_on_disk(path: str, label: str) -> None:
+    """Fail fast on empty/corrupt uploads before matchering burns CPU/RAM."""
+    try:
+        size = os.path.getsize(path)
+    except OSError as e:
+        raise HTTPException(status_code=400, detail=f"{label} could not be read: {e}")
+    if size < 256:
+        raise HTTPException(status_code=400, detail=f"{label} is empty or too small.")
+    if size > MAX_MASTER_UPLOAD_BYTES:
+        mb = MAX_MASTER_UPLOAD_BYTES // (1024 * 1024)
+        raise HTTPException(
+            status_code=413,
+            detail=f"{label} exceeds the {mb} MB upload limit. Export a shorter bounce or lower bit depth.",
+        )
+    try:
+        import soundfile as sf
+
+        info = sf.info(path)
+        if info.frames <= 0 or info.samplerate <= 0:
+            raise HTTPException(status_code=400, detail=f"{label} has no audio frames.")
+        duration = float(info.frames) / float(info.samplerate)
+        if duration < 0.25:
+            raise HTTPException(status_code=400, detail=f"{label} is too short to master.")
+        if duration > 15 * 60:
+            raise HTTPException(
+                status_code=400,
+                detail=f"{label} is over 15 minutes. Split the track or master a shorter section.",
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Non-WAV containers may still process via pedalboard/ffmpeg; only hard-fail empty
+        print(f"[AUDIO CORE] Preflight probe soft-fail for {label}: {e}")
+
+
+def _worker_error_detail(stdout: str, stderr: str, max_len: int = 400) -> str:
+    """Surface a sanitized tail of worker logs to the client for supportability."""
+    blob = (stderr or "") + "\n" + (stdout or "")
+    # Prefer the last ERROR / CRITICAL line if present
+    lines = [ln.strip() for ln in blob.splitlines() if ln.strip()]
+    interesting = [ln for ln in lines if "ERROR" in ln.upper() or "CRITICAL" in ln.upper()]
+    pick = interesting[-1] if interesting else (lines[-1] if lines else "unknown worker failure")
+    pick = pick.replace("\x00", "")[:max_len]
+    return pick
+
+
 @app.post("/api/master")
 async def master_audio(
     background_tasks: BackgroundTasks,
@@ -1142,8 +1200,16 @@ async def master_audio(
     os.makedirs("temp", exist_ok=True)
     job_id = str(int(time.time()))
 
-    wav_target_path = f"temp/target_{job_id}.wav"
-    wav_ref_path = f"temp/ref_{job_id}.wav"
+    # Preserve extension when possible so pedalboard/soundfile can decode mp3/flac
+    def _ext(upload: UploadFile, default: str = ".wav") -> str:
+        name = (upload.filename or "").lower()
+        for e in (".wav", ".mp3", ".flac", ".aiff", ".aif", ".m4a", ".ogg", ".aac"):
+            if name.endswith(e):
+                return e
+        return default
+
+    wav_target_path = f"temp/target_{job_id}{_ext(target)}"
+    wav_ref_path = f"temp/ref_{job_id}{_ext(reference) if reference else '.wav'}"
     use_ref = reference is not None and bool(getattr(reference, "filename", None))
 
     try:
@@ -1151,27 +1217,51 @@ async def master_audio(
         # full file(s) in RAM. This matters: the mastering worker (matchering)
         # peaks near the instance memory limit for full-length songs, so every
         # megabyte the parent process frees is headroom the worker needs.
-        async def _save(upload, path):
+        async def _save(upload, path, label: str):
+            total = 0
             with open(path, "wb") as f:
                 while True:
                     chunk = await upload.read(1024 * 1024)  # 1MB
                     if not chunk:
                         break
+                    total += len(chunk)
+                    if total > MAX_MASTER_UPLOAD_BYTES:
+                        f.close()
+                        try:
+                            os.remove(path)
+                        except OSError:
+                            pass
+                        mb = MAX_MASTER_UPLOAD_BYTES // (1024 * 1024)
+                        raise HTTPException(
+                            status_code=413,
+                            detail=f"{label} exceeds the {mb} MB upload limit.",
+                        )
                     f.write(chunk)
 
-        await _save(target, wav_target_path)
+        await _save(target, wav_target_path, "Mix")
+        _validate_audio_on_disk(wav_target_path, "Mix")
 
         # Reference is optional — no reference => "Pure mode" (DSP only, no matchering).
         if use_ref:
-            await _save(reference, wav_ref_path)
+            await _save(reference, wav_ref_path, "Reference")
             if os.path.getsize(wav_ref_path) == 0:
                 use_ref = False
+            else:
+                try:
+                    _validate_audio_on_disk(wav_ref_path, "Reference")
+                except HTTPException:
+                    # Soft-drop bad reference → Pure mode rather than hard fail
+                    print("[AUDIO CORE] Invalid reference — continuing in Pure mode.")
+                    use_ref = False
 
         # Release upload buffers + force GC before the memory-heavy worker runs.
         import gc
         gc.collect()
 
         print(f"[DEBUG] Audio Streams pinned to disk. Mode: {'REFERENCE' if use_ref else 'PURE'}")
+    except HTTPException:
+        release_master_slot(user.id)
+        raise
     except Exception as e:
         print("[CRITICAL] Stream Ingestion failed:")
         traceback.print_exc()
@@ -1196,12 +1286,29 @@ async def master_audio(
         flags.append(f"--lufs={lufs_target}")
 
     def _run_worker(ref_path):
-        return subprocess.run([
-            sys.executable, "matcher_worker.py",
-            wav_target_path, ref_path, mastered_wav_path,
-            str(sub), str(air), str(snap), str(width),
-            *flags,
-        ], capture_output=True, text=True)
+        # Hard ceiling so hung matchering/ffmpeg never pin the request forever.
+        # Full-song reference masters on small hosts often land under 3–6 min.
+        timeout_s = int(os.getenv("MASTER_WORKER_TIMEOUT_SEC", "600"))
+        try:
+            return subprocess.run(
+                [
+                    sys.executable, "matcher_worker.py",
+                    wav_target_path, ref_path, mastered_wav_path,
+                    str(sub), str(air), str(snap), str(width),
+                    *flags,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=timeout_s,
+            )
+        except subprocess.TimeoutExpired as te:
+            out = (te.stdout or "") if isinstance(te.stdout, str) else ""
+            err = (te.stderr or "") if isinstance(te.stderr, str) else f"timeout>{timeout_s}s"
+            class _Fake:
+                returncode = 124
+                stdout = out
+                stderr = err
+            return _Fake()
 
     fell_back = False
     try:
@@ -1219,7 +1326,15 @@ async def master_audio(
                 fell_back = True
             if process.returncode != 0:
                 print(process.stderr)
-                raise HTTPException(status_code=500, detail="Mastering engine failed. Check terminal logs.")
+                detail = _worker_error_detail(process.stdout or "", process.stderr or "")
+                raise HTTPException(
+                    status_code=500,
+                    detail=(
+                        "Mastering engine failed. "
+                        "Try Pure mode (no reference), a shorter WAV under 80 MB, or retry after the server warms up. "
+                        f"Detail: {detail}"
+                    ),
+                )
 
         # Format conversion
         final_output_path = mastered_wav_path

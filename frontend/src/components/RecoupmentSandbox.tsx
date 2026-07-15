@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Activity } from 'lucide-react';
+import { AlertTriangle, Activity, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Panel, Field } from './ui/Shell';
+import { Panel, Field, Btn } from './ui/Shell';
 
 const ACCENT = 'var(--color-zion)';
 
@@ -74,16 +74,53 @@ export default function RecoupmentSandbox() {
         return num.toLocaleString(undefined, { maximumFractionDigits: 0 });
     };
 
+    const exportScenario = () => {
+        const lines = [
+            'RECOUPMENT SCENARIO — The Artist Engine',
+            `Generated: ${new Date().toISOString()}`,
+            '',
+            'INPUTS',
+            `Advance: $${advance.toLocaleString()}`,
+            `Royalty rate: ${royaltyRate}%`,
+            `Marketing (recoupable): $${marketingBudget.toLocaleString()}`,
+            `Video (recoupable): $${videoBudget.toLocaleString()}`,
+            `Tour/merch income: $${tourMerchIncome.toLocaleString()}`,
+            `360 cut: ${threeSixtyCut}%`,
+            `Stream payout assumption: $${streamPayout}`,
+            '',
+            'OUTPUTS',
+            `Total recoupable debt: $${totalDebt.toLocaleString()}`,
+            `Streams to recoup (approx): ${streamsNeeded.toLocaleString()}`,
+            `Label gross at recoup: $${labelGross.toLocaleString()}`,
+            `360 cut on tour/merch: $${crossCollateralizationLoss.toLocaleString()}`,
+            `Artist net (illustrative): $${artistNet.toLocaleString()}`,
+            '',
+            'Educational model only — not financial or legal advice.',
+        ];
+        const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'recoupment-scenario.txt';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="font-display text-xl lg:text-2xl font-semibold text-ink-50 flex items-center gap-2 lg:gap-3">
-                    <Activity className="text-ink-400 w-5 h-5 lg:w-6 lg:h-6" />
-                    Recoupment Calculator
-                </h2>
-                <p className="font-mono text-[10px] text-ink-400 mt-1 tracking-[0.2em] uppercase">
-                    Model your deal — advances, hidden debt, and the 360 cut
-                </p>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h2 className="font-display text-xl lg:text-2xl font-semibold text-ink-50 flex items-center gap-2 lg:gap-3">
+                        <Activity className="text-ink-400 w-5 h-5 lg:w-6 lg:h-6" />
+                        Recoupment Calculator
+                    </h2>
+                    <p className="font-mono text-[10px] text-ink-400 mt-1 tracking-[0.2em] uppercase">
+                        Model your deal — advances, hidden debt, and the 360 cut
+                    </p>
+                </div>
+                <Btn variant="ghost" size="sm" onClick={exportScenario}>
+                    <Download size={14} /> Export scenario
+                </Btn>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

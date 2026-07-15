@@ -15,7 +15,12 @@ const SCAN_TYPE_OPTIONS: { value: 'contract' | 'offer'; label: string }[] = [
     { value: 'offer', label: 'Offer' },
 ];
 
-export default function ZionSentinel() {
+type ZionProps = {
+    onOpenCodexTerm?: (term: string) => void;
+    onScanComplete?: () => void;
+};
+
+export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionProps) {
     const { record } = useEngine();
     const { refreshMe } = useAuth();
     const [contractText, setContractText] = useState('');
@@ -24,6 +29,7 @@ export default function ZionSentinel() {
     const [isDragging, setIsDragging] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
     const [analysis, setAnalysis] = useState<any>(null);
+    const [scanError, setScanError] = useState<string | null>(null);
     const [rebuttalCopied, setRebuttalCopied] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +52,7 @@ export default function ZionSentinel() {
     const handleScan = async () => {
         setIsScanning(true);
         setAnalysis(null);
+        setScanError(null);
         try {
             const formData = new FormData();
             if (file) formData.append('file', file);
@@ -74,12 +81,13 @@ export default function ZionSentinel() {
                 const lintHits = data.linter?.counts?.total || 0;
                 record.scan(Math.max(flags, lintHits), data.analysis?.integrity_score);
                 refreshMe();
+                onScanComplete?.();
             } else {
                 throw new Error(data.error || 'Legal Scan Failed');
             }
         } catch (err: any) {
             console.error(err);
-            alert(err?.message || 'Scan failed. Check console.');
+            setScanError(err?.message || 'Scan failed. Check that you are signed in and the server is online.');
         } finally {
             setIsScanning(false);
         }
@@ -312,6 +320,12 @@ export default function ZionSentinel() {
                 {/* Analysis Output Container */}
                 <div className="flex flex-col h-full gap-4 relative">
 
+                    {scanError && (
+                        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                            {scanError}
+                        </div>
+                    )}
+
                     {!analysis && !isScanning && (
                         <EmptyState
                             icon={<Scale size={32} />}
@@ -393,7 +407,12 @@ export default function ZionSentinel() {
                                     actions={<ShieldAlert className="text-red-400" size={18} />}
                                 >
                                     <div className="space-y-4 -m-1">
-                                        {analysis.red_flags.map((flag: any, idx: number) => (
+                                        {analysis.red_flags.map((flag: any, idx: number) => {
+                                            const clauseText = String(flag.clause || flag.risk || '');
+                                            const matched = codexEntries.find((e) =>
+                                                clauseText.toLowerCase().includes(e.term.toLowerCase())
+                                            );
+                                            return (
                                             <div key={idx} className="glass-obsidian border border-white/10 border-l-4 border-l-red-500 rounded-lg p-4 relative">
                                                 <p className="text-xs font-mono text-ink-400 italic mb-2 border-l-2 border-red-500/50 pl-2">
                                                     "...{renderWithCodex(flag.clause)}..."
@@ -404,8 +423,18 @@ export default function ZionSentinel() {
                                                 <p className="text-sm font-inter text-emerald-400 flex items-start gap-2 mt-3 bg-emerald-900/20 p-2 rounded-lg border border-emerald-500/30">
                                                     <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-400" /> <span><span className="font-mono text-[10px] text-emerald-300 tracking-widest uppercase block mb-1">Recommended Fix</span>{renderWithCodex(flag.fix)}</span>
                                                 </p>
+                                                {matched && onOpenCodexTerm && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onOpenCodexTerm(matched.term)}
+                                                        className="mt-3 font-mono text-[10px] tracking-widest uppercase text-violet-300 hover:text-violet-200 underline-offset-2 hover:underline"
+                                                    >
+                                                        Look up “{matched.term}” in Codex →
+                                                    </button>
+                                                )}
                                             </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </Panel>
                             )}

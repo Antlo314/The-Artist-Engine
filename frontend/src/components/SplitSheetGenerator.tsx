@@ -16,11 +16,26 @@ interface Writer {
 }
 
 export default function SplitSheetGenerator() {
-    const [songTitle, setSongTitle] = useState('OMEGA PROTOCOL');
+    const profileAlias = (() => {
+        try {
+            const p = JSON.parse(localStorage.getItem('sovereign_identity') || '{}');
+            return (p.artistAlias || '').trim();
+        } catch {
+            return '';
+        }
+    })();
+    const [songTitle, setSongTitle] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [writers, setWriters] = useState<Writer[]>([
-        { name: 'John Doe', role: 'Writer', pro: 'ASCAP', ipi: '123456789', split: 50, hasPublisher: false, publisherName: '' },
-        { name: 'Jane Smith', role: 'Producer', pro: 'BMI', ipi: '987654321', split: 50, hasPublisher: true, publisherName: 'Sony Music Publishing' }
+        {
+            name: profileAlias || '',
+            role: 'Writer',
+            pro: '',
+            ipi: '',
+            split: 100,
+            hasPublisher: false,
+            publisherName: '',
+        },
     ]);
 
     const addWriter = () => {

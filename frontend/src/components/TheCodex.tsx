@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, BookOpen } from 'lucide-react';
+import { EmptyState } from './ui/Shell';
 
 export const codexEntries = [
     {
@@ -204,10 +205,24 @@ const DANGER_STYLES: Record<string, { bar: string; badge: string }> = {
     SAFE: { bar: 'bg-emerald-500', badge: 'text-emerald-400 border-emerald-500/50' },
 };
 
-export default function TheCodex() {
-    const [query, setQuery] = useState('');
+type CodexProps = {
+    initialQuery?: string;
+    onQueryConsumed?: () => void;
+};
+
+export default function TheCodex({ initialQuery = '', onQueryConsumed }: CodexProps) {
+    const [query, setQuery] = useState(initialQuery || '');
+    const [levelFilter, setLevelFilter] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (initialQuery) {
+            setQuery(initialQuery);
+            onQueryConsumed?.();
+        }
+    }, [initialQuery, onQueryConsumed]);
 
     const filteredEntries = codexEntries.filter(entry => {
+        if (levelFilter && entry.dangerLevel !== levelFilter) return false;
         const q = query.trim().toLowerCase();
         if (!q) return true;
         return (
@@ -237,10 +252,26 @@ export default function TheCodex() {
                         placeholder="Search legal jargon... (e.g. Recoupment, Gross Revenue)"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        className="bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-ink-50 placeholder:text-ink-700 text-sm focus:outline-none focus:border-violet-400/60 transition-colors w-full"
+                        className="bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-ink-50 placeholder:text-ink-700 text-sm focus:outline-none focus:border-violet-400/60 transition-colors w-full min-h-[44px]"
                     />
                 </div>
-                <div className="flex justify-end">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap gap-1.5">
+                        {[null, 'CRITICAL', 'HIGH', 'WARNING', 'SAFE'].map((lvl) => (
+                            <button
+                                key={String(lvl)}
+                                type="button"
+                                onClick={() => setLevelFilter(lvl)}
+                                className={`font-mono text-[9px] tracking-widest uppercase px-2.5 py-1 rounded-full border transition-colors ${
+                                    levelFilter === lvl
+                                        ? 'border-violet-400/50 text-violet-300 bg-violet-500/15'
+                                        : 'border-white/10 text-ink-400 hover:border-white/25'
+                                }`}
+                            >
+                                {lvl || 'All'}
+                            </button>
+                        ))}
+                    </div>
                     <span className="font-mono text-[10px] text-ink-400 tracking-widest uppercase">
                         {filteredEntries.length} of {codexEntries.length} terms
                     </span>
@@ -257,8 +288,8 @@ export default function TheCodex() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ delay: idx * 0.05 }}
-                                className="glass-obsidian rounded-xl border border-white/10 p-6 relative overflow-hidden"
+                                transition={{ delay: Math.min(idx * 0.03, 0.3) }}
+                                className="glass-obsidian sheen rounded-2xl border border-white/10 p-6 relative overflow-hidden"
                             >
                                 <div className={`absolute top-0 left-0 w-1 h-full ${style.bar}`} />
 
@@ -278,8 +309,12 @@ export default function TheCodex() {
                     })}
                 </AnimatePresence>
                 {filteredEntries.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-ink-400 font-mono text-sm tracking-widest">
-                        No codex entries found. You are in uncharted territory.
+                    <div className="col-span-full">
+                        <EmptyState
+                            icon={<Search size={32} />}
+                            title="No codex entries found"
+                            hint="Try another keyword or clear the danger filter."
+                        />
                     </div>
                 )}
             </div>

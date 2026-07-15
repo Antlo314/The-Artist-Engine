@@ -1,6 +1,6 @@
 import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Mic2, Scale, Radio, BarChart2 } from 'lucide-react';
+import { ShieldCheck, Mic2, Scale, Radio, BarChart2, HelpCircle } from 'lucide-react';
 
 const Dashboard = lazy(() => import('../components/Dashboard'));
 const GigRadar = lazy(() => import('../components/GigRadar'));
@@ -11,6 +11,8 @@ import FoundingBadge from '../components/FoundingBadge';
 import ThemeToggle from '../components/ThemeToggle';
 import BrandMark from '../components/BrandMark';
 import { EngineProvider } from '../lib/engineState';
+import Walkthrough from '../components/ui/Walkthrough';
+import { hasSeenTour, resetOnboarding } from '../lib/onboarding';
 
 type ViewId = 'dashboard' | 'radar' | 'studio' | 'legal' | 'profile';
 
@@ -104,6 +106,28 @@ export default function EngineCore() {
     );
 }
 
+function defaultProfile() {
+    return {
+        artistAlias: '',
+        agentName: '',
+        agentEmail: '',
+        agentPhone: '',
+        agentSocial: '',
+        treasuryBalance: '',
+        cryptoBalance: '',
+        cryptoAddress: '',
+        homeCity: '',
+        primaryGenre: '',
+        bio: '',
+        oneLiner: '',
+        spotifyUrl: '',
+        appleUrl: '',
+        youtubeUrl: '',
+        otherUrl: '',
+        targetMarkets: '',
+    };
+}
+
 function EngineCoreInner() {
     const isMobile = useIsMobile();
     // Mobile opens on Find Gigs — the most useful phone feature
@@ -115,16 +139,16 @@ function EngineCoreInner() {
 
     const [profile, setProfile] = useState(() => {
         const saved = localStorage.getItem('sovereign_identity');
-        if (saved) return JSON.parse(saved);
-        return {
-            artistAlias: '',
-            agentName: '',
-            agentEmail: '',
-            agentPhone: '',
-            agentSocial: '',
-            treasuryBalance: '0',
-        };
+        if (saved) {
+            try {
+                return { ...defaultProfile(), ...JSON.parse(saved) };
+            } catch {
+                return defaultProfile();
+            }
+        }
+        return defaultProfile();
     });
+    const [showWelcome, setShowWelcome] = useState(() => !hasSeenTour('welcome'));
 
     useEffect(() => {
         localStorage.setItem('sovereign_identity', JSON.stringify(profile));
@@ -132,6 +156,34 @@ function EngineCoreInner() {
 
     const current = ALL_NAV.find((n) => n.id === activeView) || ALL_NAV[0];
     const avatar = localStorage.getItem('sovereign_avatar');
+
+    const welcomeTour = (
+        <Walkthrough
+            tourId="welcome"
+            open={showWelcome}
+            accent="var(--color-ember-500)"
+            onClose={() => setShowWelcome(false)}
+            primaryLabel={isMobile ? 'Open Find Gigs' : 'Open Dashboard'}
+            onPrimary={() => setActiveView(isMobile ? 'radar' : 'dashboard')}
+            steps={[
+                {
+                    title: 'Welcome to the Engine',
+                    body: 'One workspace for gigs, mastering, contracts, and your artist identity — built for independent artists.',
+                    bullets: ['Daily quotas apply on heavy tools', 'Stay signed in for Studio & Legal'],
+                },
+                {
+                    title: 'Four pillars',
+                    body: 'Find Gigs scouts venues. Studio masters tracks. Legal flags predatory clauses. Profile powers pitches.',
+                    bullets: ['Mobile opens on Find Gigs by default', 'Desktop opens on Dashboard'],
+                },
+                {
+                    title: 'Guided along the way',
+                    body: 'Each tool has a short first-visit tour and tips you can dismiss. Replay them anytime from Profile.',
+                    bullets: ['WAV masters under 80 MB', 'Fill Profile for stronger pitch drafts'],
+                },
+            ]}
+        />
+    );
 
     // ===================== MOBILE: column layout only (no side-by-side chrome) =====================
     if (isMobile) {
@@ -145,6 +197,7 @@ function EngineCoreInner() {
                     overflow: 'hidden',
                 }}
             >
+                {welcomeTour}
                 {/* Top bar */}
                 <header
                     className="shrink-0 border-b border-white/10 bg-ink-950/95 backdrop-blur-md z-20"
@@ -289,6 +342,17 @@ function EngineCoreInner() {
                         Engine / {current.label}
                     </div>
                     <div className="flex items-center gap-3 min-w-0">
+                        <button
+                            type="button"
+                            title="Help / welcome tour"
+                            onClick={() => {
+                                resetOnboarding();
+                                setShowWelcome(true);
+                            }}
+                            className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-ink-400 hover:text-ink-50 hover:bg-white/5"
+                        >
+                            <HelpCircle size={16} />
+                        </button>
                         <ThemeToggle />
                         <FoundingBadge />
                     </div>
@@ -304,6 +368,7 @@ function EngineCoreInner() {
                     </div>
                 </div>
             </main>
+            {welcomeTour}
         </div>
     );
 }
