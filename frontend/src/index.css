@@ -13,12 +13,13 @@
     --color-ink-950: #060607;   /* page void */
     --color-ink-900: #0a0a0c;   /* base surface */
     --color-ink-800: #101014;   /* raised surface */
-    --color-ink-700: #1a1a20;   /* deep wells / tertiary chrome */
-    --color-ink-500: #6b6b76;   /* quiet labels / meta */
-    --color-ink-400: #8a8a93;   /* muted text */
-    --color-ink-300: #b0b0b8;   /* soft secondary (rare) */
-    --color-ink-200: #d6d6da;   /* secondary text */
-    --color-ink-50:  #f4f4f5;   /* primary text */
+    --color-ink-700: #1a1a20;   /* deep wells / tertiary chrome (bg only) */
+    /* Readable muted type on dark + glass (was too close to grey surfaces) */
+    --color-ink-500: #a8a8b4;   /* quiet labels / meta — ~AA on #0a0a0c */
+    --color-ink-400: #c2c2cc;   /* secondary / subtext */
+    --color-ink-300: #d4d4dc;   /* soft secondary */
+    --color-ink-200: #e4e4ea;   /* strong secondary (descs, body support) */
+    --color-ink-50:  #f7f7f8;   /* primary text */
 
     /* --- Brand --- */
     --color-ember-600: #dc2626; /* signature red */
@@ -124,6 +125,33 @@ html[data-theme="light"] .hover\:text-white:hover { color: var(--color-ink-50); 
 /* Placeholders inherit ink-700; force opacity so they never wash out */
 html[data-theme="light"] ::placeholder {
     color: var(--color-ink-700);
+    opacity: 1;
+}
+
+/*
+ * Dark mode: ink-700 is a SURFACE token (#1a1a20), nearly invisible as text.
+ * Remap text + placeholder utilities to a readable muted grey without changing
+ * bg-ink-700 chrome dots / wells.
+ */
+html:not([data-theme="light"]) .text-ink-700 {
+    color: #a1a1ad;
+}
+html:not([data-theme="light"]) .placeholder\:text-ink-700::placeholder,
+html:not([data-theme="light"]) .placeholder\:text-ink-700::-webkit-input-placeholder {
+    color: #8e8e9a;
+    opacity: 1;
+}
+/* Hover helpers that lighten into "muted" from near-black */
+html:not([data-theme="light"]) .hover\:text-ink-400:hover {
+    color: var(--color-ink-400);
+}
+html:not([data-theme="light"]) .hover\:text-ink-200:hover {
+    color: var(--color-ink-200);
+}
+
+/* Ensure ::placeholder is never washed out on dark either */
+html:not([data-theme="light"]) ::placeholder {
+    color: #8e8e9a;
     opacity: 1;
 }
 

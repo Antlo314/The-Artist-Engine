@@ -209,7 +209,7 @@ export default function PricingPage() {
                     <h1 className="font-display text-4xl md:text-5xl font-semibold tracking-tight mb-3">
                         One OS. Clear tiers.
                     </h1>
-                    <p className="text-ink-300 max-w-xl mx-auto text-sm leading-relaxed">
+                    <p className="text-ink-200 max-w-xl mx-auto text-sm leading-relaxed">
                         Master tracks, scout venues, defend contracts, and run your pipeline — free to start, credits when you scale.
                     </p>
                     <div className="mt-6 inline-flex items-center gap-1 p-1 rounded-full border border-white/10 bg-white/5">
@@ -294,7 +294,7 @@ export default function PricingPage() {
                 {/* Credits */}
                 <section className="mt-16">
                     <h2 className="font-display text-2xl font-semibold mb-2">Buy more credits</h2>
-                    <p className="text-sm text-ink-400 mb-6 max-w-lg">
+                    <p className="text-sm text-ink-200 mb-6 max-w-lg leading-relaxed">
                         Masters, stems, scouts, pitches, and contract AI burn credits. Packs never expire. Available on every tier after login.
                     </p>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -319,7 +319,7 @@ export default function PricingPage() {
                 {/* Promo */}
                 <section className="mt-16 glass-obsidian hud-corners border border-ember-500/20 rounded-2xl p-6 md:p-8">
                     <h2 className="font-display text-xl font-semibold mb-2">Investor pilot code</h2>
-                    <p className="text-sm text-ink-300 mb-4 max-w-xl">
+                    <p className="text-sm text-ink-200 mb-4 max-w-xl leading-relaxed">
                         Have the investor code? Sign in first, then redeem to multiply daily limits and monthly credits by ×5 for 90 days.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 max-w-md">

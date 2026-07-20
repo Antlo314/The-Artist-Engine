@@ -224,7 +224,7 @@ export default function LoginPage() {
                     <h1 className="font-display text-3xl font-semibold tracking-tight mb-2">
                         {mode === 'register' ? 'Create your account' : mode === 'reset' ? 'Reset password' : 'Sign in'}
                     </h1>
-                    <p className="text-sm text-ink-200 leading-relaxed mb-6">
+                    <p className="text-sm text-ink-200 leading-relaxed mb-6 opacity-100">
                         {mode === 'reset'
                             ? 'Free reset: we issue a 6-digit code (shown in beta without email SMTP).'
                             : supabaseReady

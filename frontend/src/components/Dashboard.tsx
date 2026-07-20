@@ -263,9 +263,9 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
                     {activeLeads.length === 0 ? (
                         <div className="flex-1 flex flex-col items-center justify-center text-center py-14 border border-dashed border-white/10 rounded-lg">
-                            <RadarIcon size={30} className="text-ink-700 mb-4" />
-                            <p className="text-ink-400 text-sm mb-1">Pipeline empty</p>
-                            <p className="font-mono text-[10px] text-ink-700 tracking-widest uppercase mb-5">Run a scout to populate real leads</p>
+                            <RadarIcon size={30} className="text-ink-400 mb-4" />
+                            <p className="text-ink-50 text-sm mb-1">Pipeline empty</p>
+                            <p className="font-mono text-[10px] text-ink-400 tracking-widest uppercase mb-5">Run a scout to populate real leads</p>
                             <button
                                 onClick={() => onNavigate('radar')}
                                 className="group flex items-center gap-2 rounded-full bg-orange-500/90 hover:bg-orange-500 transition-colors px-5 py-2.5 font-display font-medium text-sm text-ink-950"
@@ -282,7 +282,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                                     <div key={col.key} className="flex flex-col">
                                         <div className="flex items-center justify-between mb-2 px-1">
                                             <span className="font-mono text-[9px] tracking-widest uppercase text-ink-400">{col.label}</span>
-                                            <span className="font-mono text-[9px] text-ink-700 tabular-nums">{leads.length}</span>
+                                            <span className="font-mono text-[9px] text-ink-400 tabular-nums">{leads.length}</span>
                                         </div>
                                         <div className="space-y-2 min-h-[40px]">
                                             {leads.map((l) => (
@@ -309,7 +309,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                         {hasAnyActivity && (
                             <button
                                 onClick={record.clearActivity}
-                                className="font-mono text-[9px] tracking-widest uppercase text-ink-700 hover:text-ink-400 transition-colors"
+                                className="font-mono text-[9px] tracking-widest uppercase text-ink-400 hover:text-ink-200 transition-colors"
                             >
                                 Clear
                             </button>
@@ -318,8 +318,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
                     {!hasAnyActivity ? (
                         <div className="flex-1 flex flex-col items-center justify-center text-center py-10">
-                            <Radio size={24} className="text-ink-700 mb-3" />
-                            <p className="font-mono text-[10px] text-ink-700 tracking-widest uppercase">No operations logged yet</p>
+                            <Radio size={24} className="text-ink-400 mb-3" />
+                            <p className="font-mono text-[10px] text-ink-400 tracking-widest uppercase">No operations logged yet</p>
                         </div>
                     ) : (
                         <div className="space-y-3 overflow-y-auto max-h-[420px] pr-1 custom-scrollbar">
@@ -331,7 +331,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                                     />
                                     <div className="min-w-0">
                                         <p className="text-sm text-ink-200 leading-snug break-words">{ev.label}</p>
-                                        <p className="font-mono text-[9px] text-ink-700 tracking-widest uppercase mt-0.5">
+                                        <p className="font-mono text-[9px] text-ink-400 tracking-widest uppercase mt-0.5">
                                             {relTime(ev.ts)}
                                         </p>
                                     </div>

@@ -114,7 +114,7 @@ export function PageHeader({
                     <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold text-ink-50 tracking-tight leading-tight">
                         {title}
                     </h1>
-                    <p className="text-ink-200 font-light text-xs sm:text-sm mt-1 max-w-xl leading-relaxed line-clamp-2 md:line-clamp-none">
+                    <p className="text-ink-200 font-normal text-xs sm:text-sm mt-1 max-w-xl leading-relaxed line-clamp-2 md:line-clamp-none drop-shadow-[0_1px_8px_rgba(0,0,0,0.75)]">
                         {desc}
                     </p>
                 </div>
@@ -148,7 +148,10 @@ export function Panel({
                     <div className="min-w-0">
                         {title && <h3 className="font-display text-base text-ink-50 tracking-wide truncate">{title}</h3>}
                         {sub && (
-                            <p className="font-mono text-[10px] tracking-[0.2em] uppercase mt-0.5 truncate" style={{ color: accent || '#8a8a93' }}>
+                            <p
+                                className="font-mono text-[10px] tracking-[0.2em] uppercase mt-0.5 truncate text-ink-400"
+                                style={accent ? { color: accent } : undefined}
+                            >
                                 {sub}
                             </p>
                         )}
@@ -173,7 +176,7 @@ export function Field({
         <label className="flex flex-col gap-1.5">
             <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">{label}</span>
             {children}
-            {hint && <span className="text-[11px] text-ink-700">{hint}</span>}
+            {hint && <span className="text-[11px] text-ink-400 leading-snug">{hint}</span>}
         </label>
     );
 }
@@ -182,7 +185,7 @@ export function Field({
 export function inputCls(accent = '#dc2626') {
     // accent only tints focus; kept as inline style at call sites where needed.
     void accent;
-    return 'bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-ink-50 placeholder:text-ink-700 text-sm focus:outline-none focus:border-white/30 transition-colors w-full';
+    return 'bg-ink-900 border border-white/10 rounded-lg px-3.5 py-2.5 text-ink-50 placeholder:text-ink-500 text-sm focus:outline-none focus:border-white/30 transition-colors w-full';
 }
 
 /* ---- Btn: one button hierarchy ---- */
@@ -228,9 +231,9 @@ export function EmptyState({
 }) {
     return (
         <div className="flex flex-col items-center justify-center text-center py-12 border border-dashed border-white/10 rounded-xl">
-            <div className="text-ink-700 mb-4">{icon}</div>
-            <p className="text-ink-200 text-sm mb-1">{title}</p>
-            <p className="font-mono text-[10px] text-ink-700 tracking-widest uppercase mb-5 max-w-xs">{hint}</p>
+            <div className="text-ink-400 mb-4">{icon}</div>
+            <p className="text-ink-50 text-sm mb-1">{title}</p>
+            <p className="font-mono text-[10px] text-ink-400 tracking-widest uppercase mb-5 max-w-xs leading-relaxed">{hint}</p>
             {cta}
         </div>
     );

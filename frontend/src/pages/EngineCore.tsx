@@ -308,7 +308,7 @@ function EngineCoreInner() {
                 </div>
 
                 <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
-                    <div className="text-[10px] font-mono tracking-widest text-ink-700 mb-3 px-3 uppercase">Workspace</div>
+                    <div className="text-[10px] font-mono tracking-widest text-ink-400 mb-3 px-3 uppercase">Workspace</div>
                     {navItems.map((item) => {
                         const active = activeView === item.id;
                         return (
@@ -325,7 +325,7 @@ function EngineCoreInner() {
                                 <item.icon size={18} className={active ? 'text-ember-500' : ''} />
                                 <div className="text-left min-w-0">
                                     <div className="text-sm font-medium leading-tight">{item.label}</div>
-                                    <div className="font-mono text-[9px] text-ink-700 tracking-wide truncate">{item.desc}</div>
+                                    <div className="font-mono text-[9px] text-ink-400 tracking-wide truncate">{item.desc}</div>
                                 </div>
                             </button>
                         );
