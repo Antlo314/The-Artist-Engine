@@ -6,6 +6,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
 const EngineCore = lazy(() => import('./pages/EngineCore'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
 
 function RouteFallback() {
     return (
@@ -32,6 +33,7 @@ export default function App() {
                     <Routes>
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/features" element={<FeaturesPage />} />
+                        <Route path="/pricing" element={<PricingPage />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route
                             path="/engine"

@@ -18,6 +18,7 @@ from simple_auth import (  # noqa: F401
     init_db,
     register_user,
     login_user,
+    login_or_register_google,
     logout_token,
     list_users_admin,
     user_from_token,

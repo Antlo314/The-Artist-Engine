@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { Upload, Save, CheckCircle, RotateCcw } from 'lucide-react';
 import { PageHeader, Panel, Field, Btn } from './ui/Shell';
 import { apiJson } from '../lib/api';
@@ -39,15 +39,44 @@ function completenessScore(profile: any, hasAvatar: boolean): { pct: number; mis
 }
 
 export default function ArtistProfile({ profile, setProfile }: ArtistProfileProps) {
-    const { email, displayName, me, signOut } = useAuth();
+    const { email, displayName, me, signOut, refreshMe } = useAuth();
     const [avatarPreview, setAvatarPreview] = useState<string | null>(localStorage.getItem('sovereign_avatar'));
     const [isSaved, setIsSaved] = useState(false);
+    const [saveErr, setSaveErr] = useState<string | null>(null);
     const [epk, setEpk] = useState<any | null>(null);
     const [epkBusy, setEpkBusy] = useState(false);
     const [epkErr, setEpkErr] = useState<string | null>(null);
     const [showProfileTour, setShowProfileTour] = useState(() => !hasSeenTour('profile'));
     const [tourResetNote, setTourResetNote] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const stats = me?.profile?.stats || {};
+
+    // Hydrate from server profile when available
+    useEffect(() => {
+        const p = me?.profile;
+        if (!p) return;
+        setProfile((prev: any) => ({
+            ...prev,
+            artistAlias: p.artistAlias || p.artist_alias || prev.artistAlias,
+            oneLiner: p.oneLiner || p.one_liner || prev.oneLiner,
+            bio: p.bio || prev.bio,
+            homeCity: p.homeCity || p.home_city || prev.homeCity,
+            primaryGenre: p.primaryGenre || p.primary_genre || prev.primaryGenre,
+            targetMarkets: p.targetMarkets || p.target_markets || prev.targetMarkets,
+            agentName: p.agentName || p.agent_name || prev.agentName,
+            agentEmail: p.agentEmail || p.agent_email || prev.agentEmail || email || '',
+            agentPhone: p.agentPhone || p.agent_phone || prev.agentPhone,
+            agentSocial: p.agentSocial || p.agent_social || prev.agentSocial,
+            spotifyUrl: p.spotifyUrl || p.spotify_url || prev.spotifyUrl,
+            appleUrl: p.appleUrl || p.apple_url || prev.appleUrl,
+            youtubeUrl: p.youtubeUrl || p.youtube_url || prev.youtubeUrl,
+            otherUrl: p.otherUrl || p.other_url || prev.otherUrl,
+        }));
+        if (p.avatar_url || p.avatarUrl) {
+            setAvatarPreview(p.avatar_url || p.avatarUrl);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [me?.profile?.updated_at, email]);
 
     const score = useMemo(
         () => completenessScore(profile, Boolean(avatarPreview)),
@@ -67,9 +96,40 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
         }
     };
 
-    const handleSave = () => {
-        setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 3000);
+    const handleSave = async () => {
+        setSaveErr(null);
+        try {
+            await apiJson('/api/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    artist_alias: profile.artistAlias,
+                    one_liner: profile.oneLiner,
+                    bio: profile.bio,
+                    home_city: profile.homeCity,
+                    primary_genre: profile.primaryGenre,
+                    target_markets: profile.targetMarkets,
+                    agent_name: profile.agentName,
+                    agent_email: profile.agentEmail,
+                    agent_phone: profile.agentPhone,
+                    agent_social: profile.agentSocial,
+                    spotify_url: profile.spotifyUrl,
+                    apple_url: profile.appleUrl,
+                    youtube_url: profile.youtubeUrl,
+                    other_url: profile.otherUrl,
+                    avatar_url: avatarPreview || '',
+                    onboarding_done: true,
+                }),
+            });
+            await refreshMe();
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 3000);
+        } catch (e: any) {
+            setSaveErr(e?.message || 'Could not save profile to server');
+            // still mark local save
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 3000);
+        }
     };
 
     const setField = (key: string, value: string) => setProfile({ ...profile, [key]: value });
@@ -84,9 +144,25 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                 desc="Powers Find Gigs defaults, pitch footers, and your free EPK pack."
             />
             <CoachPrompt id="profile-power-tip" accent="#eab308" title="Profile tip">
-                Fill alias, city, genre, bio, and one streaming link — pitch drafts and scouts get smarter. Completeness
-                is local to this browser.
+                Fill alias, city, genre, bio, and one streaming link — pitch drafts and scouts get smarter. Saved to your
+                account (server profile), not just this browser.
             </CoachPrompt>
+
+            {me?.profile?.stats && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                        ['Masters', stats.masters_total],
+                        ['Scouts', stats.scouts_total],
+                        ['Pitches', stats.pitches_total],
+                        ['Open leads', stats.leads_open],
+                    ].map(([label, val]) => (
+                        <div key={String(label)} className="glass-obsidian border border-white/10 rounded-xl p-3">
+                            <p className="font-mono text-[9px] tracking-widest uppercase text-ink-500">{label}</p>
+                            <p className="font-display text-xl tabular-nums mt-0.5">{Number(val) || 0}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Completeness */}
             <Panel title="Profile power" sub={`${score.pct}% ready for stronger pitches`} accent="#eab308" sheen>
@@ -276,6 +352,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
 
                         <div className="mt-6 pt-5 border-t border-white/10 flex items-center gap-3 flex-wrap">
                             <Btn variant="accent" accent="#eab308" onClick={handleSave}>
+                                {saveErr && <span className="text-xs text-amber-400 mr-2">{saveErr}</span>}
                                 {isSaved ? (
                                     <>
                                         <CheckCircle size={14} /> Saved

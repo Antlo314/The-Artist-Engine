@@ -1,12 +1,15 @@
 import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Mic2, Scale, Radio, BarChart2, HelpCircle } from 'lucide-react';
+import { ShieldCheck, Mic2, Scale, Radio, BarChart2, HelpCircle, CreditCard, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '../lib/auth';
 
 const Dashboard = lazy(() => import('../components/Dashboard'));
 const GigRadar = lazy(() => import('../components/GigRadar'));
 const StudioCore = lazy(() => import('../components/StudioCore'));
 const LegalCore = lazy(() => import('../components/LegalCore'));
 const ArtistProfile = lazy(() => import('../components/ArtistProfile'));
+const BillingPanel = lazy(() => import('../components/billing/BillingPanel'));
+const AdminConsole = lazy(() => import('../components/admin/AdminConsole'));
 import FoundingBadge from '../components/FoundingBadge';
 import ThemeToggle from '../components/ThemeToggle';
 import BrandMark from '../components/BrandMark';
@@ -14,7 +17,7 @@ import { EngineProvider } from '../lib/engineState';
 import Walkthrough from '../components/ui/Walkthrough';
 import { hasSeenTour, resetOnboarding } from '../lib/onboarding';
 
-type ViewId = 'dashboard' | 'radar' | 'studio' | 'legal' | 'profile';
+type ViewId = 'dashboard' | 'radar' | 'studio' | 'legal' | 'profile' | 'billing' | 'admin';
 
 const ALL_NAV: {
     id: ViewId;
@@ -23,15 +26,18 @@ const ALL_NAV: {
     desc: string;
     icon: typeof BarChart2;
     mobile: boolean;
+    adminOnly?: boolean;
 }[] = [
     { id: 'dashboard', label: 'Dashboard', short: 'Home', desc: 'Overview & pipeline', icon: BarChart2, mobile: true },
     { id: 'radar', label: 'Find Gigs', short: 'Gigs', desc: 'Live venue scouting', icon: Radio, mobile: true },
     { id: 'studio', label: 'Studio', short: 'Studio', desc: 'Mastering & analysis', icon: Mic2, mobile: true },
     { id: 'legal', label: 'Legal', short: 'Legal', desc: 'Contracts & splits', icon: Scale, mobile: true },
+    { id: 'billing', label: 'Billing', short: 'Plan', desc: 'Credits & promo', icon: CreditCard, mobile: false },
+    { id: 'admin', label: 'CRM Ops', short: 'Admin', desc: 'Platform CRM', icon: LayoutDashboard, mobile: false, adminOnly: true },
     { id: 'profile', label: 'Profile', short: 'You', desc: 'Identity & settings', icon: ShieldCheck, mobile: true },
 ];
 
-const MOBILE_NAV = ALL_NAV.filter((n) => n.mobile);
+
 
 function useIsMobile() {
     const [mobile, setMobile] = useState(() =>
@@ -68,6 +74,10 @@ function ViewLoader({
                 return <LegalCore />;
             case 'studio':
                 return <StudioCore />;
+            case 'billing':
+                return <BillingPanel />;
+            case 'admin':
+                return <AdminConsole />;
             case 'profile':
                 return <ArtistProfile profile={profile} setProfile={setProfile} />;
             default:
@@ -130,6 +140,13 @@ function defaultProfile() {
 
 function EngineCoreInner() {
     const isMobile = useIsMobile();
+    const { me } = useAuth();
+    const isAdmin = me?.user?.role === 'admin';
+    const navItems = useMemo(
+        () => ALL_NAV.filter((n) => !n.adminOnly || isAdmin),
+        [isAdmin]
+    );
+    const mobileNav = useMemo(() => navItems.filter((n) => n.mobile), [navItems]);
     // Mobile opens on Find Gigs — the most useful phone feature
     const [activeView, setActiveView] = useState<ViewId>(() =>
         typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
@@ -154,7 +171,7 @@ function EngineCoreInner() {
         localStorage.setItem('sovereign_identity', JSON.stringify(profile));
     }, [profile]);
 
-    const current = ALL_NAV.find((n) => n.id === activeView) || ALL_NAV[0];
+    const current = navItems.find((n) => n.id === activeView) || navItems[0] || ALL_NAV[0];
     const avatar = localStorage.getItem('sovereign_avatar');
 
     const welcomeTour = (
@@ -254,7 +271,7 @@ function EngineCoreInner() {
                     style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
                 >
                     <div className="grid grid-cols-5 h-[3.75rem]">
-                        {MOBILE_NAV.map((item) => {
+                        {mobileNav.map((item) => {
                             const active = activeView === item.id;
                             return (
                                 <button
@@ -292,7 +309,7 @@ function EngineCoreInner() {
 
                 <div className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
                     <div className="text-[10px] font-mono tracking-widest text-ink-700 mb-3 px-3 uppercase">Workspace</div>
-                    {ALL_NAV.map((item) => {
+                    {navItems.map((item) => {
                         const active = activeView === item.id;
                         return (
                             <button

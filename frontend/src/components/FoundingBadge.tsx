@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
 export default function FoundingBadge({ compact = false }: { compact?: boolean }) {
@@ -19,7 +20,9 @@ export default function FoundingBadge({ compact = false }: { compact?: boolean }
         { key: 'contract', label: 'Contracts' },
     ];
     const hours = Math.max(0, Math.floor((me?.resets_in_seconds || 0) / 3600));
-    const badge = me?.user?.badge || (me?.user?.role === 'admin' ? 'Admin' : 'Member');
+    const badge = me?.user?.badge || (me?.user?.role === 'admin' ? 'Admin' : me?.plan?.name || 'Member');
+    const credits = me?.credits?.balance ?? 0;
+    const pilot = Boolean(me?.promo && (me.promo.multiplier || 1) > 1);
 
     if (compact) {
         return (
@@ -27,6 +30,7 @@ export default function FoundingBadge({ compact = false }: { compact?: boolean }
                 <span className="font-mono text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-full border border-ember-500/40 bg-ember-500/10 text-ember-400 shrink-0">
                     {badge}
                 </span>
+                <span className="font-mono text-[8px] tabular-nums text-ink-400 shrink-0">{credits} cr</span>
                 <button
                     onClick={() => signOut()}
                     className="font-mono text-[8px] tracking-widest uppercase text-ink-500 hover:text-ink-200 shrink-0"
@@ -39,13 +43,30 @@ export default function FoundingBadge({ compact = false }: { compact?: boolean }
 
     return (
         <div className="flex flex-col items-end gap-1.5 max-w-[min(100vw-2rem,28rem)]">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
+                {pilot && (
+                    <span className="font-mono text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-full border border-amber-400/40 bg-amber-500/10 text-amber-300">
+                        Pilot ×{me?.promo?.multiplier}
+                    </span>
+                )}
                 <span className="font-mono text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full border border-ember-500/40 bg-ember-500/10 text-ember-400">
                     {badge}
+                </span>
+                <span
+                    className="font-mono text-[9px] tabular-nums px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-ink-200"
+                    title="Credit balance"
+                >
+                    {credits} credits
                 </span>
                 <span className="font-mono text-[9px] text-ink-400 truncate max-w-[9rem]" title={email || ''}>
                     {displayName || email}
                 </span>
+                <Link
+                    to="/pricing"
+                    className="font-mono text-[9px] tracking-widest uppercase text-ink-500 hover:text-ember-400"
+                >
+                    Plans
+                </Link>
                 <button
                     onClick={() => refreshMe()}
                     className="font-mono text-[9px] tracking-widest uppercase text-ink-500 hover:text-ink-200"

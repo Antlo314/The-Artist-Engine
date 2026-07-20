@@ -46,6 +46,11 @@ from crm import (
     import_all,
     create_reset_token,
     reset_password_with_code,
+    count_leads,
+    list_tasks,
+    add_task,
+    set_task_done,
+    PIPELINE_STAGES,
 )
 from free_data import (
     free_stack_manifest,
@@ -70,8 +75,36 @@ from founding_auth import (
     init_db,
     register_user,
     login_user,
+    login_or_register_google,
     logout_token,
     list_users_admin,
+)
+from entitlements import list_plans_public, CREDIT_PACKS, feature_allowed, credit_cost
+from billing import (
+    redeem_promo,
+    create_checkout_session,
+    handle_stripe_webhook,
+    get_credits_snapshot,
+    promo_stats,
+    admin_adjust_credits,
+    admin_set_plan,
+    admin_add_note,
+    effective_plan_for_user,
+    ensure_monthly_grant,
+    active_multiplier,
+)
+from user_profiles import (
+    ensure_profile,
+    get_profile,
+    save_profile,
+    recompute_stats_from_usage,
+    seed_demo_artists,
+    init_profile_tables,
+)
+from supabase_auth import (
+    supabase_configured,
+    fetch_supabase_user,
+    optional_sync_app_user_row,
 )
 
 # Google GenAI Integration
@@ -427,6 +460,20 @@ async def startup_event():
         f"Bandsintown={'ON' if bandsintown_available() else 'off'}"
     )
     system_startup_log.append("[STATUS] Source pillars online: Studio · Radar · Legal · CRM · EPK.")
+    try:
+        init_profile_tables()
+        system_startup_log.append("[PROFILES] User profile tables ONLINE.")
+        if os.getenv("SEED_DEMO", "").strip().lower() in ("1", "true", "yes"):
+            seeded = seed_demo_artists()
+            system_startup_log.append(f"[SEED] Demo artists: {len(seeded)}")
+    except Exception as e:
+        system_startup_log.append(f"[PROFILES] Init warning: {e}")
+    try:
+        system_startup_log.append(
+            f"[AUTH] Supabase Google bridge={'ON' if supabase_configured() else 'off (set SUPABASE_URL + keys)'}"
+        )
+    except Exception:
+        pass
 
 # ---------------------------------------------------------------------------
 # MODELS
@@ -520,21 +567,31 @@ class ResetBody(BaseModel):
     new_password: str
 
 
+def _user_public(user: AppUser, snap: dict | None = None) -> dict:
+    plan_name = (snap or {}).get("plan", {}).get("name") if snap else None
+    badge = "Admin" if user.role == "admin" else (plan_name or "Member")
+    if snap and snap.get("promo"):
+        badge = f"{badge} · Pilot"
+    return {
+        "id": user.id,
+        "email": user.email,
+        "display_name": user.display_name,
+        "role": user.role,
+        "plan_id": getattr(user, "plan_id", None) or (snap or {}).get("plan_id") or "spark",
+        "badge": badge,
+        "auth_provider": getattr(user, "auth_provider", "password"),
+    }
+
+
 @app.post("/api/auth/register")
 async def auth_register(body: RegisterBody):
     """Create account — name, email, password. Site opens after this."""
     user, token = register_user(body.name, body.email, body.password)
-    snap = await get_usage_snapshot(user.id)
+    snap = await get_usage_snapshot(user.id, user)
     return {
         "status": "success",
         "token": token,
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "display_name": user.display_name,
-            "role": user.role,
-            "badge": "Admin" if user.role == "admin" else "Member",
-        },
+        "user": _user_public(user, snap),
         **snap,
     }
 
@@ -542,18 +599,127 @@ async def auth_register(body: RegisterBody):
 @app.post("/api/auth/login")
 async def auth_login(body: LoginBody):
     user, token = login_user(body.email, body.password)
-    snap = await get_usage_snapshot(user.id)
+    snap = await get_usage_snapshot(user.id, user)
     return {
         "status": "success",
         "token": token,
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "display_name": user.display_name,
-            "role": user.role,
-            "badge": "Admin" if user.role == "admin" else "Member",
-        },
+        "user": _user_public(user, snap),
         **snap,
+    }
+
+
+class GoogleAuthBody(BaseModel):
+    id_token: str
+
+
+@app.post("/api/auth/google")
+async def auth_google(body: GoogleAuthBody):
+    """
+    Verify Google ID token (GIS) and issue Engine session.
+    Prefer /api/auth/supabase when using Supabase Google OAuth.
+    """
+    client_id = (os.getenv("GOOGLE_CLIENT_ID") or "").strip()
+    token = (body.id_token or "").strip()
+    if not token:
+        raise HTTPException(status_code=400, detail="Missing Google id_token.")
+
+    email = name = sub = avatar = ""
+    if not client_id:
+        if os.getenv("GOOGLE_AUTH_MOCK", "0").strip().lower() in ("1", "true", "yes"):
+            if token.startswith("mock:"):
+                parts = token.split(":", 2)
+                email = parts[1] if len(parts) > 1 else "pilot@example.com"
+                name = parts[2] if len(parts) > 2 else "Investor Pilot"
+            else:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Google Sign-In not configured. Use Supabase Google or set GOOGLE_CLIENT_ID.",
+                )
+        else:
+            raise HTTPException(
+                status_code=503,
+                detail="Google Sign-In not configured. Enable Google in Supabase Auth, or set GOOGLE_CLIENT_ID.",
+            )
+    else:
+        try:
+            from google.oauth2 import id_token as google_id_token
+            from google.auth.transport import requests as google_requests
+
+            idinfo = google_id_token.verify_oauth2_token(
+                token, google_requests.Request(), client_id
+            )
+            email = (idinfo.get("email") or "").strip().lower()
+            name = (idinfo.get("name") or idinfo.get("given_name") or "").strip()
+            sub = idinfo.get("sub") or ""
+            avatar = idinfo.get("picture") or ""
+            if not idinfo.get("email_verified", True):
+                raise HTTPException(status_code=401, detail="Google email not verified.")
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=401, detail=f"Invalid Google token: {e}")
+
+    user, session = login_or_register_google(email, name, google_sub=sub, avatar_url=avatar)
+    snap = await get_usage_snapshot(user.id, user)
+    profile = ensure_profile(user.id, name=user.display_name, email=user.email, avatar_url=avatar)
+    return {
+        "status": "success",
+        "token": session,
+        "user": _user_public(user, snap),
+        "profile": profile,
+        **snap,
+    }
+
+
+class SupabaseAuthBody(BaseModel):
+    access_token: str
+
+
+@app.post("/api/auth/supabase")
+async def auth_supabase(body: SupabaseAuthBody):
+    """
+    Preferred path when Google is enabled in Supabase:
+    Frontend: supabase.auth.signInWithOAuth({ provider: 'google' })
+    Then POST the session access_token here → Engine session.
+    """
+    su = await fetch_supabase_user(body.access_token)
+    user, session = login_or_register_google(
+        su["email"],
+        su.get("name") or "",
+        google_sub=str(su.get("id") or ""),
+        avatar_url=su.get("avatar_url") or "",
+        auth_provider="supabase_google" if su.get("provider") in ("google", "supabase") else "supabase",
+    )
+    try:
+        await optional_sync_app_user_row(su, user.plan_id or "spark")
+    except Exception:
+        pass
+    snap = await get_usage_snapshot(user.id, user)
+    profile = ensure_profile(
+        user.id,
+        name=user.display_name,
+        email=user.email,
+        avatar_url=su.get("avatar_url") or "",
+    )
+    return {
+        "status": "success",
+        "token": session,
+        "user": _user_public(user, snap),
+        "profile": profile,
+        "auth_via": "supabase",
+        **snap,
+    }
+
+
+@app.get("/api/auth/providers")
+async def auth_providers():
+    """Tell the UI which Google path is available."""
+    return {
+        "status": "success",
+        "supabase": supabase_configured(),
+        "google_gis": bool((os.getenv("GOOGLE_CLIENT_ID") or "").strip()),
+        "google_mock": os.getenv("GOOGLE_AUTH_MOCK", "0").strip().lower() in ("1", "true", "yes"),
+        "preferred": "supabase" if supabase_configured() else ("gis" if (os.getenv("GOOGLE_CLIENT_ID") or "").strip() else "password"),
     }
 
 
@@ -605,34 +771,192 @@ async def auth_reset(body: ResetBody):
 
 @app.get("/api/me")
 async def me(user: AppUser = Depends(require_founding_user)):
-    """Profile + today's remaining fair-use quotas."""
-    snap = await get_usage_snapshot(user.id)
+    """Profile + plan quotas + credits + promo + rich artist profile."""
+    try:
+        ensure_monthly_grant(user.id, user.plan_id or "spark", active_multiplier(user.id))
+    except Exception:
+        pass
+    snap = await get_usage_snapshot(user.id, user)
+    profile = ensure_profile(user.id, name=user.display_name, email=user.email)
+    try:
+        profile = recompute_stats_from_usage(user.id) or profile
+    except Exception:
+        pass
     return {
         "status": "success",
         "user": {
-            "id": user.id,
-            "email": user.email,
-            "display_name": user.display_name,
-            "avatar_url": user.avatar_url,
-            "role": user.role,
+            **_user_public(user, snap),
+            "avatar_url": profile.get("avatar_url") or user.avatar_url,
             "status": user.status,
-            "badge": "Admin" if user.role == "admin" else "Member",
         },
+        "profile": profile,
         **snap,
+    }
+
+
+@app.get("/api/profile")
+async def api_get_profile(user: AppUser = Depends(require_founding_user)):
+    profile = ensure_profile(user.id, name=user.display_name, email=user.email)
+    try:
+        profile = recompute_stats_from_usage(user.id) or profile
+    except Exception:
+        pass
+    return {"status": "success", "profile": profile}
+
+
+@app.put("/api/profile")
+async def api_put_profile(request: Request, user: AppUser = Depends(require_founding_user)):
+    body = await request.json()
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=400, detail="Expected JSON object.")
+    existing = get_profile(user.id) or {}
+    merged = {**existing, **body}
+    saved = save_profile(user.id, merged)
+    return {"status": "success", "profile": saved}
+
+
+@app.post("/api/admin/seed-demo")
+async def admin_seed_demo(user: AppUser = Depends(require_founding_user)):
+    """Seed rich demo artists (Nova, Kiln, Sierra) for investor walkthrough."""
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only.")
+    init_profile_tables()
+    artists = seed_demo_artists()
+    return {
+        "status": "success",
+        "seeded": artists,
+        "login_hint": "Password for all demo accounts: DemoArtist1!",
     }
 
 
 @app.get("/api/usage")
 async def usage(user: AppUser = Depends(require_founding_user)):
-    snap = await get_usage_snapshot(user.id)
+    snap = await get_usage_snapshot(user.id, user)
     return {"status": "success", **snap}
+
+
+@app.get("/api/plans")
+async def api_plans():
+    """Public pricing catalog."""
+    return {
+        "status": "success",
+        "plans": list_plans_public(),
+        "credit_packs": [
+            {"id": k, **v} for k, v in CREDIT_PACKS.items()
+        ],
+        "credit_costs": {
+            "master": credit_cost("master"),
+            "stems": credit_cost("stems"),
+            "oracle": credit_cost("oracle"),
+            "scout": credit_cost("scout"),
+            "pitch": credit_cost("pitch"),
+            "contract": credit_cost("contract"),
+        },
+    }
+
+
+class PromoBody(BaseModel):
+    code: str
+
+
+@app.post("/api/promo/redeem")
+async def api_promo_redeem(body: PromoBody, user: AppUser = Depends(require_founding_user)):
+    result = redeem_promo(user.id, body.code)
+    snap = await get_usage_snapshot(user.id, user)
+    return {**result, **snap}
+
+
+class CheckoutBody(BaseModel):
+    mode: str = "subscription"  # subscription | payment
+    plan_id: Optional[str] = None
+    pack_id: Optional[str] = None
+    interval: str = "month"
+
+
+@app.post("/api/billing/checkout")
+async def api_billing_checkout(body: CheckoutBody, user: AppUser = Depends(require_founding_user)):
+    return create_checkout_session(
+        user.id,
+        user.email,
+        mode=body.mode,
+        plan_id=body.plan_id,
+        pack_id=body.pack_id,
+        interval=body.interval,
+    )
+
+
+@app.get("/api/billing/summary")
+async def api_billing_summary(user: AppUser = Depends(require_founding_user)):
+    snap = await get_usage_snapshot(user.id, user)
+    return {
+        "status": "success",
+        "plan_id": snap.get("plan_id"),
+        "plan": snap.get("plan"),
+        "credits": snap.get("credits"),
+        "promo": snap.get("promo"),
+        "packs": [{"id": k, **v} for k, v in CREDIT_PACKS.items()],
+    }
+
+
+@app.post("/api/stripe/webhook")
+async def api_stripe_webhook(request: Request):
+    payload = await request.body()
+    sig = request.headers.get("stripe-signature")
+    return handle_stripe_webhook(payload, sig)
 
 
 @app.get("/api/admin/users")
 async def admin_users(user: AppUser = Depends(require_founding_user)):
     if user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin only.")
-    return {"status": "success", "users": list_users_admin()}
+    return {"status": "success", "users": list_users_admin(), "promo": promo_stats()}
+
+
+class AdminCreditBody(BaseModel):
+    user_id: str
+    delta: int
+    reason: str = "adjustment"
+
+
+@app.post("/api/admin/credits")
+async def admin_credits(body: AdminCreditBody, user: AppUser = Depends(require_founding_user)):
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only.")
+    bal = admin_adjust_credits(user.id, body.user_id, body.delta, body.reason)
+    return {"status": "success", "balance": bal}
+
+
+class AdminPlanBody(BaseModel):
+    user_id: str
+    plan_id: str
+
+
+@app.post("/api/admin/plan")
+async def admin_plan(body: AdminPlanBody, user: AppUser = Depends(require_founding_user)):
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only.")
+    admin_set_plan(body.user_id, body.plan_id)
+    return {"status": "success", "plan_id": body.plan_id}
+
+
+class AdminNoteBody(BaseModel):
+    user_id: str
+    body: str
+
+
+@app.post("/api/admin/notes")
+async def admin_notes(body: AdminNoteBody, user: AppUser = Depends(require_founding_user)):
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only.")
+    note = admin_add_note(user.id, body.user_id, body.body)
+    return {"status": "success", "note": note}
+
+
+@app.get("/api/admin/promo")
+async def admin_promo(user: AppUser = Depends(require_founding_user)):
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only.")
+    return {"status": "success", **promo_stats()}
 
 # ---------------------------------------------------------------------------
 # PILLAR 1.5: AGENT MEMORY (Cognee Graph DB — optional subsystem)
@@ -1194,8 +1518,34 @@ async def master_audio(
     user: AppUser = Depends(require_founding_user),
 ):
     print(f"[AUDIO CORE] Ingesting mastering request. Target: {target.filename} user={user.email}")
+    # Plan feature: reference matching
+    if reference is not None and user.role != "admin":
+        try:
+            plan = effective_plan_for_user(user.id)
+            if not feature_allowed(plan, "reference_master"):
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "feature_locked",
+                        "action": "reference_master",
+                        "message": "Reference match mastering requires Creator or higher. Use Pure mode or upgrade.",
+                        "upgrade_hint": "creator",
+                    },
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            pass
     await assert_quota(user, "master")
-    acquire_master_slot(user.id)
+    concurrent = 1
+    try:
+        plan = effective_plan_for_user(user.id)
+        concurrent = int(plan.get("concurrent_masters") or 1)
+        if user.role == "admin":
+            concurrent = 99
+    except Exception:
+        pass
+    acquire_master_slot(user.id, max_concurrent=concurrent)
 
     os.makedirs("temp", exist_ok=True)
     job_id = str(int(time.time()))
@@ -1715,23 +2065,60 @@ Return JSON: {{
 
 @app.get("/api/crm/state")
 async def crm_state(user: AppUser = Depends(require_founding_user)):
+    max_leads = 10
+    try:
+        plan = effective_plan_for_user(user.id)
+        max_leads = int(plan.get("max_lead_count") or 10)
+    except Exception:
+        pass
     return {
         "status": "success",
         "leads": list_leads(user.id),
         "pitches": list_pitches(user.id),
         "activity": list_activity(user.id),
+        "tasks": list_tasks(user.id),
+        "stages": list(PIPELINE_STAGES),
+        "lead_count": count_leads(user.id),
+        "max_leads": max_leads if user.role != "admin" else 99999,
     }
+
+
+def _assert_lead_capacity(user: AppUser, adding: int = 1) -> None:
+    if user.role == "admin":
+        return
+    try:
+        plan = effective_plan_for_user(user.id)
+        max_leads = int(plan.get("max_lead_count") or 10)
+    except Exception:
+        max_leads = 10
+    current = count_leads(user.id)
+    if current + adding > max_leads:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "lead_cap",
+                "message": f"CRM lead cap reached ({current}/{max_leads}). Upgrade plan or remove leads.",
+                "upgrade_hint": "pro",
+            },
+        )
 
 
 @app.post("/api/crm/leads")
 async def crm_upsert_lead(body: CrmLeadBody, user: AppUser = Depends(require_founding_user)):
-    lead = upsert_lead(user.id, body.model_dump(exclude_none=True))
+    data = body.model_dump(exclude_none=True)
+    # Only count capacity for new leads
+    lid = data.get("id")
+    if not lid:
+        _assert_lead_capacity(user, 1)
+    lead = upsert_lead(user.id, data)
     return {"status": "success", "lead": lead}
 
 
 @app.post("/api/crm/leads/bulk")
 async def crm_bulk(body: CrmImportBody, user: AppUser = Depends(require_founding_user)):
-    leads = bulk_upsert_leads(user.id, body.leads or [])
+    incoming = body.leads or []
+    _assert_lead_capacity(user, len(incoming))
+    leads = bulk_upsert_leads(user.id, incoming)
     return {"status": "success", "count": len(leads), "leads": leads}
 
 
@@ -1763,6 +2150,22 @@ async def crm_pitch(body: CrmPitchBody, user: AppUser = Depends(require_founding
 
 @app.get("/api/crm/export")
 async def crm_export(user: AppUser = Depends(require_founding_user)):
+    if user.role != "admin":
+        try:
+            plan = effective_plan_for_user(user.id)
+            if not feature_allowed(plan, "crm_export"):
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "feature_locked",
+                        "message": "CRM export requires Creator or higher.",
+                        "upgrade_hint": "creator",
+                    },
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            pass
     return {"status": "success", **export_all(user.id)}
 
 
@@ -1770,6 +2173,37 @@ async def crm_export(user: AppUser = Depends(require_founding_user)):
 async def crm_import(body: CrmImportBody, user: AppUser = Depends(require_founding_user)):
     result = import_all(user.id, body.model_dump())
     return {"status": "success", **result}
+
+
+class CrmTaskBody(BaseModel):
+    body: str
+    lead_id: Optional[str] = None
+    due_at: Optional[float] = None
+
+
+@app.get("/api/crm/tasks")
+async def crm_tasks(user: AppUser = Depends(require_founding_user)):
+    return {"status": "success", "tasks": list_tasks(user.id, include_done=True)}
+
+
+@app.post("/api/crm/tasks")
+async def crm_add_task(body: CrmTaskBody, user: AppUser = Depends(require_founding_user)):
+    if not (body.body or "").strip():
+        raise HTTPException(status_code=400, detail="Task body required.")
+    task = add_task(user.id, body.body, body.lead_id, body.due_at)
+    try:
+        add_activity(user.id, "task", f"Task · {body.body[:60]}", "ember")
+    except Exception:
+        pass
+    return {"status": "success", "task": task}
+
+
+@app.patch("/api/crm/tasks/{task_id}")
+async def crm_task_done(task_id: str, done: bool = True, user: AppUser = Depends(require_founding_user)):
+    ok = set_task_done(user.id, task_id, done)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"status": "success"}
 
 
 if __name__ == "__main__":

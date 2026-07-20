@@ -58,10 +58,20 @@ class AppUser:
     avatar_url: str = ""
     role: str = "member"  # member | admin
     status: str = "active"
+    plan_id: str = "spark"
+    promo_multiplier: int = 1
+    promo_expires_at: Optional[float] = None
+    auth_provider: str = "password"
+    cohort_tags: str = ""
+    stripe_customer_id: str = ""
 
     @property
     def is_allowed(self) -> bool:
         return self.status == "active" and self.role in ("member", "admin", "founding_member")
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role == "admin"
 
 
 def auth_configured() -> bool:
@@ -121,6 +131,20 @@ def init_db() -> None:
             _seed_admin(con)
         finally:
             con.close()
+    # Billing / plan columns + tables (safe re-run)
+    try:
+        from billing import ensure_user_billing_columns, init_billing_tables
+
+        ensure_user_billing_columns()
+        init_billing_tables()
+    except Exception as e:
+        print(f"[AUTH] Billing init deferred: {e}")
+    try:
+        from user_profiles import init_profile_tables
+
+        init_profile_tables()
+    except Exception as e:
+        print(f"[AUTH] Profile tables deferred: {e}")
 
 
 def _hash_password(password: str) -> str:
@@ -168,14 +192,32 @@ def _seed_admin(con: sqlite3.Connection) -> None:
     print(f"[AUTH] Admin account created: {email}")
 
 
+def _row_get(row: sqlite3.Row, key: str, default: Any = None) -> Any:
+    try:
+        keys = row.keys()
+        if key not in keys:
+            return default
+        val = row[key]
+        return default if val is None else val
+    except Exception:
+        return default
+
+
 def _row_user(row: sqlite3.Row) -> AppUser:
+    role = row["role"] if row["role"] != "founding_member" else "member"
     return AppUser(
         id=row["id"],
         email=row["email"],
         display_name=row["name"],
         avatar_url="",
-        role=row["role"] if row["role"] != "founding_member" else "member",
+        role=role,
         status=row["status"],
+        plan_id=str(_row_get(row, "plan_id", "spark") or "spark"),
+        promo_multiplier=int(_row_get(row, "promo_multiplier", 1) or 1),
+        promo_expires_at=_row_get(row, "promo_expires_at"),
+        auth_provider=str(_row_get(row, "auth_provider", "password") or "password"),
+        cohort_tags=str(_row_get(row, "cohort_tags", "") or ""),
+        stripe_customer_id=str(_row_get(row, "stripe_customer_id", "") or ""),
     )
 
 
@@ -200,15 +242,28 @@ def register_user(name: str, email: str, password: str) -> tuple[AppUser, str]:
             uid = secrets.token_hex(16)
             now = datetime.now(timezone.utc).isoformat()
             con.execute(
-                "INSERT INTO users (id, email, name, password_hash, role, status, created_at) VALUES (?,?,?,?,?,?,?)",
-                (uid, email, name, _hash_password(password), "member", "active", now),
+                "INSERT INTO users (id, email, name, password_hash, role, status, created_at, plan_id, auth_provider) VALUES (?,?,?,?,?,?,?,?,?)",
+                (uid, email, name, _hash_password(password), "member", "active", now, "spark", "password"),
             )
             token = _create_session(con, uid)
             con.commit()
-            user = AppUser(id=uid, email=email, display_name=name, role="member", status="active")
-            return user, token
+            user = AppUser(id=uid, email=email, display_name=name, role="member", status="active", plan_id="spark")
         finally:
             con.close()
+    # Outside lock — billing uses same lock
+    try:
+        from billing import bootstrap_new_user_billing
+
+        bootstrap_new_user_billing(user.id)
+    except Exception as e:
+        print(f"[AUTH] bootstrap billing: {e}")
+    try:
+        from user_profiles import ensure_profile
+
+        ensure_profile(user.id, name=name, email=email)
+    except Exception as e:
+        print(f"[AUTH] profile bootstrap: {e}")
+    return user, token
 
 
 def login_user(email: str, password: str) -> tuple[AppUser, str]:
@@ -218,7 +273,8 @@ def login_user(email: str, password: str) -> tuple[AppUser, str]:
         con = _conn()
         try:
             row = con.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
-            if not row or not _check_password(password, row["password_hash"]):
+            ph = row["password_hash"] if row else ""
+            if not row or not ph or ph.startswith("!") or not _check_password(password, ph):
                 raise HTTPException(status_code=401, detail="Invalid email or password.")
             if row["status"] != "active":
                 raise HTTPException(status_code=403, detail="Account is suspended.")
@@ -228,9 +284,95 @@ def login_user(email: str, password: str) -> tuple[AppUser, str]:
                 (datetime.now(timezone.utc).isoformat(), row["id"]),
             )
             con.commit()
-            return _row_user(row), token
+            user = _row_user(row)
         finally:
             con.close()
+    try:
+        from billing import ensure_monthly_grant, active_multiplier
+
+        ensure_monthly_grant(user.id, user.plan_id or "spark", active_multiplier(user.id))
+    except Exception:
+        pass
+    return user, token
+
+
+def login_or_register_google(
+    email: str,
+    name: str,
+    *,
+    google_sub: str = "",
+    avatar_url: str = "",
+    auth_provider: str = "google",
+) -> tuple[AppUser, str]:
+    """Upsert user from verified Google / Supabase identity; issue session token."""
+    email = (email or "").strip().lower()
+    name = (name or email.split("@")[0] or "Artist").strip()
+    provider = (auth_provider or "google").strip() or "google"
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Google account has no email.")
+
+    is_new = False
+    with _db_lock:
+        con = _conn()
+        try:
+            row = con.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+            now = datetime.now(timezone.utc).isoformat()
+            if row:
+                if row["status"] != "active":
+                    raise HTTPException(status_code=403, detail="Account is suspended.")
+                con.execute(
+                    "UPDATE users SET last_login_at = ?, auth_provider = ?, name = CASE WHEN name = '' OR name IS NULL THEN ? ELSE name END WHERE id = ?",
+                    (now, provider, name, row["id"]),
+                )
+                token = _create_session(con, row["id"])
+                con.commit()
+                user = _row_user(
+                    con.execute("SELECT * FROM users WHERE id = ?", (row["id"],)).fetchone()
+                )
+            else:
+                is_new = True
+                uid = secrets.token_hex(16)
+                # Unusable password hash for OAuth-only accounts
+                sentinel = f"!{provider}!{secrets.token_hex(16)}"
+                con.execute(
+                    """
+                    INSERT INTO users
+                    (id, email, name, password_hash, role, status, created_at, last_login_at, plan_id, auth_provider)
+                    VALUES (?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (uid, email, name, sentinel, "member", "active", now, now, "spark", provider),
+                )
+                token = _create_session(con, uid)
+                con.commit()
+                user = AppUser(
+                    id=uid,
+                    email=email,
+                    display_name=name,
+                    role="member",
+                    status="active",
+                    plan_id="spark",
+                    auth_provider=provider,
+                )
+        finally:
+            con.close()
+    try:
+        from billing import bootstrap_new_user_billing, ensure_monthly_grant, active_multiplier
+
+        if is_new:
+            bootstrap_new_user_billing(user.id)
+        else:
+            ensure_monthly_grant(user.id, user.plan_id or "spark", active_multiplier(user.id))
+    except Exception as e:
+        print(f"[AUTH] oauth billing: {e}")
+    try:
+        from user_profiles import ensure_profile, get_profile, save_profile
+
+        prof = ensure_profile(user.id, name=name, email=email, avatar_url=avatar_url or "")
+        if avatar_url and not (prof or {}).get("avatar_url"):
+            save_profile(user.id, {**(prof or {}), "avatar_url": avatar_url})
+    except Exception as e:
+        print(f"[AUTH] oauth profile: {e}")
+    return user, token
 
 
 def _create_session(con: sqlite3.Connection, user_id: str) -> str:
@@ -294,19 +436,24 @@ def user_from_token(token: str) -> Optional[AppUser]:
 
 
 def list_users_admin() -> list[dict[str, Any]]:
-    with _db_lock:
-        con = _conn()
-        try:
-            rows = con.execute(
-                "SELECT id, email, name, role, status, created_at, last_login_at FROM users ORDER BY created_at DESC"
-            ).fetchall()
-            return [dict(r) for r in rows]
-        finally:
-            con.close()
+    try:
+        from billing import admin_list_users_rich
+
+        return admin_list_users_rich()
+    except Exception:
+        with _db_lock:
+            con = _conn()
+            try:
+                rows = con.execute(
+                    "SELECT id, email, name, role, status, created_at, last_login_at FROM users ORDER BY created_at DESC"
+                ).fetchall()
+                return [dict(r) for r in rows]
+            finally:
+                con.close()
 
 
 # ---------------------------------------------------------------------------
-# Quotas
+# Quotas (plan-aware + credits)
 # ---------------------------------------------------------------------------
 
 def _utc_day_start_ts() -> float:
@@ -349,52 +496,175 @@ async def record_usage(user_id: str, action: str, meta: Optional[dict] = None) -
             con.close()
 
 
-async def get_usage_snapshot(user_id: str) -> dict[str, Any]:
+def _effective_daily_limits(user: AppUser) -> dict[str, int]:
+    """Plan daily limits with promo multiplier. Admin → huge caps."""
+    if user.role == "admin":
+        return {k: 99999 for k in ("master", "stems", "oracle", "scout", "pitch", "contract")}
+    try:
+        from billing import effective_plan_for_user, ensure_monthly_grant, active_multiplier
+
+        ensure_monthly_grant(user.id, user.plan_id or "spark", active_multiplier(user.id))
+        plan = effective_plan_for_user(user.id)
+        daily = dict(plan.get("daily") or {})
+        # Keep any legacy keys from DAILY_LIMITS defaults
+        for k in DAILY_LIMITS:
+            daily.setdefault(k, DAILY_LIMITS[k])
+        return {k: int(v) for k, v in daily.items()}
+    except Exception:
+        return dict(DAILY_LIMITS)
+
+
+async def get_usage_snapshot(user_id: str, user: Optional[AppUser] = None) -> dict[str, Any]:
+    if user is None:
+        # minimal shell for limits
+        user = AppUser(id=user_id, email="", plan_id="spark")
+        try:
+            from billing import get_user_plan_id, active_multiplier
+
+            user.plan_id = get_user_plan_id(user_id)
+            user.promo_multiplier = active_multiplier(user_id)
+        except Exception:
+            pass
+
+    limits = _effective_daily_limits(user)
     usage = {}
-    for action, limit in DAILY_LIMITS.items():
+    for action, limit in limits.items():
         used = await count_usage_today(user_id, action)
         usage[action] = {"used": used, "limit": limit, "remaining": max(0, limit - used)}
+
+    credits = {"balance": 0, "period_grant": 0, "period_key": None}
+    promo = None
+    plan_id = user.plan_id or "spark"
+    try:
+        from billing import get_credits_snapshot, get_user_promo, get_user_plan_id, effective_plan_for_user
+
+        credits = get_credits_snapshot(user_id)
+        promo = get_user_promo(user_id)
+        plan_id = get_user_plan_id(user_id)
+        plan = effective_plan_for_user(user_id)
+    except Exception:
+        plan = {"id": plan_id, "name": plan_id, "monthly_credits": 0, "features": {}, "max_lead_count": 10, "max_scout_cities": 1}
+
+    badge = "Admin" if user.role == "admin" else (plan.get("name") or "Spark")
+    if promo:
+        badge = f"{badge} · Pilot"
+
     return {
         "usage": usage,
         "resets_in_seconds": _seconds_until_reset(),
-        "limits": DAILY_LIMITS,
+        "limits": limits,
+        "credits": credits,
+        "promo": promo,
+        "plan": {
+            "id": plan.get("id") or plan_id,
+            "name": plan.get("name") or plan_id,
+            "monthly_credits": plan.get("monthly_credits"),
+            "max_lead_count": plan.get("max_lead_count"),
+            "max_scout_cities": plan.get("max_scout_cities"),
+            "features": plan.get("features") or {},
+            "concurrent_masters": plan.get("concurrent_masters", 1),
+            "max_track_minutes": plan.get("max_track_minutes", 15),
+        },
+        "plan_id": plan_id,
+        "credit_costs": {
+            "master": 15,
+            "stems": 20,
+            "oracle": 5,
+            "scout": 8,
+            "pitch": 3,
+            "contract": 12,
+        },
     }
 
 
-async def assert_quota(user: AppUser, action: str) -> dict[str, Any]:
-    if action not in DAILY_LIMITS:
-        return {}
-    # Admins unlimited
+async def assert_quota(user: AppUser, action: str, *, spend: bool = True) -> dict[str, Any]:
+    """
+    Enforce daily plan limits + credit balance.
+    When spend=True (default), deduct credits for the action cost.
+    """
+    from entitlements import credit_cost, feature_allowed, QUOTA_ACTIONS
+
     if user.role == "admin":
-        return {}
-    used = await count_usage_today(user.id, action)
-    limit = DAILY_LIMITS[action]
-    if used >= limit:
+        return {"admin": True}
+
+    # Feature gates for zero-cap actions
+    try:
+        from billing import effective_plan_for_user
+
+        plan = effective_plan_for_user(user.id)
+    except Exception:
+        plan = {"daily": DAILY_LIMITS, "features": {}}
+
+    if action == "stems" and not feature_allowed(plan, "stems"):
         raise HTTPException(
-            status_code=429,
+            status_code=403,
             detail={
-                "error": "quota_exceeded",
+                "error": "feature_locked",
                 "action": action,
-                "used": used,
-                "limit": limit,
-                "resets_in_seconds": _seconds_until_reset(),
-                "message": (
-                    f"Daily limit for {action} reached ({used}/{limit}). "
-                    f"Resets in {_seconds_until_reset() // 3600}h."
-                ),
+                "message": "Stem separation requires Creator or higher.",
+                "upgrade_hint": "creator",
             },
         )
-    return {"used": used, "limit": limit, "remaining": limit - used}
+
+    limits = _effective_daily_limits(user)
+    if action in limits or action in QUOTA_ACTIONS:
+        limit = int(limits.get(action, 0))
+        used = await count_usage_today(user.id, action)
+        if limit <= 0:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "error": "feature_locked",
+                    "action": action,
+                    "used": used,
+                    "limit": limit,
+                    "message": f"{action} is not included on your plan. Upgrade to unlock.",
+                    "upgrade_hint": "creator",
+                },
+            )
+        if used >= limit:
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "error": "quota_exceeded",
+                    "action": action,
+                    "used": used,
+                    "limit": limit,
+                    "resets_in_seconds": _seconds_until_reset(),
+                    "message": (
+                        f"Daily limit for {action} reached ({used}/{limit}). "
+                        f"Resets in {_seconds_until_reset() // 3600}h — or buy credits / upgrade."
+                    ),
+                    "upgrade_hint": "pro",
+                },
+            )
+    else:
+        used = 0
+        limit = limits.get(action, 0)
+
+    cost = credit_cost(action)
+    if spend and cost > 0:
+        try:
+            from billing import spend_credits
+
+            spend_credits(user.id, cost, action, "usage", action)
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"[QUOTA] credit spend error: {e}")
+
+    return {"used": used, "limit": limit, "remaining": max(0, limit - used - 1), "credits_spent": cost if spend else 0}
 
 
-def acquire_master_slot(user_id: str) -> None:
+def acquire_master_slot(user_id: str, max_concurrent: Optional[int] = None) -> None:
+    cap = max_concurrent if max_concurrent is not None else MAX_CONCURRENT_MASTERS
     with _mem_lock:
-        if _active_masters[user_id] >= MAX_CONCURRENT_MASTERS:
+        if _active_masters[user_id] >= cap:
             raise HTTPException(
                 status_code=429,
                 detail={
                     "error": "concurrent_limit",
-                    "message": "One master at a time. Wait for the current job to finish.",
+                    "message": "Master slot limit reached. Wait for the current job to finish.",
                 },
             )
         _active_masters[user_id] += 1

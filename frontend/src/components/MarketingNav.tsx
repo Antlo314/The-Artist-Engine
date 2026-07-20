@@ -49,6 +49,17 @@ export default function MarketingNav() {
                     Architecture
                 </button>
 
+                <button
+                    onClick={() => navigate('/pricing')}
+                    className={`hidden sm:block font-mono text-xs tracking-widest uppercase transition-colors ${
+                        location.pathname === '/pricing'
+                            ? 'text-ink-50 font-bold'
+                            : 'text-ink-400 hover:text-ink-50'
+                    }`}
+                >
+                    Pricing
+                </button>
+
                 <ThemeToggle />
 
                 <button
