@@ -1,56 +1,66 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Check, X, Radar, Scale, AudioWaveform, Swords } from 'lucide-react';
+import { ArrowRight, Check, X, Radar, Scale, AudioWaveform, Handshake, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MarketingNav from '../components/MarketingNav';
 import { useSmoothScroll } from '../lib/useSmoothScroll';
 
 /* ============================================================
-   FEATURES — "SOVEREIGN PLAYBOOK" (Design System v2)
-   All claims below are accurate to the shipped product.
+   FEATURES — the five rooms, in plain language.
+   Every claim below is accurate to the shipped product.
 ============================================================ */
 
 const FEATURES = [
     {
         icon: Radar,
         accent: 'var(--color-radar)',
-        title: 'GIG RADAR ARRAY',
-        tagline: 'Verified rooms. Not rumors.',
-        desc: 'The Radar pulls live ticketing data to find venues actively booking your genre — real rooms with real upcoming shows, not scraped lists or stale directories. An AI strategy layer then prices every target: payout structure, artist-fairness reputation, booking lead time, and the leverage angle for your pitch.',
+        title: 'FIND GIGS',
+        tagline: 'Real venues. Not rumors.',
+        desc: 'Tell it your city, your genre, and how big a room you want to play. It searches live ticketing data for venues actually booking music like yours right now — not a scraped list or a stale directory. Then it adds what each room is likely to pay, who to talk to, and how far ahead they book.',
         bullets: [
-            'Live Ticketmaster event data — every target verified active',
-            'Reputation scores + payout models on every venue',
-            'Leverage angles referencing real upcoming dates',
-            'One-tap pitch drafts: email, call script, or DM (~2s)',
-            'Full venue scan measured ~8s on production',
+            'Live ticketing data — venues marked "verified" are really selling tickets',
+            'A plain-English read on how each venue pays and treats artists',
+            'A contact name or booking link wherever we can find one',
+            'Every venue is saved to your pipeline so nothing gets lost',
+            'A full search takes about 8 seconds',
         ],
         image: '/site/gig_radar_mockup.png',
     },
     {
-        icon: Swords,
+        icon: Handshake,
         accent: 'var(--color-shark)',
-        title: 'SHARK PROTOCOL',
-        tagline: 'Your negotiator never sleeps.',
-        desc: 'Trained on the predatory tactics promoters actually use, the Shark reads every offer, prices your leverage against the room, and drafts the counter before you lose momentum. Flat-fee lowballs, merch-cut grabs, and pay-to-play packages get named and countered — in your voice.',
+        title: 'PITCH & DEALS',
+        tagline: 'Ask for the gig. Understand the offer.',
+        desc: 'Your negotiation desk. Write a booking email, a call script, or a DM for any venue — carrying your bio, your city, and your streaming links automatically. Paste in an offer and get a plain-word read on what it actually costs you. Put two offers side by side and see which one treats you better.',
         bullets: [
-            'Offer decomposition against venue economics',
-            'Counters drafted in ~2s — email, call script, or DM',
-            'Tone-calibrated: firm, professional, no bridges burned',
-            'Paired with Radar intel for maximum leverage',
+            'Pitches drafted in about 2 seconds — email, call script, or DM',
+            'Send it your way: open in your mail app, download it, or just copy',
+            'Any offer read clause by clause, with a suggested way to push back',
+            'Two offers compared side by side, with a fairness score on each',
         ],
         image: null,
+        mock: {
+            label: 'An offer, read out loud',
+            lines: [
+                { tone: 'quiet', text: 'They offered: “Great exposure. $100 flat. You cover travel.”' },
+                { tone: 'warn', text: 'Heads up — “exposure” plus a flat fee below the going rate is a common lowball.' },
+                { tone: 'warn', text: 'This room holds 350 people at about $18 a ticket. That is roughly $6,300 through the door.' },
+                { tone: 'good', text: 'Suggested reply: ask for $350 guaranteed, plus 20% of the door after 150 tickets.' },
+            ],
+        },
         reverse: true,
     },
     {
         icon: AudioWaveform,
         accent: 'var(--color-audio)',
-        title: 'AUDIO MASTER CORE',
-        tagline: 'Platinum fidelity on command.',
-        desc: 'Drop your mix and a reference record. The Core matches RMS, EQ curve, loudness and stereo field to the reference with real DSP — then finishes through a Sub / Air / Snap / Width control stage and a true-peak limiter at streaming standard. The Oracle listens first and recommends the exact settings your mix needs.',
+        title: 'STUDIO',
+        tagline: 'Streaming-ready, in under a minute.',
+        desc: 'Upload a finished mix and the Studio masters it — balancing the tone, evening out the volume, and bringing it up to the loudness Spotify and Apple Music expect. It listens first and tells you in plain words what it would change. Optionally point it at a favorite record and it will aim for that sound.',
         bullets: [
-            'Reference-matched mastering engine (real DSP, not presets)',
-            'Oracle mix analysis in ~7s with recommended settings',
-            'True-peak limiting at −1.0 dBTP streaming standard',
-            'Full-song masters measured ~35s live',
+            'An honest read on your mix before you commit — about 7 seconds',
+            'Simple controls: more or less bass, sparkle, punch, width, warmth',
+            'Flip between your original and the master to hear exactly what changed',
+            'Split a song into vocals, drums, bass, and everything else',
+            'A full-song master takes about 35 seconds',
         ],
         image: '/site/neural_audio_mockup.png',
         reverse: false,
@@ -58,45 +68,71 @@ const FEATURES = [
     {
         icon: Scale,
         accent: 'var(--color-zion)',
-        title: 'ZION LEGAL SENTINEL',
-        tagline: 'Read the trap before you sign it.',
-        desc: 'Upload any contract — PDF, DOCX, or pasted text. Zion forensically dissects it clause by clause: recoupment traps, perpetual licensing grabs, delayed-payout games, and AI voice-cloning rights get flagged and translated into plain language, with the industry codex built in.',
+        title: 'CONTRACTS',
+        tagline: 'Know what it says before you sign it.',
+        desc: 'Upload a contract as a PDF, a Word file, or pasted text. It reads the whole thing clause by clause and flags the terms that commonly work against artists — signing away your recordings forever, paying the label back out of your own share, payouts that never quite arrive. Each one is explained in plain words.',
         bullets: [
-            'Clause-level predatory-language detection (~3s live)',
-            'PDF / DOCX / raw text ingestion',
-            'Plain-language translation of legalese',
-            '32-term industry codex + recoupment sandbox',
+            'A full scan in about 3 seconds; a free instant check with no AI at all',
+            'A fairness score, plus what each risky clause means for you',
+            'A dictionary of 32 music-business terms, written for humans',
+            'Work out how long an advance really takes to pay back',
+            'Make a split sheet so songwriting royalties reach the right people',
         ],
         image: '/site/zion_defense_mockup.png',
         reverse: true,
+    },
+    {
+        icon: Users,
+        accent: 'var(--color-ember-500)',
+        title: 'ROSTER',
+        tagline: 'Everyone you know, in one place.',
+        desc: 'Your address book and to-do list. Every venue you find lands here as a lead you can move from found, to pitched, to talking, to booked. Add the booker you met at a show by hand. Keep a task list tied to specific venues. And build a press kit from your public releases when someone asks for one.',
+        bullets: [
+            'A four-stage pipeline that reflects what is really happening',
+            'Add your own contacts — not everything comes from a search',
+            'A to-do list you can tie to a specific venue',
+            'A press kit built from your public releases and cover art',
+            'Export everything as a spreadsheet or a backup file, any time',
+        ],
+        image: null,
+        mock: {
+            label: 'Your pipeline, honestly',
+            lines: [
+                { tone: 'quiet', text: 'Found — The Echo Room, Atlanta · 350 cap' },
+                { tone: 'quiet', text: 'Pitched — Blue Room, Nashville · emailed Tuesday' },
+                { tone: 'warn', text: 'Talking — The Hall, Charlotte · they asked for a date' },
+                { tone: 'good', text: 'Booked — Bell House, Richmond · March 14' },
+            ],
+        },
+        reverse: false,
     },
 ];
 
 const COMPARISON = [
     {
-        capability: 'Booking Intelligence',
-        old: 'Manual research, cold emails, stale contact lists',
-        engine: 'Live-verified venues + AI leverage intel + drafted pitches',
+        capability: 'Finding shows',
+        old: 'Googling venues, cold emails, contact lists from 2019',
+        engine: 'Live-verified venues, what they pay, and who to ask',
     },
     {
-        capability: 'Legal Defense',
-        old: '$450/hr retainer attorney, days of turnaround',
-        engine: 'Forensic contract scan in ~3s, plain-language flags',
+        capability: 'Reading contracts',
+        old: '$450/hr lawyer, days of waiting, still confusing',
+        engine: 'A plain-language read in about 3 seconds',
     },
     {
         capability: 'Mastering',
         old: '$100–500 per track, weeks of back-and-forth',
-        engine: 'Reference-matched full master in ~35s live',
+        engine: 'A streaming-ready master in about 35 seconds',
     },
     {
-        capability: 'Negotiation',
+        capability: 'Negotiating',
         old: 'Take the offer or lose the room',
-        engine: 'Every offer decomposed and countered in ~2–3s',
+        engine: 'Every offer explained, with a reply drafted for you',
     },
     {
-        capability: 'Revenue Split',
-        old: '15–20% to management, forever',
-        engine: '100% yours. The Engine takes nothing.',
+        capability: 'What it costs you',
+        old: '15–20% of everything, to management, forever',
+        engine: 'A flat plan. You keep 100% of your money and masters.',
     },
 ];
 
@@ -124,15 +160,15 @@ export default function FeaturesPage() {
                     className="mb-28 md:mb-36"
                 >
                     <p className="font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-5">
-                        System architecture · v3
+                        Everything it does
                     </p>
                     <h1 className="text-cinema text-5xl md:text-7xl max-w-4xl mb-8">
-                        The sovereign<br />playbook.
+                        Five rooms.<br />One workspace.
                     </h1>
                     <p className="max-w-2xl text-ink-200 font-light leading-relaxed text-base md:text-lg">
-                        The Source Engine is an autonomous agency replacement — booking intelligence,
-                        negotiation, legal defense, and mastering in one system. No manager, no retainer,
-                        no percentage. You keep the masters and the money.
+                        Being an independent artist is five jobs at once: finding shows, finishing the music,
+                        asking for the money, reading the paperwork, and remembering who everyone is. The Source
+                        Engine does all five in one place — in plain language, with no manager taking a cut.
                     </p>
                 </motion.div>
 
@@ -161,19 +197,29 @@ export default function FeaturesPage() {
                                             />
                                         </div>
                                     ) : (
-                                        <div className="glass-obsidian glass-obsidian-hover rounded-2xl p-6 font-mono text-xs leading-relaxed">
-                                            <div className="flex items-center gap-2 mb-4">
-                                                <span className="h-2.5 w-2.5 rounded-full bg-ember-600" />
-                                                <span className="h-2.5 w-2.5 rounded-full bg-ink-700" />
-                                                <span className="h-2.5 w-2.5 rounded-full bg-ink-700" />
-                                                <span className="ml-3 text-ink-400 tracking-widest uppercase text-[9px]">shark_protocol.exe</span>
-                                            </div>
-                                            <p className="text-ink-400">&gt; INBOUND — “Exposure gig. $100 flat. You cover travel.”</p>
-                                            <p className="text-ember-400 mt-3">&gt; PATTERN MATCH: “exposure” + sub-market flat = predatory class 2.</p>
-                                            <p className="text-ember-400">&gt; ROOM ECONOMICS: 350 cap × $18 avg = $6,300 gross potential.</p>
-                                            <p className="text-ink-50 mt-3">&gt; COUNTER: $350 guarantee + 20% door after 150 heads. Sent.
-                                                <span className="inline-block w-2 h-4 bg-ember-500 ml-1 animate-pulse align-middle" />
+                                        <div className="glass-obsidian glass-obsidian-hover rounded-2xl p-6 md:p-7">
+                                            <p
+                                                className="text-[10px] tracking-[0.25em] uppercase mb-5"
+                                                style={{ color: feat.accent }}
+                                            >
+                                                {feat.mock?.label}
                                             </p>
+                                            <div className="space-y-3.5">
+                                                {(feat.mock?.lines || []).map((line) => (
+                                                    <p
+                                                        key={line.text}
+                                                        className={`text-sm leading-relaxed pl-3 border-l-2 ${
+                                                            line.tone === 'good'
+                                                                ? 'text-emerald-300 border-emerald-500/50'
+                                                                : line.tone === 'warn'
+                                                                ? 'text-ink-50 border-ember-500/60'
+                                                                : 'text-ink-300 border-white/10'
+                                                        }`}
+                                                    >
+                                                        {line.text}
+                                                    </p>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -210,17 +256,17 @@ export default function FeaturesPage() {
                     className="mt-28 md:mt-40 grid md:grid-cols-2 gap-6"
                 >
                     <div className="glass-obsidian rounded-2xl p-6 md:p-8">
-                        <p className="font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-3">Live free now</p>
-                        <h3 className="font-display text-2xl md:text-3xl text-ink-50 mb-4">Maxed open stack</h3>
+                        <p className="font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-3">Working today</p>
+                        <h3 className="font-display text-2xl md:text-3xl text-ink-50 mb-4">All of this is live</h3>
                         <ul className="space-y-2 text-sm text-ink-200">
                             {[
-                                'Matchering + meters + stem HPSS',
-                                'Ticketmaster + Bandsintown venue intel',
-                                'MusicBrainz / Cover Art EPK',
-                                'OpenStreetMap tour routing',
-                                'Contract linter + AI scan',
-                                'CRM + CSV/JSON + mailto pitches',
-                                'Auth, quotas, light/dark, PWA',
+                                'Mastering, loudness metering, and stem splitting',
+                                'Venue search across live ticketing and touring data',
+                                'Press kits built from public release data',
+                                'Tour routing that puts your cities in the right order',
+                                'Contract scanning — instant free check plus a full AI read',
+                                'Contacts, tasks, pipeline, and exports you own',
+                                'Accounts, fair daily limits, light and dark, installs like an app',
                             ].map((t) => (
                                 <li key={t} className="flex gap-2">
                                     <Check size={14} className="text-ember-500 shrink-0 mt-0.5" />
@@ -233,16 +279,17 @@ export default function FeaturesPage() {
                         <p className="font-mono text-[10px] tracking-[0.35em] text-ink-400 uppercase mb-3">Roadmap</p>
                         <h3 className="font-display text-2xl md:text-3xl text-ink-50 mb-4">Coming later</h3>
                         <p className="text-sm text-ink-400 mb-4 leading-relaxed">
-                            Not free today — we show them as future rails so investors see the full OS, not fake demos.
+                            Honest about what we have not built yet. These need paid services or partners, so we list
+                            them rather than fake them.
                         </p>
                         <ul className="space-y-2 text-sm text-ink-400">
                             {[
-                                'Streaming/social analytics suites (Chartmetric-class)',
-                                'E-sign + versioned contracts',
-                                'Bank / instant artist payouts',
-                                'Tracked multi-channel send + inbox',
-                                'Always-on neural stem GPU farm',
-                                'PRO registration + DSP distribution partners',
+                                'Your streaming and social numbers, all on one screen',
+                                'Signing contracts in the app, with version history',
+                                'Getting paid straight to your bank',
+                                'Sending pitches from here and tracking who replied',
+                                'Higher-quality stem splitting for every plan',
+                                'Registering songs with your PRO and sending music to stores',
                             ].map((t) => (
                                 <li key={t} className="flex gap-2">
                                     <span className="font-mono text-[9px] uppercase tracking-widest text-ink-500 shrink-0 mt-0.5">Soon</span>
@@ -262,17 +309,17 @@ export default function FeaturesPage() {
                     className="mt-32 md:mt-44"
                 >
                     <div className="mb-14">
-                        <p className="font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-4">The brutal reality</p>
+                        <p className="font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-4">The difference</p>
                         <h2 className="text-cinema text-4xl md:text-6xl">
-                            The old model,<br />retired.
+                            How this used to<br />work.
                         </h2>
                     </div>
 
                     <div className="glass-obsidian rounded-2xl overflow-hidden">
                         {/* Header row */}
                         <div className="hidden md:grid grid-cols-[1.2fr_2fr_2fr] border-b hairline">
-                            <div className="p-5 font-mono text-[10px] tracking-[0.3em] uppercase text-ink-400">Capability</div>
-                            <div className="p-5 font-mono text-[10px] tracking-[0.3em] uppercase text-ink-400 border-l hairline">Traditional agency</div>
+                            <div className="p-5 font-mono text-[10px] tracking-[0.3em] uppercase text-ink-400">The job</div>
+                            <div className="p-5 font-mono text-[10px] tracking-[0.3em] uppercase text-ink-400 border-l hairline">The old way</div>
                             <div className="p-5 font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 border-l hairline">The Source Engine</div>
                         </div>
                         {COMPARISON.map((row, i) => (
@@ -304,7 +351,7 @@ export default function FeaturesPage() {
                 >
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full bg-ember-600/10 blur-[110px] pointer-events-none" />
                     <h2 className="relative text-cinema text-4xl md:text-6xl mb-10">
-                        Fire your middlemen.
+                        Run your own career.
                     </h2>
                     <button
                         onClick={() => navigate('/login')}

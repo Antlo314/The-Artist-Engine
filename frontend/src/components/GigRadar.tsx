@@ -12,7 +12,7 @@ import { apiJson } from '../lib/api';
 import Walkthrough from './ui/Walkthrough';
 import CoachPrompt from './ui/CoachPrompt';
 import HelpTip from './ui/HelpTip';
-import { hasSeenTour } from '../lib/onboarding';
+import { shouldOpenViewTour } from '../lib/onboarding';
 
 const SCOUT_CACHE_KEY = 'engine_last_scout_v1';
 
@@ -55,6 +55,22 @@ const csvEscape = (val: any) => {
     return `"${s.replace(/"/g, '""')}"`;
 };
 
+/**
+ * What to print under a venue's name. The venue's own reported capacity wins:
+ * showing the search's room-size filter here mislabels a 6,900-cap amphitheatre
+ * as "mid-size" just because that is what was searched for.
+ */
+function roomSizeLabel(gig: any, searchTier: string): string {
+    const cap = Number(gig?.capacity);
+    if (Number.isFinite(cap) && cap > 0) {
+        if (cap < 250) return 'Small room · holds ' + cap.toLocaleString();
+        if (cap < 1000) return 'Mid-size · holds ' + cap.toLocaleString();
+        if (cap < 3000) return 'Theater · holds ' + cap.toLocaleString();
+        return 'Arena · holds ' + cap.toLocaleString();
+    }
+    return gig?.tier || searchTier;
+}
+
 export default function GigRadar({ profile }: GigRadarProps) {
     const { record } = useEngine();
     const { refreshMe } = useAuth();
@@ -68,15 +84,15 @@ export default function GigRadar({ profile }: GigRadarProps) {
     })();
     const [city, setCity] = useState(cached?.city || profile?.homeCity || 'Chicago');
     const [genre, setGenre] = useState(cached?.genre || profile?.primaryGenre || 'Deep House');
-    const [tier, setTier] = useState(cached?.tier || 'Mid-Size Touring (250-1000 cap)');
+    const [tier, setTier] = useState(cached?.tier || 'Mid-size — 250 to 1,000 people');
     const [radius, setRadius] = useState(cached?.radius || '50 miles');
-    const [timeframe, setTimeframe] = useState(cached?.timeframe || 'Fall 2026');
+    const [timeframe, setTimeframe] = useState(cached?.timeframe || 'Next 90 days');
 
     // UI State
     const [isScouting, setIsScouting] = useState(false);
     const [gigs, setGigs] = useState<any[]>(() => (Array.isArray(cached?.gigs) ? cached.gigs : []));
     const [error, setError] = useState<string | null>(null);
-    const [showRadarTour, setShowRadarTour] = useState(() => !hasSeenTour('radar'));
+    const [showRadarTour, setShowRadarTour] = useState(() => shouldOpenViewTour('radar'));
     const [hasContactOnly, setHasContactOnly] = useState(false);
 
     // Results toolbar state
@@ -197,7 +213,13 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 throw new Error(data.error);
             }
         } catch (err: any) {
-            setGeneratedPitch(`ERROR GENERATING PITCH: ${err.message}. ${err.message.includes('Failed to fetch') ? '(Is the Python backend running?)' : 'MANUAL OVERRIDE REQUIRED.'}`);
+            setGeneratedPitch(
+                `Couldn't write the pitch: ${err.message}. ${
+                    err.message.includes('Failed to fetch')
+                        ? "The Engine isn't reachable right now — check your connection and try again."
+                        : 'You can still write the message yourself here.'
+                }`
+            );
         } finally {
             setIsDrafting(false);
         }
@@ -325,22 +347,23 @@ export default function GigRadar({ profile }: GigRadarProps) {
             <PageHeader
                 view="radar"
                 accent="var(--color-radar)"
-                module="GIG RADAR"
+                module="WHO'S BOOKING YOUR MUSIC"
                 title="Find Gigs"
-                desc="Live venues + payout intel. Scans measure ~8 seconds."
-                speedHint="~8s"
+                desc="Real venues booking your genre, with an estimate of what they pay and who to ask."
+                speedHint="about 8 seconds"
             />
 
-            <StepHint steps={['Set your search', 'Review verified venues', 'Send the pitch']} accent="var(--color-radar)" />
-            <CoachPrompt id="radar-search-tip" accent="var(--color-radar)" title="Find Gigs tip">
-                Prefill city & genre from Profile. Hit Scan, open Best odds first, then Draft pitch — your identity links are appended automatically.
+            <StepHint steps={['Set your search', 'Read the venues', 'Send a pitch']} accent="var(--color-radar)" />
+            <CoachPrompt id="radar-search-tip" accent="var(--color-radar)" title="How to get the most out of this">
+                Your city and genre come from your Profile. Search, open the venue marked "Best odds" first, then press
+                "Draft pitch" — your bio and streaming links get added to the message automatically.
             </CoachPrompt>
 
-            <Panel title="Search" sub="Live multi-source venue scout" accent="var(--color-radar)" hud className="sheen">
+            <Panel title="What are you looking for?" sub="Searches live ticketing and touring data" accent="var(--color-radar)" hud className="sheen">
                 {Object.keys(presets).length > 0 && (
                     <div className="mb-4 flex flex-wrap gap-2">
-                        <span className="font-mono text-[9px] tracking-widest uppercase text-ink-400 self-center mr-1">
-                            Free presets
+                        <span className="text-[11px] text-ink-400 self-center mr-1">
+                            Quick starts:
                         </span>
                         {Object.entries(presets).map(([id, p]: [string, any]) => (
                             <button
@@ -360,7 +383,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                     </div>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-                    <Field label="City (global)">
+                    <Field label="City" hint="Anywhere in the world.">
                         <div className="relative">
                             <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-700 pointer-events-none" />
                             <input
@@ -395,30 +418,31 @@ export default function GigRadar({ profile }: GigRadarProps) {
                         </select>
                     </Field>
 
-                    <Field label="Venue tier">
+                    <Field label="Room size" hint="How many people the venue holds.">
                         <select value={tier} onChange={(e) => setTier(e.target.value)} className={`${inputCls()} min-h-[44px]`}>
-                            <option>Grassroots / Mom & Pop (50-250 cap)</option>
-                            <option>Mid-Size Touring (250-1000 cap)</option>
-                            <option>Top-Tier Theater (1000-3000 cap)</option>
-                            <option>Arena / Stadium (3000+ cap)</option>
+                            <option>Small rooms — 50 to 250 people</option>
+                            <option>Mid-size — 250 to 1,000 people</option>
+                            <option>Theaters — 1,000 to 3,000 people</option>
+                            <option>Arenas — 3,000 people and up</option>
                         </select>
                     </Field>
 
-                    <Field label="Radius">
+                    <Field label="How far you'll travel">
                         <select value={radius} onChange={(e) => setRadius(e.target.value)} className={`${inputCls()} min-h-[44px]`}>
-                            <option>Exact City</option>
+                            <option>Just this city</option>
                             <option>10 miles</option>
                             <option>50 miles</option>
                             <option>250 miles</option>
                         </select>
                     </Field>
 
-                    <Field label="Timeframe">
+                    <Field label="When you want to play">
                         <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)} className={`${inputCls()} min-h-[44px]`}>
-                            <option>Active Now</option>
+                            <option>Next 60 days</option>
+                            <option>Next 90 days</option>
+                            <option>Next 6 months</option>
                             <option>Summer 2026</option>
                             <option>Fall 2026</option>
-                            <option>Q1 2027</option>
                         </select>
                     </Field>
                 </div>
@@ -426,9 +450,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 <div className="mt-4 md:mt-5 flex md:justify-end">
                     <Btn variant="accent" accent="var(--color-radar)" onClick={handleScout} disabled={isScouting} className="w-full md:w-auto min-h-[48px]">
                         {isScouting ? (
-                            <><Activity size={16} className="animate-spin" /> Scanning venues…</>
+                            <><Activity size={16} className="animate-spin" /> Searching…</>
                         ) : (
-                            <><Target size={16} /> Scan for venues</>
+                            <><Target size={16} /> Find venues</>
                         )}
                     </Btn>
                 </div>
@@ -437,7 +461,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
             {error && (
                 <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 text-sm">
                     <ShieldAlert size={16} className="shrink-0" />
-                    Search failed — backend may be cold-starting. Retry once; warm scans land in ~8 seconds.
+                    That search didn't go through. The Engine may still be waking up — try once more in about 30 seconds.
                 </div>
             )}
 
@@ -454,23 +478,23 @@ export default function GigRadar({ profile }: GigRadarProps) {
                         <button
                             type="button"
                             onClick={() => setVerifiedOnly((v) => !v)}
-                            className={`px-4 py-1.5 rounded-full font-mono text-[11px] tracking-widest uppercase transition-colors border ${verifiedOnly ? 'bg-orange-500/15 text-orange-400 border-orange-500/40' : 'border-white/10 text-ink-400 hover:text-ink-50 hover:border-white/25'}`}
+                            className={`px-4 py-2 rounded-full text-[12px] transition-colors border min-h-[40px] ${verifiedOnly ? 'bg-orange-500/15 text-orange-400 border-orange-500/40' : 'border-white/10 text-ink-400 hover:text-ink-50 hover:border-white/25'}`}
                         >
-                            Verified only
+                            Confirmed real
                         </button>
                         <button
                             type="button"
                             onClick={() => setHasContactOnly((v) => !v)}
-                            className={`px-4 py-1.5 rounded-full font-mono text-[11px] tracking-widest uppercase transition-colors border ${hasContactOnly ? 'bg-orange-500/15 text-orange-400 border-orange-500/40' : 'border-white/10 text-ink-400 hover:text-ink-50 hover:border-white/25'}`}
+                            className={`px-4 py-2 rounded-full text-[12px] transition-colors border min-h-[40px] ${hasContactOnly ? 'bg-orange-500/15 text-orange-400 border-orange-500/40' : 'border-white/10 text-ink-400 hover:text-ink-50 hover:border-white/25'}`}
                         >
-                            Has contact
+                            Has someone to contact
                         </button>
                         <span className="inline-flex items-center gap-1 text-ink-500">
-                            <HelpTip text="Best odds ranks by reputation + live booking signals. Verified filters to venues with a live ticketing presence when available." />
+                            <HelpTip text="Best odds puts the venue most likely to say yes first. 'Confirmed real' keeps only venues we saw actively selling tickets." />
                         </span>
                     </div>
                     <Btn variant="ghost" size="sm" onClick={handleExportCsv}>
-                        <Download size={14} /> Export CSV
+                        <Download size={14} /> Save as spreadsheet
                     </Btn>
                 </div>
             )}
@@ -487,15 +511,17 @@ export default function GigRadar({ profile }: GigRadarProps) {
                             <EmptyState
                                 icon={<Search size={40} />}
                                 title="No venues yet"
-                                hint="Run a search above to find venues booking your genre."
+                                hint="Set your city and genre above, then press Find venues."
                                 cta={
                                     <Btn variant="accent" accent="var(--color-radar)" size="sm" onClick={handleScout} disabled={isScouting}>
-                                        <Target size={14} /> Run a scan
+                                        <Target size={14} /> Find venues
                                     </Btn>
                                 }
                             />
-                            <CoachPrompt id="radar-empty-tip" accent="var(--color-radar)" title="No results?">
-                                Widen radius, try another city, or switch timeframe. Cold hosts can return empty on first try — scan again after ~30s.
+                            <CoachPrompt id="radar-empty-tip" accent="var(--color-radar)" title="Coming up empty?">
+                                Widen how far you'll travel, try a bigger city nearby, or change when you want to play.
+                                The first search of the day can also come back empty while the Engine wakes up — try again
+                                after about 30 seconds.
                             </CoachPrompt>
                         </motion.div>
                     )}
@@ -504,8 +530,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
                         <div className="col-span-full w-full max-w-lg mx-auto py-16 px-4">
                             <LoadingProgressBar
                                 active={isScouting}
-                                message="Scanning for venues"
-                                subMessage="Live ticketing grid + AI payout intel. Measured ~8s on production."
+                                message="Looking for venues"
+                                subMessage="Checking live ticket listings and working out what each room might pay."
                                 colorClass="orange"
                                 estimatedDurationMs={8000}
                                 speedLabel="~8s live"
@@ -520,8 +546,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 <div className="col-span-full">
                                     <EmptyState
                                         icon={<Search size={40} />}
-                                        title="No verified venues"
-                                        hint="Turn off 'Verified only' to see all scanned venues."
+                                        title="Nothing matches those filters"
+                                        hint="Turn off the filters above to see every venue we found."
                                     />
                                 </div>
                             );
@@ -555,7 +581,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                                     </a>
                                                 )}
                                             </div>
-                                            <p className="font-mono text-[10px] text-ink-400 uppercase tracking-widest mt-1 truncate">{gig.tier || tier}</p>
+                                            <p className="font-mono text-[10px] text-ink-400 uppercase tracking-widest mt-1 truncate">{roomSizeLabel(gig, tier)}</p>
                                         </div>
                                         <div className="flex flex-col items-end gap-2 shrink-0">
                                             <div className="flex items-center gap-1.5 flex-wrap justify-end">
@@ -587,39 +613,39 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                     {/* Meta grid */}
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="bg-white/5 rounded-lg border border-white/10 p-3 flex flex-col gap-1">
-                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest flex items-center gap-1"><DollarSign size={10} /> Payout</span>
-                                            <span className="text-sm text-ink-50 truncate">{gig.payout_model || 'Unknown'}</span>
+                                            <span className="text-[10px] text-ink-400 flex items-center gap-1"><DollarSign size={10} /> How they pay</span>
+                                            <span className="text-sm text-ink-50 truncate">{gig.payout_model || 'Not known'}</span>
                                         </div>
                                         <div className="bg-white/5 rounded-lg border border-white/10 p-3 flex flex-col gap-1">
-                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest flex items-center gap-1"><Calendar size={10} /> Lead time</span>
-                                            <span className="text-sm text-ink-50 truncate">{gig.lead_time || 'N/A'}</span>
+                                            <span className="text-[10px] text-ink-400 flex items-center gap-1"><Calendar size={10} /> Books this far ahead</span>
+                                            <span className="text-sm text-ink-50 truncate">{gig.lead_time || 'Not known'}</span>
                                         </div>
                                         <div className="bg-white/5 rounded-lg border border-white/10 p-3 flex flex-col gap-1">
-                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest flex items-center justify-between gap-1">
-                                                <span className="flex items-center gap-1"><Activity size={10} /> Contact</span>
-                                                {gig.contact_source && <span className="text-orange-400/80 normal-case truncate">{gig.contact_source}</span>}
+                                            <span className="text-[10px] text-ink-400 flex items-center justify-between gap-1">
+                                                <span className="flex items-center gap-1"><Activity size={10} /> Who to ask</span>
+                                                {gig.contact_source && <span className="text-orange-400/80 truncate">{gig.contact_source}</span>}
                                             </span>
                                             <span className="text-sm text-ink-50 truncate">{gig.contact_persona || gig.contact || 'Not listed'}</span>
                                         </div>
                                         <div className="bg-white/5 rounded-lg border border-white/10 p-3 flex flex-col gap-1">
-                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest flex items-center gap-1"><Users size={10} /> Similar acts</span>
-                                            <span className="text-sm text-ink-50 line-clamp-1 group-hover:line-clamp-none transition-all">{gig.similar_acts ? (Array.isArray(gig.similar_acts) ? gig.similar_acts.join(', ') : gig.similar_acts) : 'None extracted'}</span>
+                                            <span className="text-[10px] text-ink-400 flex items-center gap-1"><Users size={10} /> Acts like you who played here</span>
+                                            <span className="text-sm text-ink-50 line-clamp-1 group-hover:line-clamp-none transition-all">{gig.similar_acts ? (Array.isArray(gig.similar_acts) ? gig.similar_acts.join(', ') : gig.similar_acts) : 'None found'}</span>
                                         </div>
                                     </div>
 
                                     {/* Financial strip */}
                                     <div className="flex items-center justify-between bg-black/20 border border-white/10 rounded-lg p-3">
                                         <div className="flex flex-col items-center text-center flex-1 border-r border-white/10">
-                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest mb-1">Capacity</span>
-                                            <span className="font-display text-base text-ink-50">{gig.capacity || 'N/A'}</span>
+                                            <span className="text-[10px] text-ink-400 mb-1">Room holds</span>
+                                            <span className="font-display text-base text-ink-50">{gig.capacity || '—'}</span>
                                         </div>
                                         <div className="flex flex-col items-center text-center flex-1 border-r border-white/10">
-                                            <span className="font-mono text-[9px] text-ink-400 uppercase tracking-widest mb-1">Avg ticket</span>
-                                            <span className="font-display text-base text-ink-50">{gig.avg_ticket_price_usd ? `$${gig.avg_ticket_price_usd}` : 'N/A'}</span>
+                                            <span className="text-[10px] text-ink-400 mb-1">Typical ticket</span>
+                                            <span className="font-display text-base text-ink-50">{gig.avg_ticket_price_usd ? `$${gig.avg_ticket_price_usd}` : '—'}</span>
                                         </div>
                                         <div className="flex flex-col items-center text-center flex-1">
-                                            <span className="font-mono text-[9px] text-orange-400 uppercase tracking-widest mb-1">Gross potential</span>
-                                            <span className="font-display text-lg text-orange-400">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : 'N/A'}</span>
+                                            <span className="text-[10px] text-orange-400 mb-1">A full night could gross</span>
+                                            <span className="font-display text-lg text-orange-400">{gig.gross_potential_usd ? `$${gig.gross_potential_usd.toLocaleString()}` : '—'}</span>
                                         </div>
                                     </div>
 
@@ -627,15 +653,15 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                     <div className="space-y-3 border-t border-white/10 pt-4">
                                         {gig.leverage_point && (
                                             <div className="border-l-2 border-orange-500/50 pl-3 py-0.5">
-                                                <div className="flex items-center gap-1.5 font-mono text-[10px] text-orange-400 uppercase tracking-widest mb-1">
-                                                    <AlertTriangle size={12} /> Leverage
+                                                <div className="flex items-center gap-1.5 text-[11px] text-orange-400 mb-1">
+                                                    <AlertTriangle size={12} /> Your angle with them
                                                 </div>
                                                 <p className="text-xs text-ink-200 italic leading-snug">"{gig.leverage_point}"</p>
                                             </div>
                                         )}
                                         <div>
-                                            <div className="flex items-center gap-1.5 font-mono text-[10px] text-ink-400 uppercase tracking-widest mb-1.5">
-                                                <BrainCircuit size={12} /> Negotiation strategy
+                                            <div className="flex items-center gap-1.5 text-[11px] text-ink-400 mb-1.5">
+                                                <BrainCircuit size={12} /> How to approach them
                                             </div>
                                             <p className="text-sm text-ink-200 leading-relaxed line-clamp-2 md:line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
                                                 {gig.strategy}
@@ -679,9 +705,9 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 {/* Modal Header */}
                                 <div className="p-5 border-b border-white/10 flex items-center justify-between gap-4">
                                     <div className="min-w-0">
-                                        <h3 className="font-display text-lg text-ink-50">Draft pitch</h3>
-                                        <p className="font-mono text-[10px] text-orange-400 tracking-widest uppercase mt-1 truncate">
-                                            {pitchModal.name} · {pitchModal.contact_persona || 'Booking contact'}
+                                        <h3 className="font-display text-lg text-ink-50">Your pitch</h3>
+                                        <p className="text-[12px] text-orange-400 mt-1 truncate">
+                                            To {pitchModal.name} · {pitchModal.contact_persona || 'the booking team'}
                                         </p>
                                     </div>
                                     <button onClick={() => setPitchModal(null)} className="text-ink-400 hover:text-ink-50 transition-colors p-2 shrink-0">
@@ -696,7 +722,7 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                             <LoadingProgressBar
                                                 active={isDrafting}
                                                 message={`Writing your ${outreachType === 'call_script' ? 'call script' : outreachType === 'dm' ? 'DM' : 'email'}`}
-                                                subMessage="Venue-tier pitch in your manager's voice. Measured ~2 seconds live."
+                                                subMessage="Written for this venue, in your manager's voice."
                                                 colorClass="orange"
                                                 estimatedDurationMs={2000}
                                                 speedLabel="~2s live"
@@ -740,10 +766,10 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                             Copy
                                         </Btn>
                                         <Btn variant="ghost" onClick={() => handleDeployPitch(gigs.indexOf(pitchModal), 'eml')}>
-                                            <Download size={14} /> .eml
+                                            <Download size={14} /> Save as email file
                                         </Btn>
                                         <Btn variant="accent" accent="var(--color-radar)" onClick={() => handleDeployPitch(gigs.indexOf(pitchModal), 'mailto')}>
-                                            <Send size={14} /> Open mail
+                                            <Send size={14} /> Open in my mail app
                                         </Btn>
                                     </div>
                                 )}
@@ -771,8 +797,8 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                 className="glass-obsidian border border-white/10 rounded-2xl w-full max-w-md flex flex-col overflow-hidden"
                             >
                                 <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                                    <h3 className="font-mono text-xs tracking-widest text-orange-400 uppercase flex items-center gap-2">
-                                        <Search size={14} /> Reputation
+                                    <h3 className="text-sm text-orange-400 flex items-center gap-2">
+                                        <Search size={14} /> Why this score?
                                     </h3>
                                     <button onClick={() => setRepModal(null)} className="text-ink-400 hover:text-ink-50 transition-colors p-1">
                                         <X size={18} />
@@ -787,9 +813,14 @@ export default function GigRadar({ profile }: GigRadarProps) {
                                     </div>
                                     <div className="bg-white/5 rounded-lg border border-white/10 p-4">
                                         <p className="text-sm text-ink-200 leading-relaxed">
-                                            {repModal.reputation_explanation || 'No detailed reputation notes yet for this venue.'}
+                                            {repModal.reputation_explanation ||
+                                                "We don't have notes on this venue yet — treat the score as a rough guide only."}
                                         </p>
                                     </div>
+                                    <p className="text-[11px] text-ink-400 mt-3 leading-relaxed">
+                                        This is a rough 0–100 read on how established the venue looks, based on public
+                                        activity. It is a guide, not a verdict.
+                                    </p>
                                 </div>
                                 <div className="p-4 border-t border-white/10">
                                     <Btn variant="ghost" className="w-full" onClick={() => setRepModal(null)}>Got it</Btn>
@@ -806,22 +837,22 @@ export default function GigRadar({ profile }: GigRadarProps) {
                 open={showRadarTour}
                 accent="var(--color-radar)"
                 onClose={() => setShowRadarTour(false)}
-                primaryLabel="Start scouting"
+                primaryLabel="Start searching"
                 steps={[
                     {
-                        title: 'Set your market',
-                        body: 'City, genre, tier, radius, and timeframe drive the scout. Profile home city & genre pre-fill for you.',
-                        bullets: ['Use free presets for common packages', 'Last search is restored next visit'],
+                        title: 'Tell it where and what',
+                        body: 'City, genre, room size, how far you will travel, and when you want to play. Your home city and genre from Profile fill in automatically.',
+                        bullets: ['Quick starts set common combinations for you', 'Your last search comes back next time'],
                     },
                     {
-                        title: 'Read the cards',
-                        body: 'Best odds is your alpha target. Check payout, lead time, and contact before pitching.',
-                        bullets: ['Filter Verified or Has contact', 'Export CSV for your team'],
+                        title: 'Read the venues',
+                        body: 'Each card shows how the venue pays, how far ahead it books, and who to ask. "Best odds" marks the one most likely to say yes.',
+                        bullets: ['Filter to confirmed venues or ones with a contact', 'Save the whole list as a spreadsheet'],
                     },
                     {
-                        title: 'Draft & send',
-                        body: 'Draft pitch opens a venue-specific email, call script, or DM. Your bio and links from Profile are appended.',
-                        bullets: ['mailto / .eml / copy', 'Pitched venues mark in your pipeline'],
+                        title: 'Send your pitch',
+                        body: 'Press "Draft pitch" and the Engine writes a booking email, call script, or DM for that specific venue — with your bio and links attached.',
+                        bullets: ['Edit anything before it goes out', 'Venues you pitch move along in your pipeline'],
                     },
                 ]}
             />

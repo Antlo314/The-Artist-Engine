@@ -9,28 +9,37 @@
 @import "tailwindcss";
 
 @theme {
-    /* --- Core surface scale (dark cinematic defaults) --- */
-    --color-ink-950: #060607;   /* page void */
-    --color-ink-900: #0a0a0c;   /* base surface */
-    --color-ink-800: #101014;   /* raised surface */
-    --color-ink-700: #1a1a20;   /* deep wells / tertiary chrome (bg only) */
-    /* Readable muted type on dark + glass (was too close to grey surfaces) */
-    --color-ink-500: #a8a8b4;   /* quiet labels / meta — ~AA on #0a0a0c */
-    --color-ink-400: #c2c2cc;   /* secondary / subtext */
-    --color-ink-300: #d4d4dc;   /* soft secondary */
-    --color-ink-200: #e4e4ea;   /* strong secondary (descs, body support) */
-    --color-ink-50:  #f7f7f8;   /* primary text */
+    /*
+     * "Warm Room" — the feel of a good studio at night, not a spaceship.
+     * Surfaces carry a faint umber cast so brass and ember sit naturally
+     * on them instead of glowing off a blue-black void.
+     */
+    --color-ink-950: #0a0806;   /* page void — warm near-black */
+    --color-ink-900: #0f0c0a;   /* base surface */
+    --color-ink-800: #17130f;   /* raised surface */
+    --color-ink-700: #241d17;   /* deep wells / tertiary chrome (bg only) */
+    /* Readable muted type on dark + glass (warm-tinted greys) */
+    --color-ink-500: #ada79d;   /* quiet labels / meta — ~AA on #0f0c0a */
+    --color-ink-400: #c7c1b6;   /* secondary / subtext */
+    --color-ink-300: #d8d3c9;   /* soft secondary */
+    --color-ink-200: #e8e4dc;   /* strong secondary (descs, body support) */
+    --color-ink-50:  #faf8f4;   /* primary text — warm paper white */
 
     /* --- Brand --- */
-    --color-ember-600: #dc2626; /* signature red */
-    --color-ember-500: #ef4444;
-    --color-ember-400: #f87171;
+    --color-ember-600: #d4442a; /* signature ember */
+    --color-ember-500: #e8573a;
+    --color-ember-400: #f47a5c;
 
-    /* --- Pillar accents (used sparingly) --- */
-    --color-radar: #fb923c;     /* Gig Radar — orange   */
-    --color-zion: #a78bfa;      /* Zion Legal — violet  */
-    --color-audio: #22d3ee;     /* Master Core — cyan   */
-    --color-shark: #f4f4f5;     /* Shark — bone white   */
+    /* --- Brass: the signature warm metal, used for rules & marks --- */
+    --color-brass-500: #d9a441;
+    --color-brass-400: #e5bb66;
+    --color-brass-300: #f0d49a;
+
+    /* --- Room accents (used sparingly, one per area) --- */
+    --color-radar: #f0a13a;     /* Find Gigs — amber lamp   */
+    --color-zion: #b08cf0;      /* Contracts — violet ink   */
+    --color-audio: #5ac8bd;     /* Studio — patinated teal  */
+    --color-shark: #e8e0d2;     /* Deals — bone / paper     */
 
     /* --- Fonts --- */
     --font-display: 'Clash Display', 'Inter', sans-serif;
@@ -46,26 +55,31 @@
    it must stay dark enough for text-ink-700 / placeholders.
    ============================================================ */
 html[data-theme="light"] {
-    --color-ink-950: #f2f3f6;   /* page canvas */
-    --color-ink-900: #ffffff;   /* primary surface */
-    --color-ink-800: #e8eaef;   /* raised / inputs */
-    /* Tertiary labels, icons, placeholders — must pass ~4.5:1 on white */
-    --color-ink-700: #3d4450;
-    --color-ink-500: #3a4150;   /* meta / quiet actions */
-    --color-ink-400: #2f3540;   /* muted body / mono labels */
-    --color-ink-300: #4a5160;   /* soft secondary */
-    --color-ink-200: #1c212b;   /* secondary text */
-    --color-ink-50:  #0a0c10;   /* primary text */
+    /* Daylight in the same room: warm paper, not clinical white. */
+    --color-ink-950: #f5f2ec;   /* page canvas — warm paper */
+    --color-ink-900: #fffdf9;   /* primary surface */
+    --color-ink-800: #ece7de;   /* raised / inputs */
+    /* Tertiary labels, icons, placeholders — must pass ~4.5:1 on paper */
+    --color-ink-700: #4a4239;
+    --color-ink-500: #453d34;   /* meta / quiet actions */
+    --color-ink-400: #3a332b;   /* muted body / labels */
+    --color-ink-300: #574e44;   /* soft secondary */
+    --color-ink-200: #241f1a;   /* secondary text */
+    --color-ink-50:  #100c08;   /* primary text */
 
-    /* Ember must clear ~4.5:1 on white (400 was 3.4, 500 was 4.3) */
-    --color-ember-600: #991b1b;
-    --color-ember-500: #b91c1c;
-    --color-ember-400: #b91c1c;
+    /* Ember must clear ~4.5:1 on paper */
+    --color-ember-600: #8f2412;
+    --color-ember-500: #a82c17;
+    --color-ember-400: #a82c17;
 
-    --color-radar: #c2410c;     /* orange-700 — readable on white */
-    --color-zion: #6d28d9;      /* violet-700 */
-    --color-audio: #0e7490;     /* cyan-700 */
-    --color-shark: #18181b;    /* near-black (was bone on dark) */
+    --color-brass-500: #8a6414;
+    --color-brass-400: #8a6414;
+    --color-brass-300: #6f4f10;
+
+    --color-radar: #a8560c;     /* amber, readable on paper */
+    --color-zion: #6134c4;      /* violet ink */
+    --color-audio: #0f6d68;     /* patinated teal */
+    --color-shark: #1c1814;     /* near-black */
 }
 
 html[data-theme="light"] body {
@@ -75,8 +89,8 @@ html[data-theme="light"] body {
 
 html[data-theme="light"] body::selection,
 html[data-theme="light"] ::selection {
-    background-color: rgba(185, 28, 28, 0.22);
-    color: #0a0c10;
+    background-color: rgba(168, 44, 23, 0.2);
+    color: #100c08;
 }
 
 /*
@@ -84,21 +98,21 @@ html[data-theme="light"] ::selection {
  * Remap to 600–700 weight hues so status chips and metrics stay legible.
  */
 html[data-theme="light"] .text-orange-300,
-html[data-theme="light"] .text-orange-400 { color: #c2410c; }
-html[data-theme="light"] .text-orange-400\/80 { color: rgba(194, 65, 12, 0.92); }
+html[data-theme="light"] .text-orange-400 { color: #a8560c; }
+html[data-theme="light"] .text-orange-400\/80 { color: rgba(168, 86, 12, 0.92); }
 html[data-theme="light"] .hover\:text-orange-400:hover,
-html[data-theme="light"] .hover\:text-orange-300:hover { color: #9a3412; }
+html[data-theme="light"] .hover\:text-orange-300:hover { color: #86440a; }
 
 html[data-theme="light"] .text-amber-300,
-html[data-theme="light"] .text-amber-400 { color: #b45309; }
+html[data-theme="light"] .text-amber-400 { color: #8a6414; }
 html[data-theme="light"] .text-yellow-400,
-html[data-theme="light"] .text-yellow-500 { color: #a16207; }
-html[data-theme="light"] .text-yellow-500\/50 { color: rgba(161, 98, 7, 0.7); }
-html[data-theme="light"] .group:hover .group-hover\:text-yellow-400 { color: #854d0e; }
+html[data-theme="light"] .text-yellow-500 { color: #7d5a10; }
+html[data-theme="light"] .text-yellow-500\/50 { color: rgba(125, 90, 16, 0.7); }
+html[data-theme="light"] .group:hover .group-hover\:text-yellow-400 { color: #6a4c0d; }
 
 html[data-theme="light"] .text-cyan-300,
-html[data-theme="light"] .text-cyan-400 { color: #0e7490; }
-html[data-theme="light"] .hover\:text-cyan-400:hover { color: #155e75; }
+html[data-theme="light"] .text-cyan-400 { color: #0f6d68; }
+html[data-theme="light"] .hover\:text-cyan-400:hover { color: #0b5652; }
 
 html[data-theme="light"] .text-emerald-300,
 html[data-theme="light"] .text-emerald-400 { color: #047857; }
@@ -107,19 +121,19 @@ html[data-theme="light"] .hover\:text-emerald-300:hover { color: #065f46; }
 html[data-theme="light"] .text-green-400 { color: #15803d; }
 
 html[data-theme="light"] .text-red-300,
-html[data-theme="light"] .text-red-400 { color: #b91c1c; }
+html[data-theme="light"] .text-red-400 { color: #a82c17; }
 html[data-theme="light"] .hover\:text-red-400:hover,
 html[data-theme="light"] .hover\:text-red-300:hover,
-html[data-theme="light"] .hover\:text-red-500:hover { color: #991b1b; }
+html[data-theme="light"] .hover\:text-red-500:hover { color: #8f2412; }
 
 html[data-theme="light"] .text-purple-300,
-html[data-theme="light"] .text-purple-400 { color: #6d28d9; }
+html[data-theme="light"] .text-purple-400 { color: #6134c4; }
 html[data-theme="light"] .hover\:text-purple-300:hover,
-html[data-theme="light"] .hover\:text-purple-400:hover { color: #5b21b6; }
-html[data-theme="light"] .text-violet-400 { color: #6d28d9; }
-html[data-theme="light"] .text-fuchsia-400 { color: #a21caf; }
+html[data-theme="light"] .hover\:text-purple-400:hover { color: #4f28a6; }
+html[data-theme="light"] .text-violet-400 { color: #6134c4; }
+html[data-theme="light"] .text-fuchsia-400 { color: #97258f; }
 
-html[data-theme="light"] .text-gray-400 { color: #3f4654; }
+html[data-theme="light"] .text-gray-400 { color: #4a4239; }
 html[data-theme="light"] .hover\:text-white:hover { color: var(--color-ink-50); }
 
 /* Placeholders inherit ink-700; force opacity so they never wash out */
@@ -134,11 +148,11 @@ html[data-theme="light"] ::placeholder {
  * bg-ink-700 chrome dots / wells.
  */
 html:not([data-theme="light"]) .text-ink-700 {
-    color: #a1a1ad;
+    color: #a69e92;
 }
 html:not([data-theme="light"]) .placeholder\:text-ink-700::placeholder,
 html:not([data-theme="light"]) .placeholder\:text-ink-700::-webkit-input-placeholder {
-    color: #8e8e9a;
+    color: #948b7e;
     opacity: 1;
 }
 /* Hover helpers that lighten into "muted" from near-black */
@@ -151,7 +165,7 @@ html:not([data-theme="light"]) .hover\:text-ink-200:hover {
 
 /* Ensure ::placeholder is never washed out on dark either */
 html:not([data-theme="light"]) ::placeholder {
-    color: #8e8e9a;
+    color: #948b7e;
     opacity: 1;
 }
 
@@ -185,7 +199,7 @@ html:not([data-theme="light"]) ::placeholder {
 
     body::selection,
     ::selection {
-        background-color: rgba(220, 38, 38, 0.3);
+        background-color: rgba(212, 68, 42, 0.3);
         color: #fff;
     }
 
@@ -208,31 +222,45 @@ html:not([data-theme="light"]) ::placeholder {
 
 @layer utilities {
 
-    /* ====== V4 liquid glass (HUD surfaces) ====== */
-    .glass-obsidian {
+    /* ====== Warm Room surfaces ======
+       Panels read like brushed, lacquered gear: a warm top light,
+       a soft amber bloom in the upper-left, and real weight beneath. */
+    /* Zero-specificity so `absolute` / `fixed` / `sticky` on the same element
+       still win. The panel only needs *a* containing block for .sheen and
+       .hud-corners pseudo-elements — it does not need to be `relative`. */
+    :where(.glass-obsidian) {
         position: relative;
-        background: linear-gradient(150deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02) 38%, rgba(255,255,255,0.05));
-        backdrop-filter: blur(28px) saturate(1.4);
-        -webkit-backdrop-filter: blur(28px) saturate(1.4);
-        border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .glass-obsidian {
+        background:
+            radial-gradient(120% 90% at 12% 0%, rgba(217,164,65,0.07), transparent 62%),
+            linear-gradient(150deg, rgba(255,246,235,0.085), rgba(255,246,235,0.018) 40%, rgba(255,246,235,0.045));
+        backdrop-filter: blur(26px) saturate(1.25);
+        -webkit-backdrop-filter: blur(26px) saturate(1.25);
+        border: 1px solid rgba(233, 214, 186, 0.11);
         box-shadow:
-            0 24px 60px rgba(0,0,0,0.55),
-            inset 0 1px 0 rgba(255,255,255,0.12),
-            inset 0 -1px 0 rgba(255,255,255,0.03);
+            0 24px 60px rgba(0,0,0,0.5),
+            inset 0 1px 0 rgba(255,238,214,0.14),
+            inset 0 -1px 0 rgba(0,0,0,0.22);
     }
 
     html[data-theme="light"] .glass-obsidian {
-        background: linear-gradient(150deg, rgba(255,255,255,0.96), rgba(255,255,255,0.88) 50%, rgba(248,249,252,0.94));
-        border: 1px solid rgba(15, 18, 28, 0.08);
+        background:
+            radial-gradient(120% 90% at 12% 0%, rgba(217,164,65,0.09), transparent 60%),
+            linear-gradient(150deg, rgba(255,253,249,0.97), rgba(252,249,243,0.9) 50%, rgba(247,243,235,0.95));
+        border: 1px solid rgba(60, 48, 34, 0.1);
         box-shadow:
-            0 16px 40px rgba(15, 18, 28, 0.08),
-            0 1px 0 rgba(255,255,255,0.9) inset,
-            0 -1px 0 rgba(15, 18, 28, 0.03) inset;
+            0 16px 40px rgba(60, 48, 34, 0.09),
+            0 1px 0 rgba(255,255,255,0.95) inset,
+            0 -1px 0 rgba(60, 48, 34, 0.04) inset;
     }
 
     /* Liquid sheen sweep on hover */
-    .sheen {
+    :where(.sheen) {
         position: relative;
+    }
+    .sheen {
         overflow: hidden;
     }
     .sheen::before {
@@ -243,7 +271,7 @@ html:not([data-theme="light"]) ::placeholder {
         width: 60%;
         height: 100%;
         pointer-events: none;
-        background: linear-gradient(100deg, transparent, rgba(255,255,255,0.06) 50%, transparent);
+        background: linear-gradient(100deg, transparent, rgba(255,232,196,0.07) 50%, transparent);
         transform: skewX(-18deg);
         transition: left 0.9s cubic-bezier(0.22, 1, 0.36, 1);
     }
@@ -251,35 +279,68 @@ html:not([data-theme="light"]) ::placeholder {
         left: 150%;
     }
 
-    /* HUD corner brackets */
+    /* Brass corner marks — like the reinforced corners on a flight case */
     .hud-corners::before,
     .hud-corners::after {
         content: "";
         position: absolute;
-        width: 10px;
-        height: 10px;
+        width: 11px;
+        height: 11px;
         pointer-events: none;
         z-index: 2;
     }
     .hud-corners::before {
         top: 8px;
         left: 8px;
-        border-top: 1px solid rgba(255,255,255,0.25);
-        border-left: 1px solid rgba(255,255,255,0.25);
+        border-top: 1px solid rgba(217, 164, 65, 0.42);
+        border-left: 1px solid rgba(217, 164, 65, 0.42);
     }
     .hud-corners::after {
         bottom: 8px;
         right: 8px;
-        border-bottom: 1px solid rgba(255,255,255,0.25);
-        border-right: 1px solid rgba(255,255,255,0.25);
+        border-bottom: 1px solid rgba(217, 164, 65, 0.42);
+        border-right: 1px solid rgba(217, 164, 65, 0.42);
     }
     html[data-theme="light"] .hud-corners::before {
-        border-top-color: rgba(15, 18, 28, 0.18);
-        border-left-color: rgba(15, 18, 28, 0.18);
+        border-top-color: rgba(138, 100, 20, 0.35);
+        border-left-color: rgba(138, 100, 20, 0.35);
     }
     html[data-theme="light"] .hud-corners::after {
-        border-bottom-color: rgba(15, 18, 28, 0.18);
-        border-right-color: rgba(15, 18, 28, 0.18);
+        border-bottom-color: rgba(138, 100, 20, 0.35);
+        border-right-color: rgba(138, 100, 20, 0.35);
+    }
+
+    /* ---- Signature: brass rule, a hairline that reads as trim ---- */
+    .brass-rule {
+        height: 1px;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(217, 164, 65, 0.55) 18%,
+            rgba(217, 164, 65, 0.28) 60%,
+            transparent
+        );
+    }
+
+    /* ---- Signature: tape counter — tabular, slightly inset readouts ---- */
+    .tape-readout {
+        font-family: 'JetBrains Mono', monospace;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.04em;
+        color: var(--color-brass-300);
+        text-shadow: 0 0 14px rgba(217, 164, 65, 0.28);
+    }
+    html[data-theme="light"] .tape-readout {
+        color: var(--color-brass-300);
+        text-shadow: none;
+    }
+
+    /* ---- Signature: warm lamp glow behind a focal element ---- */
+    .lamp-glow {
+        box-shadow: 0 0 70px 12px rgba(217, 164, 65, 0.13);
+    }
+    html[data-theme="light"] .lamp-glow {
+        box-shadow: 0 0 50px 8px rgba(217, 164, 65, 0.16);
     }
 
     /* Breathing status dot */
@@ -298,12 +359,12 @@ html:not([data-theme="light"]) ::placeholder {
                     transform 280ms cubic-bezier(0.22,1,0.36,1);
     }
     .glass-obsidian-hover:hover {
-        border-color: rgba(220,38,38,0.35);
-        box-shadow: 0 30px 80px rgba(0,0,0,0.65), 0 0 40px rgba(220,38,38,0.12), inset 0 1px 0 rgba(255,255,255,0.12);
+        border-color: rgba(212,68,42,0.35);
+        box-shadow: 0 30px 80px rgba(0,0,0,0.65), 0 0 40px rgba(212,68,42,0.12), inset 0 1px 0 rgba(255,255,255,0.12);
         transform: translateY(-2px);
     }
     html[data-theme="light"] .glass-obsidian-hover:hover {
-        box-shadow: 0 20px 48px rgba(15, 18, 28, 0.12), 0 0 0 1px rgba(185, 28, 28, 0.15), inset 0 1px 0 rgba(255,255,255,0.95);
+        box-shadow: 0 20px 48px rgba(60, 48, 34, 0.12), 0 0 0 1px rgba(168, 44, 23, 0.15), inset 0 1px 0 rgba(255,255,255,0.95);
     }
 
     /* Fluid view surfaces */
@@ -319,7 +380,7 @@ html:not([data-theme="light"]) ::placeholder {
         border-color: rgba(255,255,255,0.08);
     }
     html[data-theme="light"] .hairline {
-        border-color: rgba(15, 18, 28, 0.1);
+        border-color: rgba(60, 48, 34, 0.1);
     }
 
     /* Marketing / chrome surfaces that used hard-coded black/white */
@@ -330,9 +391,9 @@ html:not([data-theme="light"]) ::placeholder {
     }
     html[data-theme="light"] .theme-nav {
         background-color: rgba(255, 255, 255, 0.88);
-        border-color: rgba(15, 18, 28, 0.08);
+        border-color: rgba(60, 48, 34, 0.08);
         color: #0c0e12;
-        box-shadow: 0 8px 24px rgba(15, 18, 28, 0.06);
+        box-shadow: 0 8px 24px rgba(60, 48, 34, 0.06);
     }
 
     .theme-chip {
@@ -341,34 +402,34 @@ html:not([data-theme="light"]) ::placeholder {
         color: var(--color-ink-200);
     }
     html[data-theme="light"] .theme-chip {
-        border-color: rgba(15, 18, 28, 0.12);
-        background-color: rgba(15, 18, 28, 0.04);
+        border-color: rgba(60, 48, 34, 0.12);
+        background-color: rgba(60, 48, 34, 0.04);
         color: var(--color-ink-200);
     }
 
     /* Soft page gradients for light marketing hero */
     html[data-theme="light"] .theme-hero-mobile {
-        background: radial-gradient(ellipse at 70% 20%, #ffe4e6 0%, #f3f3f5 50%, #eef0f4 100%) !important;
+        background: radial-gradient(ellipse at 70% 20%, #fbe7d4 0%, #f7f3ec 50%, #f1ece2 100%) !important;
     }
     html[data-theme="light"] .theme-hero-scrim {
-        background: linear-gradient(to right, rgba(243, 243, 245, 0.96), rgba(243, 243, 245, 0.75), rgba(243, 243, 245, 0.35)) !important;
+        background: linear-gradient(to right, rgba(245, 242, 236, 0.96), rgba(245, 242, 236, 0.75), rgba(245, 242, 236, 0.35)) !important;
     }
 
     /* PageHeader band — keep cinematic video readable in both themes */
     html[data-theme="light"] .theme-header-scrim {
         background: linear-gradient(
             to right,
-            rgba(243, 243, 245, 0.97),
-            rgba(243, 243, 245, 0.88),
-            rgba(243, 243, 245, 0.42)
+            rgba(245, 242, 236, 0.97),
+            rgba(245, 242, 236, 0.88),
+            rgba(245, 242, 236, 0.42)
         ) !important;
     }
     html[data-theme="light"] .theme-header-fade {
-        background: linear-gradient(to top, rgba(243, 243, 245, 0.95), transparent) !important;
+        background: linear-gradient(to top, rgba(245, 242, 236, 0.95), transparent) !important;
     }
     html[data-theme="light"] .theme-page-header {
-        border-color: rgba(15, 18, 28, 0.1);
-        box-shadow: 0 12px 32px rgba(15, 18, 28, 0.06);
+        border-color: rgba(60, 48, 34, 0.1);
+        box-shadow: 0 12px 32px rgba(60, 48, 34, 0.06);
     }
     /* Slightly desaturate / lift video under light scrim so it doesn't muddy type */
     html[data-theme="light"] .theme-header-media video {
@@ -387,51 +448,51 @@ html:not([data-theme="light"]) ::placeholder {
     html[data-theme="light"] .border-white\/10,
     html[data-theme="light"] .border-white\/15,
     html[data-theme="light"] .border-white\/30 {
-        border-color: rgba(15, 18, 28, 0.1);
+        border-color: rgba(60, 48, 34, 0.1);
     }
     html[data-theme="light"] .border-white\/15 {
-        border-color: rgba(15, 18, 28, 0.12);
+        border-color: rgba(60, 48, 34, 0.12);
     }
     html[data-theme="light"] .border-white\/30 {
-        border-color: rgba(15, 18, 28, 0.2);
+        border-color: rgba(60, 48, 34, 0.2);
     }
     html[data-theme="light"] .hover\:border-white\/25:hover,
     html[data-theme="light"] .hover\:border-white\/30:hover {
-        border-color: rgba(15, 18, 28, 0.22);
+        border-color: rgba(60, 48, 34, 0.22);
     }
     html[data-theme="light"] .border-dashed.border-white\/15 {
-        border-color: rgba(15, 18, 28, 0.18);
+        border-color: rgba(60, 48, 34, 0.18);
     }
 
     html[data-theme="light"] .bg-white\/5,
     html[data-theme="light"] .bg-white\/\[0\.03\],
     html[data-theme="light"] .bg-white\/10,
     html[data-theme="light"] .bg-white\/15 {
-        background-color: rgba(15, 18, 28, 0.04);
+        background-color: rgba(60, 48, 34, 0.04);
     }
     html[data-theme="light"] .bg-white\/10 {
-        background-color: rgba(15, 18, 28, 0.06);
+        background-color: rgba(60, 48, 34, 0.06);
     }
     html[data-theme="light"] .bg-white\/15 {
-        background-color: rgba(15, 18, 28, 0.1);
+        background-color: rgba(60, 48, 34, 0.1);
     }
     html[data-theme="light"] .hover\:bg-white\/5:hover {
-        background-color: rgba(15, 18, 28, 0.05);
+        background-color: rgba(60, 48, 34, 0.05);
     }
     html[data-theme="light"] .hover\:bg-white\/15:hover {
-        background-color: rgba(15, 18, 28, 0.08);
+        background-color: rgba(60, 48, 34, 0.08);
     }
 
     html[data-theme="light"] .bg-black\/60 {
-        background-color: rgba(15, 18, 28, 0.08);
+        background-color: rgba(60, 48, 34, 0.08);
     }
     html[data-theme="light"] .bg-ink-950\/95,
     html[data-theme="light"] .bg-ink-950\/98 {
-        background-color: rgba(243, 243, 245, 0.94);
+        background-color: rgba(245, 242, 236, 0.94);
     }
 
     html[data-theme="light"] .focus\:border-white\/30:focus {
-        border-color: rgba(15, 18, 28, 0.28);
+        border-color: rgba(60, 48, 34, 0.28);
     }
 
     /* Ember CTAs keep white label text in both themes */
@@ -442,20 +503,20 @@ html:not([data-theme="light"]) ::placeholder {
 
     /* Scrollbars in light mode */
     html[data-theme="light"] ::-webkit-scrollbar-track {
-        background: #eef0f4;
+        background: #ece7de;
     }
     html[data-theme="light"] ::-webkit-scrollbar-thumb {
-        background: #c5cad4;
+        background: #cfc4b2;
     }
     html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-        background: rgba(185, 28, 28, 0.45);
+        background: rgba(168, 44, 23, 0.45);
     }
 
     html[data-theme="light"] .glass-well {
         background: rgba(255, 255, 255, 0.92);
-        box-shadow: inset 0 2px 10px rgba(15, 18, 28, 0.06), 0 1px 0 rgba(255, 255, 255, 0.9);
-        border-top: 1px solid rgba(15, 18, 28, 0.06);
-        border-bottom: 1px solid rgba(15, 18, 28, 0.08);
+        box-shadow: inset 0 2px 10px rgba(60, 48, 34, 0.06), 0 1px 0 rgba(255, 255, 255, 0.9);
+        border-top: 1px solid rgba(60, 48, 34, 0.06);
+        border-bottom: 1px solid rgba(60, 48, 34, 0.08);
     }
 
     html[data-theme="light"] .grain::after {
@@ -463,11 +524,11 @@ html:not([data-theme="light"]) ::placeholder {
     }
 
     html[data-theme="light"] .halo-ember {
-        box-shadow: 0 0 60px 8px rgba(185, 28, 28, 0.12);
+        box-shadow: 0 0 60px 8px rgba(168, 44, 23, 0.12);
     }
 
     html[data-theme="light"] .border-glow {
-        box-shadow: 0 0 12px rgba(185, 28, 28, 0.12), inset 0 0 12px rgba(15, 18, 28, 0.03);
+        box-shadow: 0 0 12px rgba(168, 44, 23, 0.12), inset 0 0 12px rgba(60, 48, 34, 0.03);
     }
 
     /* Cinematic display text: tight, but not so tight that descenders clip */
@@ -505,15 +566,15 @@ html:not([data-theme="light"]) ::placeholder {
 
     /* Soft ember halo behind elements */
     .halo-ember {
-        box-shadow: 0 0 80px 10px rgba(220,38,38,0.18);
+        box-shadow: 0 0 80px 10px rgba(212,68,42,0.18);
     }
 
     .text-glow {
-        text-shadow: 0 0 10px rgba(220, 38, 38, 0.2), 0 0 20px rgba(220, 38, 38, 0.1);
+        text-shadow: 0 0 10px rgba(212, 68, 42, 0.2), 0 0 20px rgba(212, 68, 42, 0.1);
     }
 
     .border-glow {
-        box-shadow: 0 0 15px rgba(220, 38, 38, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 15px rgba(212, 68, 42, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.08);
     }
 
     /* Film grain — subtle, layered over dark surfaces */
@@ -541,7 +602,7 @@ html:not([data-theme="light"]) ::placeholder {
         background-color: rgba(255, 255, 255, 0.65);
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.8);
-        box-shadow: 0 8px 32px 0 rgba(220, 38, 38, 0.05);
+        box-shadow: 0 8px 32px 0 rgba(212, 68, 42, 0.05);
     }
 
     .glass-card {
@@ -555,8 +616,8 @@ html:not([data-theme="light"]) ::placeholder {
     }
 
     .glass-card:hover {
-        border-color: rgba(220, 38, 38, 0.3);
-        box-shadow: 0 15px 50px rgba(220, 38, 38, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.8);
+        border-color: rgba(212, 68, 42, 0.3);
+        box-shadow: 0 15px 50px rgba(212, 68, 42, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.8);
         transform: translateY(-2px);
     }
 }
@@ -570,16 +631,16 @@ html:not([data-theme="light"]) ::placeholder {
     }
 
     ::-webkit-scrollbar-track {
-        background: #0a0a0c;
+        background: #0f0c0a;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: #2a2a32;
+        background: #322820;
         border-radius: 3px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: rgba(220, 38, 38, 0.5);
+        background: rgba(212, 68, 42, 0.5);
     }
 
     /* Glitch Effect on Hover for Headers (fixed: was invalid rgba(hex) syntax) */

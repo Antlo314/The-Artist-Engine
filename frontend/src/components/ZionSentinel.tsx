@@ -12,7 +12,7 @@ const ACCENT = 'var(--color-zion)';
 
 const SCAN_TYPE_OPTIONS: { value: 'contract' | 'offer'; label: string }[] = [
     { value: 'contract', label: 'Contract' },
-    { value: 'offer', label: 'Offer' },
+    { value: 'offer', label: 'Gig offer' },
 ];
 
 type ZionProps = {
@@ -83,11 +83,11 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                 refreshMe();
                 onScanComplete?.();
             } else {
-                throw new Error(data.error || 'Legal Scan Failed');
+                throw new Error(data.error || 'We could not read that document.');
             }
         } catch (err: any) {
             console.error(err);
-            setScanError(err?.message || 'Scan failed. Check that you are signed in and the server is online.');
+            setScanError(err?.message || 'That check did not finish. Make sure you are signed in, then try again.');
         } finally {
             setIsScanning(false);
         }
@@ -104,41 +104,46 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
         if (!analysis) return;
 
         const lines: string[] = [];
-        lines.push('ZION SENTINEL — CONTRACT ANALYSIS');
+        lines.push('CONTRACT CHECK — WHAT THIS DEAL SAYS');
         lines.push('='.repeat(40));
+        lines.push('');
+        lines.push('This is a fast first read, not legal advice.');
+        lines.push("For anything you're about to sign, have a lawyer look at it.");
         lines.push('');
 
         if (analysis.parties) {
-            lines.push('PARTIES');
+            lines.push('WHO IS INVOLVED');
             lines.push(analysis.parties);
             lines.push('');
         }
         if (analysis.obligations) {
-            lines.push('OBLIGATIONS');
+            lines.push('WHAT EACH SIDE HAS TO DO');
             lines.push(analysis.obligations);
             lines.push('');
         }
         if (typeof analysis.integrity_score !== 'undefined') {
-            lines.push(`INTEGRITY SCORE: ${analysis.integrity_score}`);
+            lines.push(`FAIRNESS SCORE: ${analysis.integrity_score} out of 100 (higher is fairer to you)`);
             lines.push('');
         }
         if (Array.isArray(analysis.red_flags) && analysis.red_flags.length > 0) {
-            lines.push(`RED FLAGS (${analysis.red_flags.length})`);
+            lines.push(
+                `THINGS TO PUSH BACK ON (${analysis.red_flags.length})`
+            );
             lines.push('-'.repeat(40));
             analysis.red_flags.forEach((flag: any, idx: number) => {
-                lines.push(`${idx + 1}. Clause: ${flag.clause || 'N/A'}`);
-                lines.push(`   Risk: ${flag.risk || 'N/A'}`);
-                lines.push(`   Fix: ${flag.fix || 'N/A'}`);
+                lines.push(`${idx + 1}. What the contract says: ${flag.clause || 'N/A'}`);
+                lines.push(`   What this means for you: ${flag.risk || 'N/A'}`);
+                lines.push(`   How to push back: ${flag.fix || 'N/A'}`);
                 lines.push('');
             });
         }
         if (analysis.summary) {
-            lines.push('STRATEGIC SUMMARY');
+            lines.push('THE DEAL IN PLAIN ENGLISH');
             lines.push(analysis.summary);
             lines.push('');
         }
         if (analysis.shark_rebuttal) {
-            lines.push('SOVEREIGN REBUTTAL');
+            lines.push('YOUR REPLY, DRAFTED');
             lines.push(analysis.shark_rebuttal);
             lines.push('');
         }
@@ -179,8 +184,11 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                     {score}
                 </div>
                 <div className={`mt-2 font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded bg-${color}-900/30 text-${color}-400 border border-${color}-500/30`}>
-                    Integrity Score
+                    Fairness score
                 </div>
+                <p className="mt-2 text-[10px] text-ink-400 leading-snug text-center">
+                    0–100. Higher means the contract treats you more fairly.
+                </p>
             </div>
         );
     };
@@ -245,8 +253,8 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
         <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h2 className="font-display text-xl lg:text-2xl font-semibold text-ink-50">Contract Scanner</h2>
-                    <p className="font-mono text-[10px] text-ink-400 mt-1 tracking-[0.2em] uppercase">Automated legal analysis & strategic negotiation prep</p>
+                    <h2 className="font-display text-xl lg:text-2xl font-semibold text-ink-50">Scan a contract</h2>
+                    <p className="font-mono text-[10px] text-ink-400 mt-1 tracking-[0.2em] uppercase">Find out what it really says before you sign</p>
                 </div>
                 <Segmented
                     options={SCAN_TYPE_OPTIONS}
@@ -279,15 +287,15 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                             <>
                                 <textarea
                                     className="flex-1 bg-transparent p-4 lg:p-6 text-xs lg:text-sm font-mono text-ink-200 focus:outline-none resize-none placeholder:text-ink-700 min-h-[250px] lg:min-h-[380px] z-10 relative custom-scrollbar leading-relaxed"
-                                    placeholder={`Paste or drag your ${scanType === 'contract' ? 'contract text (.pdf, .docx, .txt)' : 'venue offer'} here for review...\n\n(Max ~15 pages / 7,500 words per scan)`}
+                                    placeholder={`Paste or drag your ${scanType === 'contract' ? 'contract (.pdf, .docx, .txt)' : 'gig or venue offer'} here...\n\n(Up to about 15 pages / 7,500 words at a time)`}
                                     value={contractText}
                                     onChange={e => setContractText(e.target.value)}
                                 />
                                 {contractText.length === 0 && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-50 px-4 text-center">
                                         <UploadCloud size={40} className="mb-3 text-ink-700" />
-                                        <span className="font-display text-sm sm:text-base lg:text-lg text-ink-400">Drag & drop a document</span>
-                                        <span className="font-mono text-[10px] text-ink-700 mt-2 tracking-widest uppercase">or paste text — ~15 pages / 7,500 words max</span>
+                                        <span className="font-display text-sm sm:text-base lg:text-lg text-ink-400">Drag a document here</span>
+                                        <span className="font-mono text-[10px] text-ink-700 mt-2 tracking-widest uppercase">or paste the text — about 15 pages max</span>
                                     </div>
                                 )}
                             </>
@@ -312,7 +320,7 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                             disabled={(!contractText && !file) || isScanning}
                         >
                             {isScanning ? <Activity size={16} className="animate-spin" /> : <Scale size={16} />}
-                            {isScanning ? 'Scanning…' : 'Scan contract'}
+                            {isScanning ? 'Reading…' : 'Check this contract'}
                         </Btn>
                     </div>
                 </div>
@@ -329,8 +337,8 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                     {!analysis && !isScanning && (
                         <EmptyState
                             icon={<Scale size={32} />}
-                            title="No document scanned yet"
-                            hint="Drop a contract or offer on the left to get a forensic breakdown"
+                            title="Nothing checked yet"
+                            hint="Paste or drop a contract on the left and we will read it for you"
                         />
                     )}
 
@@ -338,8 +346,8 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                         <div className="flex-1 flex flex-col items-center justify-center">
                             <LoadingProgressBar
                                 active={isScanning}
-                                message="Scanning document"
-                                subMessage="Clause-level predatory scan. Measured ~3 seconds live."
+                                message="Reading your contract"
+                                subMessage="Going through it line by line. Usually about 3 seconds."
                                 colorClass="violet"
                                 estimatedDurationMs={3000}
                                 speedLabel="~3s live"
@@ -356,13 +364,13 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                             {/* Toolbar */}
                             <div className="flex justify-end">
                                 <Btn variant="ghost" size="sm" onClick={handleDownloadAnalysis}>
-                                    <Download size={12} /> Download analysis (.txt)
+                                    <Download size={12} /> Download this report (.txt)
                                 </Btn>
                             </div>
 
                             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-ink-200 leading-relaxed">
                                 {analysis.disclaimer ||
-                                    'Not legal advice. Educational tool only — have a qualified entertainment attorney review any agreement before signing.'}
+                                    "This is a fast first read, not legal advice. For anything you're about to sign, have a lawyer look at it."}
                             </div>
 
                             {/* Top Row: Score & Summary */}
@@ -370,18 +378,20 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                                 <ScoreGauge score={analysis.integrity_score || 50} />
                                 <Panel className="col-span-2 flex flex-col justify-center" accent={ACCENT}>
                                     <h4 className="font-mono text-[10px] uppercase tracking-widest text-ink-400 mb-2 border-b border-white/10 pb-2 flex items-center gap-2">
-                                        <TrendingUp size={12} /> Strategic Summary
+                                        <TrendingUp size={12} /> The deal in plain English
                                     </h4>
-                                    <p className="text-xs font-inter text-ink-200 leading-relaxed">
+                                    {/* div, not p: codex terms render as <details>, which is
+                                        not valid inside a <p> and gets auto-closed by the parser. */}
+                                    <div className="text-xs font-inter text-ink-200 leading-relaxed">
                                         {renderWithCodex(analysis.summary)}
-                                    </p>
+                                    </div>
                                 </Panel>
                             </div>
 
                             {analysis.linter?.findings?.length > 0 && (
                                 <Panel
-                                    title={`Rule linter · ${analysis.linter.counts?.total || analysis.linter.findings.length} hits`}
-                                    sub="Free · no AI · regex codex"
+                                    title={`Quick check · ${analysis.linter.counts?.total || analysis.linter.findings.length} spotted`}
+                                    sub="Free instant check — no AI needed"
                                     accent={ACCENT}
                                 >
                                     <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -402,7 +412,7 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                             {/* Red Flags List */}
                             {analysis.red_flags && analysis.red_flags.length > 0 && (
                                 <Panel
-                                    title={`Threats detected: ${analysis.red_flags.length}`}
+                                    title={`${analysis.red_flags.length} thing${analysis.red_flags.length === 1 ? '' : 's'} to push back on`}
                                     accent="var(--color-ember-500)"
                                     actions={<ShieldAlert className="text-red-400" size={18} />}
                                 >
@@ -414,22 +424,24 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                                             );
                                             return (
                                             <div key={idx} className="glass-obsidian border border-white/10 border-l-4 border-l-red-500 rounded-lg p-4 relative">
-                                                <p className="text-xs font-mono text-ink-400 italic mb-2 border-l-2 border-red-500/50 pl-2">
+                                                {/* divs, not p: codex terms render as <details>, which the
+                                                    HTML parser will not allow inside a <p>. */}
+                                                <div className="text-xs font-mono text-ink-400 italic mb-2 border-l-2 border-red-500/50 pl-2">
                                                     "...{renderWithCodex(flag.clause)}..."
-                                                </p>
-                                                <p className="text-sm font-inter text-red-400 font-semibold mb-1">
-                                                    Risk: {renderWithCodex(flag.risk)}
-                                                </p>
-                                                <p className="text-sm font-inter text-emerald-400 flex items-start gap-2 mt-3 bg-emerald-900/20 p-2 rounded-lg border border-emerald-500/30">
-                                                    <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-400" /> <span><span className="font-mono text-[10px] text-emerald-300 tracking-widest uppercase block mb-1">Recommended Fix</span>{renderWithCodex(flag.fix)}</span>
-                                                </p>
+                                                </div>
+                                                <div className="text-sm font-inter text-red-400 font-semibold mb-1">
+                                                    What this means for you: {renderWithCodex(flag.risk)}
+                                                </div>
+                                                <div className="text-sm font-inter text-emerald-400 flex items-start gap-2 mt-3 bg-emerald-900/20 p-2 rounded-lg border border-emerald-500/30">
+                                                    <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-400" /> <span><span className="font-mono text-[10px] text-emerald-300 tracking-widest uppercase block mb-1">How to push back</span>{renderWithCodex(flag.fix)}</span>
+                                                </div>
                                                 {matched && onOpenCodexTerm && (
                                                     <button
                                                         type="button"
                                                         onClick={() => onOpenCodexTerm(matched.term)}
                                                         className="mt-3 font-mono text-[10px] tracking-widest uppercase text-violet-300 hover:text-violet-200 underline-offset-2 hover:underline"
                                                     >
-                                                        Look up “{matched.term}” in Codex →
+                                                        What does “{matched.term}” mean? →
                                                     </button>
                                                 )}
                                             </div>
@@ -439,9 +451,10 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                                 </Panel>
                             )}
 
-                            {/* Legal Rebuttal */}
+                            {/* Drafted reply the artist can send back */}
                             <Panel
-                                title="Sovereign Rebuttal"
+                                title="Your reply, drafted"
+                                sub="A firm, polite way to raise these points"
                                 accent={ACCENT}
                                 actions={
                                     <Btn
@@ -450,7 +463,7 @@ export default function ZionSentinel({ onOpenCodexTerm, onScanComplete }: ZionPr
                                         onClick={handleCopyRebuttal}
                                         className={rebuttalCopied ? '!border-emerald-500/50 !text-emerald-400' : ''}
                                     >
-                                        <Copy size={12} /> {rebuttalCopied ? 'Copied!' : 'Copy rebuttal'}
+                                        <Copy size={12} /> {rebuttalCopied ? 'Copied!' : 'Copy reply'}
                                     </Btn>
                                 }
                             >

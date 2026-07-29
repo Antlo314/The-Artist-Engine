@@ -42,6 +42,13 @@ def _date_window(timeframe: str):
     if not tf or "active" in tf or "now" in tf:
         # Default active window: next 60 days.
         return _iso(now), _iso(now + timedelta(days=60))
+    # Plain phrasing the UI now uses: "next 90 days", "next 6 months".
+    rel = re.search(r"next\s+(\d+)\s*(day|week|month)", tf)
+    if rel:
+        n = int(rel.group(1))
+        unit = rel.group(2)
+        days = n if unit == "day" else n * 7 if unit == "week" else n * 30
+        return _iso(now), _iso(now + timedelta(days=days))
     # Season / quarter keywords -> explicit windows.
     seasons = {
         "spring": (3, 1, 5, 31), "summer": (6, 1, 8, 31),

@@ -1,12 +1,15 @@
 /**
- * Free-max tools for investor demo: stack inventory, tour route, release checklist, offer compare.
- * Paid features only appear as Coming Soon hints.
+ * Free extras — small tools that cost nothing and need no AI:
+ * tour routing (OpenStreetMap) and a release checklist.
+ * Offer comparison moved to Pitch & Deals, where the rest of the
+ * negotiation tools live.
  */
 import { useEffect, useState } from 'react';
-import { Check, Clock, Map, ListChecks, Scale, Sparkles } from 'lucide-react';
+import { Check, Clock, Map, ListChecks } from 'lucide-react';
 import { apiJson } from '../lib/api';
 import { downloadText } from '../lib/exportUtils';
 import { Panel, Btn, Field, inputCls } from './ui/Shell';
+import HelpTip from './ui/HelpTip';
 
 export default function FreeOps() {
     const [stack, setStack] = useState<any | null>(null);
@@ -21,22 +24,12 @@ export default function FreeOps() {
             return {};
         }
     });
-    const [offerA, setOfferA] = useState('');
-    const [offerB, setOfferB] = useState('');
-    const [compare, setCompare] = useState<any | null>(null);
-    const [cmpBusy, setCmpBusy] = useState(false);
     const [err, setErr] = useState<string | null>(null);
 
     useEffect(() => {
         apiJson('/api/free/stack')
             .then(setStack)
-            .catch(() =>
-                setStack({
-                    live_free_now: [],
-                    coming_soon_paid_or_heavy: [],
-                    philosophy: 'Free stack loads when API is online.',
-                })
-            );
+            .catch(() => setStack(null));
         apiJson('/api/free/release-checklist')
             .then((d) => setChecklist(d.items || []))
             .catch(() => setChecklist([]));
@@ -46,7 +39,7 @@ export default function FreeOps() {
         try {
             localStorage.setItem('source_release_checks', JSON.stringify(checks));
         } catch {
-            /* ignore */
+            /* storage full — not fatal */
         }
     }, [checks]);
 
@@ -62,37 +55,20 @@ export default function FreeOps() {
             });
             setRoute(data);
         } catch (e: any) {
-            setErr(e?.message || 'Tour route failed');
+            setErr(e?.message || 'Could not work out a route. Check the city spellings.');
         } finally {
             setRouteBusy(false);
         }
     };
 
-    const runCompare = async () => {
-        setCmpBusy(true);
-        setErr(null);
-        try {
-            const data = await apiJson('/api/free/offer-compare', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ offer_a: offerA, offer_b: offerB }),
-            });
-            setCompare(data);
-        } catch (e: any) {
-            setErr(e?.message || 'Compare failed');
-        } finally {
-            setCmpBusy(false);
-        }
-    };
+    const doneCount = Object.values(checks).filter(Boolean).length;
 
     return (
         <div className="space-y-4 md:space-y-6">
             <div>
-                <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-ember-500 mb-1">Investor free stack</p>
-                <h2 className="font-display text-2xl text-ink-50 tracking-tight">Max free. Hint the rest.</h2>
+                <h2 className="font-display text-2xl text-ink-50 tracking-tight">Free extras</h2>
                 <p className="text-sm text-ink-400 mt-1 max-w-2xl leading-relaxed">
-                    {stack?.philosophy ||
-                        'Everything below is free/open or free-tier. Paid rails are roadmap only for the demo.'}
+                    Small tools that cost nothing to run and never touch your daily limits.
                 </p>
             </div>
 
@@ -100,59 +76,24 @@ export default function FreeOps() {
                 <p className="text-sm text-red-400 border border-red-500/30 bg-red-500/10 rounded-lg px-3 py-2">{err}</p>
             )}
 
-            <div className="grid md:grid-cols-2 gap-4">
-                <Panel title="Live free now" sub="Shipping on this demo" accent="var(--color-ember-500)" hud>
-                    <ul className="space-y-2 max-h-72 overflow-y-auto">
-                        {(stack?.live_free_now || []).map((item: any) => (
-                            <li key={item.id} className="flex gap-2 text-sm">
-                                <Check size={14} className="text-ember-500 shrink-0 mt-0.5" />
-                                <div>
-                                    <div className="text-ink-50 font-medium">{item.name}</div>
-                                    <div className="font-mono text-[10px] text-ink-400 tracking-wide">{item.stack}</div>
-                                </div>
-                            </li>
-                        ))}
-                        {!stack?.live_free_now?.length && (
-                            <li className="text-xs text-ink-400">Loading free inventory…</li>
-                        )}
-                    </ul>
-                </Panel>
-
-                <Panel title="Coming later" sub="Not free / needs partners — demo hints only" accent="#8a8a93">
-                    <ul className="space-y-2 max-h-72 overflow-y-auto">
-                        {(stack?.coming_soon_paid_or_heavy || []).map((item: any) => (
-                            <li key={item.id} className="flex gap-2 text-sm">
-                                <Clock size={14} className="text-ink-400 shrink-0 mt-0.5" />
-                                <div>
-                                    <div className="text-ink-200 font-medium">{item.name}</div>
-                                    <div className="font-mono text-[10px] text-ink-400 tracking-wide">{item.why}</div>
-                                    <span className="inline-block mt-1 font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full border border-white/10 text-ink-400">
-                                        Coming soon
-                                    </span>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </Panel>
-            </div>
-
             <div className="grid lg:grid-cols-2 gap-4">
-                <Panel title="Tour route (free OSM)" sub="Nearest-neighbor · OpenStreetMap" accent="var(--color-radar)">
+                <Panel title="Plan a tour route" sub="Puts your cities in the order that drives least" accent="var(--color-radar)">
                     <div className="flex items-center gap-2 mb-3 text-ink-400">
                         <Map size={14} />
-                        <span className="font-mono text-[10px] tracking-widest uppercase">No Google Maps bill</span>
+                        <span className="text-[11px]">Type the cities you want to play — order doesn't matter.</span>
+                        <HelpTip text="We look up each city, then order them so the total drive is as short as we can make it. Distances are straight-line estimates, not turn-by-turn directions." />
                     </div>
-                    <Field label="Cities (comma-separated)">
+                    <Field label="Cities">
                         <textarea
                             value={cities}
                             onChange={(e) => setCities(e.target.value)}
                             className={`${inputCls()} min-h-[88px]`}
-                            placeholder="City A, City B, City C"
+                            placeholder="Atlanta, Nashville, Charlotte"
                         />
                     </Field>
                     <div className="mt-3 flex gap-2">
                         <Btn variant="accent" accent="var(--color-radar)" onClick={runRoute} disabled={routeBusy}>
-                            {routeBusy ? 'Routing…' : 'Optimize order'}
+                            {routeBusy ? 'Working it out…' : 'Put them in order'}
                         </Btn>
                         {route?.route && (
                             <Btn
@@ -164,49 +105,43 @@ export default function FreeOps() {
                                             `Route: ${(route.route || []).join(' → ')}`,
                                             `Total: ${route.total_mi} mi (${route.total_km} km)`,
                                             '',
-                                            ...(route.legs_km || []).map(
-                                                (l: any) => `${l.from} → ${l.to}: ${l.mi} mi`
-                                            ),
+                                            ...(route.legs_km || []).map((l: any) => `${l.from} → ${l.to}: ${l.mi} mi`),
                                             '',
-                                            'Source: OpenStreetMap Nominatim (free)',
+                                            'Distances from OpenStreetMap.',
                                         ].join('\n')
                                     )
                                 }
                             >
-                                Export
+                                Download
                             </Btn>
                         )}
                     </div>
                     {route?.route && (
                         <div className="mt-4 space-y-2">
-                            <p className="text-sm text-ink-50 font-medium">
-                                {(route.route as string[]).join(' → ')}
-                            </p>
-                            <p className="font-mono text-[11px] text-ink-400">
-                                ~{route.total_mi} mi · {route.total_km} km · {route.source}
+                            <p className="text-sm text-ink-50 font-medium">{(route.route as string[]).join(' → ')}</p>
+                            <p className="text-[12px] text-ink-400">
+                                About {route.total_mi} miles ({route.total_km} km) of driving in total.
                             </p>
                         </div>
                     )}
                 </Panel>
 
-                <Panel title="Release checklist" sub="Local · free" accent="var(--color-audio)">
+                <Panel title="Release checklist" sub="The steps most artists forget" accent="var(--color-audio)">
                     <div className="flex items-center gap-2 mb-3 text-ink-400">
                         <ListChecks size={14} />
-                        <span className="font-mono text-[10px] tracking-widest uppercase">
-                            {Object.values(checks).filter(Boolean).length}/{checklist.length || '—'} done
+                        <span className="text-[11px]">
+                            {doneCount} of {checklist.length || '—'} done — saved on this device
                         </span>
                     </div>
-                    <ul className="space-y-2 max-h-64 overflow-y-auto">
+                    <ul className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
                         {checklist.map((item) => (
                             <li key={item.id}>
-                                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                                <label className="flex items-start gap-2.5 text-sm cursor-pointer py-1">
                                     <input
                                         type="checkbox"
                                         className="mt-1"
                                         checked={!!checks[item.id]}
-                                        onChange={(e) =>
-                                            setChecks((c) => ({ ...c, [item.id]: e.target.checked }))
-                                        }
+                                        onChange={(e) => setChecks((c) => ({ ...c, [item.id]: e.target.checked }))}
                                     />
                                     <span className={checks[item.id] ? 'text-ink-400 line-through' : 'text-ink-200'}>
                                         {item.label}
@@ -214,74 +149,38 @@ export default function FreeOps() {
                                 </label>
                             </li>
                         ))}
+                        {checklist.length === 0 && (
+                            <li className="text-xs text-ink-400">Loading the checklist…</li>
+                        )}
                     </ul>
                 </Panel>
             </div>
 
-            <Panel title="Offer compare (free)" sub="Dual linter + optional Gemini table" accent="var(--color-zion)">
-                <div className="flex items-center gap-2 mb-3 text-ink-400">
-                    <Scale size={14} />
-                    <span className="font-mono text-[10px] tracking-widest uppercase">Not legal advice</span>
+            {stack && (
+                <div className="grid md:grid-cols-2 gap-4">
+                    <Panel title="What's working today" sub="Ready to use right now" accent="var(--color-ember-500)">
+                        <ul className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                            {(stack?.live_free_now || []).map((item: any) => (
+                                <li key={item.id} className="flex gap-2 text-sm">
+                                    <Check size={14} className="text-ember-500 shrink-0 mt-0.5" />
+                                    <span className="text-ink-200">{item.name}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </Panel>
+
+                    <Panel title="Coming later" sub="On the roadmap, not built yet" accent="var(--color-ink-500)">
+                        <ul className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                            {(stack?.coming_soon_paid_or_heavy || []).map((item: any) => (
+                                <li key={item.id} className="flex gap-2 text-sm">
+                                    <Clock size={14} className="text-ink-400 shrink-0 mt-0.5" />
+                                    <span className="text-ink-300">{item.name}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </Panel>
                 </div>
-                <div className="grid md:grid-cols-2 gap-3">
-                    <Field label="Offer A">
-                        <textarea
-                            value={offerA}
-                            onChange={(e) => setOfferA(e.target.value)}
-                            className={`${inputCls()} min-h-[120px]`}
-                            placeholder="Paste offer / deal text A"
-                        />
-                    </Field>
-                    <Field label="Offer B">
-                        <textarea
-                            value={offerB}
-                            onChange={(e) => setOfferB(e.target.value)}
-                            className={`${inputCls()} min-h-[120px]`}
-                            placeholder="Paste offer / deal text B"
-                        />
-                    </Field>
-                </div>
-                <div className="mt-3">
-                    <Btn variant="accent" accent="var(--color-zion)" onClick={runCompare} disabled={cmpBusy}>
-                        {cmpBusy ? 'Comparing…' : 'Compare offers'}
-                    </Btn>
-                </div>
-                {compare && (
-                    <div className="mt-4 space-y-3 text-sm">
-                        <p className="text-ink-50 font-medium">{compare.winner_hint}</p>
-                        <div className="grid md:grid-cols-2 gap-3">
-                            <div className="border border-white/10 rounded-lg p-3">
-                                <div className="font-mono text-[10px] uppercase text-ink-400 mb-1">A integrity hint</div>
-                                <div className="text-2xl font-display text-ink-50">
-                                    {compare.offer_a?.integrity_hint ?? '—'}
-                                </div>
-                                <div className="text-xs text-ink-400 mt-1">
-                                    {compare.offer_a?.linter?.counts?.total ?? 0} rule hits
-                                </div>
-                            </div>
-                            <div className="border border-white/10 rounded-lg p-3">
-                                <div className="font-mono text-[10px] uppercase text-ink-400 mb-1">B integrity hint</div>
-                                <div className="text-2xl font-display text-ink-50">
-                                    {compare.offer_b?.integrity_hint ?? '—'}
-                                </div>
-                                <div className="text-xs text-ink-400 mt-1">
-                                    {compare.offer_b?.linter?.counts?.total ?? 0} rule hits
-                                </div>
-                            </div>
-                        </div>
-                        {compare.ai_compare && (
-                            <div className="border border-white/10 rounded-lg p-3 bg-white/[0.03]">
-                                <div className="flex items-center gap-2 font-mono text-[10px] uppercase text-ink-400 mb-2">
-                                    <Sparkles size={12} /> AI table (free tier)
-                                </div>
-                                <p className="text-ink-200 text-xs leading-relaxed mb-2">{compare.ai_compare.reason}</p>
-                                <p className="font-mono text-[11px] text-ember-500">Prefer: {compare.ai_compare.prefer}</p>
-                            </div>
-                        )}
-                        <p className="text-[10px] text-ink-400 leading-relaxed">{compare.disclaimer}</p>
-                    </div>
-                )}
-            </Panel>
+            )}
         </div>
     );
 }

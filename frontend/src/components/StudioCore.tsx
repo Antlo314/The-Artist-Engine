@@ -10,11 +10,41 @@ import { useAuth } from '../lib/auth';
 import { PageHeader, Panel, Btn, StepHint, Segmented } from './ui/Shell';
 import Walkthrough from './ui/Walkthrough';
 import CoachPrompt from './ui/CoachPrompt';
-import { hasSeenTour } from '../lib/onboarding';
+import HelpTip from './ui/HelpTip';
+import { shouldOpenViewTour } from '../lib/onboarding';
 
 /** Practical limit for cloud master (Render RAM + laptop browser). Not multi-GB dumps. */
 const MAX_AUDIO_UPLOAD_BYTES = 80 * 1024 * 1024; // 80 MB
 const MAX_AUDIO_UPLOAD_LABEL = '80 MB';
+
+/** Plain-English hint shown wherever the 0–100 controls appear. */
+const NEUTRAL_SLIDER_HINT = 'Every slider sits at 50 for no change — below 50 takes it away, above 50 adds it.';
+
+/** Turn the backend's raw loudness-measuring id into a sentence a musician can read. */
+function describeLoudnessMethod(m: string): string {
+    if (m === 'pyloudnorm_bs1770') return 'Measured with broadcast-standard metering';
+    if (m === 'unavailable') return 'We could not measure this one — check it in your recording software';
+    return 'Estimated — install full metering for exact numbers';
+}
+
+/** Turn the backend's raw stem-splitting id into a sentence a musician can read. */
+function describeStemMethod(m: string): string {
+    if (m === 'demucs_htdemucs') return 'Split with the highest-quality separator on the server.';
+    if (m === 'scipy_hpss_bands') {
+        return 'Split with the built-in separator. Good enough to practise or remix over, not a clean studio vocal.';
+    }
+    return 'Split with the separator available on the server.';
+}
+
+/** Build a friendly download name from the song the musician uploaded. */
+function masterDownloadName(originalName: string | undefined | null, format: string): string {
+    const base = (originalName || '')
+        .replace(/\.[^./\\]+$/, '')
+        .replace(/[\\/:*?"<>|]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    return `${base ? `${base} (mastered)` : 'mastered-track'}.${format}`;
+}
 
 function formatMasterError(status: number, detail: unknown): string {
     const asText = (d: unknown): string => {
@@ -33,33 +63,33 @@ function formatMasterError(status: number, detail: unknown): string {
     };
     const body = asText(detail);
     if (status === 401) {
-        return 'Session expired or not signed in. Please log in again, then retry mastering.';
+        return 'You have been signed out. Log in again, then start the master over.';
     }
     if (status === 429) {
-        return body || 'Mastering limit reached (daily quota or one master at a time). Wait a moment or try tomorrow.';
+        return body || 'You have hit the limit for now — either your daily allowance, or one song at a time. Wait a moment, or try again tomorrow.';
     }
     if (status === 413) {
-        return body || `File too large. Use a WAV/FLAC under ${MAX_AUDIO_UPLOAD_LABEL}.`;
+        return body || `That file is too big. Use a WAV or FLAC under ${MAX_AUDIO_UPLOAD_LABEL}.`;
     }
     if (status === 502 || status === 503 || status === 504) {
-        return 'Mastering server is waking up or timed out (common after idle on free hosting). Wait 30–60s and try again with a shorter file or Pure mode (no reference).';
+        return 'The mastering server is waking up, or it took too long to answer. Wait 30–60 seconds and try again with a shorter song, or without a reference track.';
     }
     if (status === 0 || status === 408) {
-        return 'Network timeout while mastering. Check Wi‑Fi, use a smaller file, or try Pure mode without a reference track.';
+        return 'The connection dropped while mastering. Check your Wi‑Fi, use a smaller file, or try again without a reference track.';
     }
-    return body || `Mastering failed (HTTP ${status}). Check that you are signed in and the server is online.`;
+    return body || `Mastering did not finish (error ${status}). Check that you are signed in and try again.`;
 }
 
 function acceptAudioFile(file: File, kind: 'mix' | 'reference'): string | null {
     if (!file.type.startsWith('audio/') && !/\.(wav|mp3|flac|aiff?|m4a|ogg|aac)$/i.test(file.name)) {
-        return `${kind === 'mix' ? 'Mix' : 'Reference'} must be an audio file (WAV, FLAC, MP3…).`;
+        return `Your ${kind === 'mix' ? 'song' : 'reference track'} has to be an audio file (WAV, FLAC, MP3…).`;
     }
     if (file.size > MAX_AUDIO_UPLOAD_BYTES) {
         const mb = (file.size / (1024 * 1024)).toFixed(1);
-        return `${kind === 'mix' ? 'Mix' : 'Reference'} is ${mb} MB. Max is ${MAX_AUDIO_UPLOAD_LABEL}. Export a shorter bounce or lower bit depth.`;
+        return `Your ${kind === 'mix' ? 'song' : 'reference track'} is ${mb} MB and the limit is ${MAX_AUDIO_UPLOAD_LABEL}. Export a shorter or smaller version from your recording software.`;
     }
     if (file.size < 256) {
-        return `${kind === 'mix' ? 'Mix' : 'Reference'} file looks empty.`;
+        return `Your ${kind === 'mix' ? 'song' : 'reference track'} file looks empty.`;
     }
     return null;
 }
@@ -104,7 +134,7 @@ export default function StudioCore() {
     const [sessionMasters, setSessionMasters] = useState<
         { id: string; label: string; url: string; mode: string; meters: any | null }[]
     >([]);
-    const [showStudioTour, setShowStudioTour] = useState(() => !hasSeenTour('studio'));
+    const [showStudioTour, setShowStudioTour] = useState(() => shouldOpenViewTour('studio'));
 
     // Blind Test states
     const [showBlindTest, setShowBlindTest] = useState(false);
@@ -264,10 +294,11 @@ export default function StudioCore() {
 
     const handleDownload = async () => {
         if (!masterAudioUrl) return;
+        const downloadName = masterDownloadName(targetFile?.name, outputFormat);
         try {
             if ('showSaveFilePicker' in window) {
                 const handle = await (window as any).showSaveFilePicker({
-                    suggestedName: `SOVEREIGN_MASTER.${outputFormat}`,
+                    suggestedName: downloadName,
                     types: [{
                         description: 'Audio File',
                         accept: { [`audio/${outputFormat === 'mp3' ? 'mpeg' : outputFormat}`]: [`.${outputFormat}`] },
@@ -280,7 +311,7 @@ export default function StudioCore() {
             } else {
                 const a = document.createElement('a');
                 a.href = masterAudioUrl;
-                a.download = `SOVEREIGN_MASTER.${outputFormat}`;
+                a.download = downloadName;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -315,11 +346,11 @@ export default function StudioCore() {
                 setOracleData(data.oracle);
                 refreshMe();
             } else {
-                throw new Error(data.error || 'Oracle Engine Failure');
+                throw new Error(data.error || 'We could not listen to your song. Please try again.');
             }
         } catch (err: any) {
             console.error(err);
-            alert(err?.message || 'Oracle Engine Failure.');
+            alert(err?.message || 'We could not listen to your song. Please try again.');
         } finally {
             setIsOracleScanning(false);
         }
@@ -391,11 +422,13 @@ export default function StudioCore() {
             setSessionMasters((prev) => {
                 const profileLabel =
                     masterProfile === 'custom'
-                        ? `CUSTOM ${customLufs}`
-                        : masterProfile.toUpperCase();
+                        ? `${customLufs} LUFS`
+                        : masterProfile === 'off'
+                          ? 'No loudness change'
+                          : masterProfile.charAt(0).toUpperCase() + masterProfile.slice(1);
                 const entry = {
                     id: `${Date.now()}`,
-                    label: `v${prev.length + 1} · ${profileLabel}${refFile ? ' · ref' : ' · pure'}`,
+                    label: `Take ${prev.length + 1} · ${profileLabel}${refFile ? ' · with reference' : ' · song only'}`,
                     url,
                     mode: modeHdr,
                     meters: metersParsed,
@@ -414,12 +447,12 @@ export default function StudioCore() {
         } catch (err: any) {
             console.error(err);
             setPhase('dropzone');
-            const msg = err?.message || 'Mastering Engine Failure. Check logs.';
+            const msg = err?.message || 'Mastering did not finish. Please try again.';
             // Fetch network failures often have TypeError / Failed to fetch
             if (/failed to fetch|networkerror|load failed/i.test(msg)) {
                 alert(
-                    'Could not reach the mastering server. If the site was idle, wait ~30s for cold start and retry. ' +
-                    'Also confirm you are signed in and your mix is under ' + MAX_AUDIO_UPLOAD_LABEL + '.'
+                    'We could not reach the mastering server. If you have been idle, give it about 30 seconds to wake up and try again. ' +
+                    'Also check that you are signed in and that your song is under ' + MAX_AUDIO_UPLOAD_LABEL + '.'
                 );
             } else {
                 alert(msg);
@@ -460,11 +493,11 @@ export default function StudioCore() {
                 setStemsMeta({ method: data.method, note: data.note });
                 refreshMe();
             } else {
-                throw new Error(data.detail || 'Stem Engine Failure');
+                throw new Error(data.detail || 'We could not split your song into separate tracks.');
             }
         } catch (err: any) {
             console.error(err);
-            alert(err?.message || 'Stem extraction failed.');
+            alert(err?.message || 'We could not split your song into separate tracks.');
         } finally {
             setIsExtractingStems(false);
         }
@@ -514,11 +547,14 @@ export default function StudioCore() {
     const Knob = ({
         label,
         hint,
+        help,
         value,
         onChange,
     }: {
         label: string;
         hint?: string;
+        /** One plain sentence explaining what this control does. */
+        help?: string;
         value: number;
         onChange?: (v: number) => void;
     }) => (
@@ -541,19 +577,25 @@ export default function StudioCore() {
                 aria-label={label}
             />
             <div className="flex flex-col items-center gap-0.5">
-                <span className="font-mono text-[10px] text-ink-200 tracking-widest uppercase text-center leading-tight">
-                    {label}
-                </span>
+                <div className="flex items-center justify-center gap-1">
+                    <span className="font-mono text-[10px] text-ink-200 tracking-widest uppercase text-center leading-tight">
+                        {label}
+                    </span>
+                    {help && <HelpTip text={help} label={`What ${label} does`} />}
+                </div>
                 {hint && <span className="text-[10px] text-ink-700 text-center leading-tight">{hint}</span>}
             </div>
         </div>
     );
 
-    const OptionSlider = ({ label, hint, value, min = 0, max = 100, suffix = '', onChange }:
-        { label: string; hint?: string; value: number; min?: number; max?: number; suffix?: string; onChange: (v: number) => void }) => (
+    const OptionSlider = ({ label, hint, help, value, min = 0, max = 100, suffix = '', onChange }:
+        { label: string; hint?: string; help?: string; value: number; min?: number; max?: number; suffix?: string; onChange: (v: number) => void }) => (
         <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] tracking-widest uppercase text-ink-200">{label}</span>
+                <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-[10px] tracking-widest uppercase text-ink-200">{label}</span>
+                    {help && <HelpTip text={help} label={`What ${label} does`} />}
+                </div>
                 <span className="font-mono text-[10px] text-cyan-400 tabular-nums">{value}{suffix}</span>
             </div>
             <input
@@ -621,7 +663,7 @@ export default function StudioCore() {
                 <div ref={containerRef} className="w-full relative z-10" />
                 {renderHeatmap && (
                     <div className="w-full mt-2 relative z-0 border-t border-white/10 pt-2">
-                        <span className="font-mono text-[8px] text-ink-200 uppercase tracking-widest absolute -top-1 left-0 bg-black/50 px-1 rounded z-20">Acoustic heatmap</span>
+                        <span className="font-mono text-[8px] text-ink-200 uppercase tracking-widest absolute -top-1 left-0 bg-black/50 px-1 rounded z-20">Frequency map — low notes at the bottom, high notes at the top</span>
                         <div ref={spectrogramRef} className="w-full rounded overflow-hidden opacity-80" />
                     </div>
                 )}
@@ -634,16 +676,16 @@ export default function StudioCore() {
             <PageHeader
                 view="studio"
                 accent="var(--color-audio)"
-                module="AUDIO MASTER CORE"
+                module="MAKE IT SOUND FINISHED"
                 title="Studio"
-                desc="Reference-matched commercial masters — Pure mode needs only your mix; add a reference for Matchering."
+                desc="Turn a rough mix into a track that holds up next to songs on the radio. Your song is all you need — add a song you love and we can match its sound."
                 speedHint="~30s–3m"
             />
-            <StepHint steps={["Drop your mix", "Optional reference", "Master & download"]} accent="var(--color-audio)" />
+            <StepHint steps={["Add your song", "Add a reference (optional)", "Master and download"]} accent="var(--color-audio)" />
             {phase === 'dropzone' && (
-                <CoachPrompt id="studio-drop-tip" accent="var(--color-audio)" title="Studio tip">
-                    Start with an unmastered WAV/FLAC under 80 MB. Reference is optional — skip it for a Pure master.
-                    Stay signed in; long reference matches can take 1–3 minutes on first cold start.
+                <CoachPrompt id="studio-drop-tip" accent="var(--color-audio)" title="Before you start">
+                    Upload the version of your song that has not been mastered yet — a WAV or FLAC under 80 MB works best.
+                    A reference track is optional. Stay signed in and keep this tab open; with a reference it can take 1–3 minutes.
                 </CoachPrompt>
             )}
 
@@ -668,9 +710,9 @@ export default function StudioCore() {
                             <div className="w-20 h-20 rounded-full border-2 border-dashed border-white/15 flex items-center justify-center mb-6 group-hover:rotate-180 transition-transform duration-1000 ease-in-out">
                                 <UploadCloud size={32} className="text-cyan-400" />
                             </div>
-                            <h3 className="font-display text-2xl text-ink-50 mb-2 tracking-tight">Drop your tracks</h3>
+                            <h3 className="font-display text-2xl text-ink-50 mb-2 tracking-tight">Drop your song here</h3>
                             <p className="font-mono text-ink-400 text-xs tracking-widest text-center max-w-sm mb-8 uppercase">
-                                Drag in your mix and optional reference · WAV/FLAC preferred · max {MAX_AUDIO_UPLOAD_LABEL} each
+                                Drag in your song, and a reference if you want one · WAV or FLAC sounds best · max {MAX_AUDIO_UPLOAD_LABEL} each
                             </p>
 
                             <div className="flex flex-col gap-4 w-full px-8 z-10">
@@ -691,9 +733,9 @@ export default function StudioCore() {
                                             <Mic2 size={14} />
                                         </div>
                                         <div className="flex flex-col truncate">
-                                            <span className={`font-mono text-[10px] tracking-widest uppercase ${targetFile ? 'text-cyan-400' : 'text-ink-400'}`}>Your mix</span>
+                                            <span className={`font-mono text-[10px] tracking-widest uppercase ${targetFile ? 'text-cyan-400' : 'text-ink-400'}`}>Your song</span>
                                             <span className={`font-mono text-xs truncate ${targetFile ? 'text-ink-50' : 'text-ink-700'}`}>
-                                                {targetFile ? targetFile.name : 'Choose your unmastered mix…'}
+                                                {targetFile ? targetFile.name : 'Pick the mix you want mastered…'}
                                             </span>
                                         </div>
                                     </div>
@@ -734,9 +776,9 @@ export default function StudioCore() {
                                             <Volume2 size={14} />
                                         </div>
                                         <div className="flex flex-col truncate">
-                                            <span className={`font-mono text-[10px] tracking-widest uppercase ${refFile ? 'text-cyan-400' : 'text-ink-400'}`}>Reference track <span className="text-ink-700 normal-case">(optional)</span></span>
+                                            <span className={`font-mono text-[10px] tracking-widest uppercase ${refFile ? 'text-cyan-400' : 'text-ink-400'}`}>A song to match <span className="text-ink-700 normal-case">(optional)</span></span>
                                             <span className={`font-mono text-xs truncate ${refFile ? 'text-ink-50' : 'text-ink-700'}`}>
-                                                {refFile ? refFile.name : 'Optional — skip for a Pure master'}
+                                                {refFile ? refFile.name : 'Optional — a released song whose sound you want'}
                                             </span>
                                         </div>
                                     </div>
@@ -764,7 +806,13 @@ export default function StudioCore() {
                             {/* Master profile (loudness target) */}
                             {targetFile && (
                                 <div className="mt-6 flex flex-col items-center gap-2 relative z-10 w-full">
-                                    <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">Master profile</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">Loudness target</span>
+                                        <HelpTip
+                                            text="How loud the finished song ends up. Streaming services quiet everything down to about the same level, so louder is not always better — pick where the song will be played."
+                                            label="What Loudness target does"
+                                        />
+                                    </div>
                                     <Segmented
                                         accent="var(--color-audio)"
                                         value={masterProfile}
@@ -778,11 +826,11 @@ export default function StudioCore() {
                                         ]}
                                     />
                                     <span className="font-mono text-[9px] text-ink-700 tracking-wide">
-                                        {masterProfile === 'streaming' && 'Spotify / Apple standard · −14 LUFS'}
-                                        {masterProfile === 'club' && 'DJ-loud for club systems · −9 LUFS'}
-                                        {masterProfile === 'podcast' && 'Speech-optimized · −16 LUFS'}
-                                        {masterProfile === 'off' && 'No loudness normalization'}
-                                        {masterProfile === 'custom' && `Target ${customLufs} LUFS`}
+                                        {masterProfile === 'streaming' && 'What Spotify and Apple Music expect · −14 LUFS'}
+                                        {masterProfile === 'club' && 'Loud enough for a club sound system · −9 LUFS'}
+                                        {masterProfile === 'podcast' && 'Best for talking and spoken word · −16 LUFS'}
+                                        {masterProfile === 'off' && 'Leave the volume where your song already sits'}
+                                        {masterProfile === 'custom' && `Aim for ${customLufs} LUFS`}
                                     </span>
                                     {masterProfile === 'custom' && (
                                         <input
@@ -795,7 +843,13 @@ export default function StudioCore() {
                             )}
 
                             <div className="mt-5 flex flex-col items-center gap-1.5 relative z-10 w-full">
-                                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">Export format</span>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-400">File type to download</span>
+                                    <HelpTip
+                                        text="WAV and FLAC keep every bit of quality and are what you send to distributors. MP3 is smaller and easier to text to a friend."
+                                        label="Which file type to pick"
+                                    />
+                                </div>
                                 <div className="flex gap-2">
                                     {['wav', 'mp3', 'flac'].map(fmt => (
                                         <button
@@ -823,16 +877,37 @@ export default function StudioCore() {
                                             initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
                                             className="mt-4 flex flex-col gap-4 bg-black/30 border border-white/10 rounded-xl p-4"
                                         >
+                                            <p className="font-mono text-[9px] text-ink-700 leading-relaxed">{NEUTRAL_SLIDER_HINT}</p>
                                             {refFile && (
-                                                <OptionSlider label="Reference influence" hint="how hard to chase the reference" value={refInfluence} min={0} max={100} onChange={setRefInfluence} suffix="%" />
+                                                <OptionSlider
+                                                    label="How much to copy the reference"
+                                                    hint="0 = ignore it, 100 = match it closely"
+                                                    help="Decides how hard we chase the reference song. Low keeps your own character; high makes your song sit as close to it as possible."
+                                                    value={refInfluence} min={0} max={100} onChange={setRefInfluence} suffix="%"
+                                                />
                                             )}
-                                            <OptionSlider label="Warmth" hint="low-mid body" value={tone.warmth} onChange={(v) => setTone({ ...tone, warmth: v })} />
-                                            <OptionSlider label="Presence" hint="vocal cut-through" value={tone.presence} onChange={(v) => setTone({ ...tone, presence: v })} />
-                                            <OptionSlider label="De-mud" hint="clears 300Hz congestion" value={tone.demud} onChange={(v) => setTone({ ...tone, demud: v })} />
+                                            <OptionSlider
+                                                label="Warmth"
+                                                hint="body and thickness"
+                                                help="Fills out the lower middle of the sound. More warmth feels fuller and rounder; too much sounds boxy and dull."
+                                                value={tone.warmth} onChange={(v) => setTone({ ...tone, warmth: v })}
+                                            />
+                                            <OptionSlider
+                                                label="Vocal presence"
+                                                hint="how forward the vocal sits"
+                                                help="Brings the singing forward so the words cut through the music. Too much starts to sound shouty and tiring."
+                                                value={tone.presence} onChange={(v) => setTone({ ...tone, presence: v })}
+                                            />
+                                            <OptionSlider
+                                                label="Clear the mud"
+                                                hint="cleans up a muffled sound"
+                                                help="Clears out the cloudy build-up that makes a song sound like it is playing through a blanket. Turn it up if your track feels stuffy."
+                                                value={tone.demud} onChange={(v) => setTone({ ...tone, demud: v })}
+                                            />
                                             <label className="flex items-center justify-between cursor-pointer">
                                                 <div>
-                                                    <span className="font-mono text-[10px] tracking-widest uppercase text-ink-200">Mono bass</span>
-                                                    <span className="block font-mono text-[9px] text-ink-700">phase-tight lows for clubs</span>
+                                                    <span className="font-mono text-[10px] tracking-widest uppercase text-ink-200">Center the bass</span>
+                                                    <span className="block font-mono text-[9px] text-ink-700">keeps the low end in the middle, which is what club systems and vinyl need</span>
                                                 </div>
                                                 <button
                                                     onClick={() => setMonoBass(v => !v)}
@@ -853,7 +928,7 @@ export default function StudioCore() {
                                     onClick={handleMaster}
                                     className="mt-8 px-12 py-3 bg-cyan-500 hover:bg-cyan-400 text-ink-950 font-display font-medium tracking-wide rounded-full transition-colors z-10 w-full md:w-auto"
                                 >
-                                    {refFile ? 'Master it' : 'Master it (Pure mode)'}
+                                    {refFile ? 'Master it' : 'Master it (no reference)'}
                                 </motion.button>
                             )}
                         </div>
@@ -861,9 +936,9 @@ export default function StudioCore() {
                         {/* Sidebar Info - Oracle Engine Mode */}
                         <div className="md:col-span-1 glass-obsidian glass-obsidian-hover rounded-xl p-6 flex flex-col gap-4 relative overflow-hidden border border-white/10">
                             <div className="border-b border-white/10 pb-3">
-                                <h3 className="font-display text-base text-ink-50 tracking-wide">AI Mix Analysis</h3>
+                                <h3 className="font-display text-base text-ink-50 tracking-wide">Let us listen first</h3>
                                 <p className="font-mono text-[10px] tracking-[0.2em] uppercase mt-0.5 text-cyan-400">
-                                    {isOracleScanning ? 'Listening…' : 'Let the Oracle listen first and set the dials for you'}
+                                    {isOracleScanning ? 'Listening…' : 'We listen to your song and set the controls for you'}
                                 </p>
                             </div>
 
@@ -872,18 +947,18 @@ export default function StudioCore() {
                                     <div className="mt-4">
                                         <LoadingProgressBar
                                             active={isOracleScanning}
-                                            message="Listening to your mix"
-                                            subMessage="DSP topology + optional AI polish. Measured ~7 seconds live."
+                                            message="Listening to your song"
+                                            subMessage="Listening to your track and checking its balance."
                                             colorClass="blue"
                                             estimatedDurationMs={7000}
-                                            speedLabel="~7s live"
+                                            speedLabel="about 7 seconds"
                                         />
                                     </div>
                                 )}
 
                                 {targetFile && !oracleData && !isOracleScanning && (
                                     <Btn variant="accent" accent="var(--color-audio)" onClick={handleOracleScan} className="w-full shrink-0">
-                                        Analyze my mix
+                                        Listen to my song
                                     </Btn>
                                 )}
 
@@ -897,11 +972,11 @@ export default function StudioCore() {
                                                 {oracleData.analysis}
                                             </p>
                                         </div>
-                                        <div className="bg-black/30 p-2 flex justify-between rounded-lg border border-white/10 font-mono text-[10px] text-cyan-400">
-                                            <span>Sub: {oracleData.knobs.sub}</span>
-                                            <span>Air: {oracleData.knobs.air}</span>
-                                            <span>Snap: {oracleData.knobs.snap}</span>
-                                            <span>Width: {oracleData.knobs.width}</span>
+                                        <div className="bg-black/30 p-2 flex flex-wrap gap-x-3 gap-y-1 justify-between rounded-lg border border-white/10 font-mono text-[10px] text-cyan-400">
+                                            <span>Deep bass: {oracleData.knobs.sub}</span>
+                                            <span>Sparkle: {oracleData.knobs.air}</span>
+                                            <span>Punch: {oracleData.knobs.snap}</span>
+                                            <span>Stereo width: {oracleData.knobs.width}</span>
                                         </div>
                                         <Btn
                                             variant="accent"
@@ -924,9 +999,9 @@ export default function StudioCore() {
                                     >
                                         <Shield size={32} className="text-cyan-400" />
                                         <div className="flex flex-col items-center">
-                                            <h4 className="font-display text-ink-50 font-medium tracking-wide mb-1">Dials set</h4>
+                                            <h4 className="font-display text-ink-50 font-medium tracking-wide mb-1">Controls set</h4>
                                             <p className="font-mono text-[10px] text-ink-400 uppercase tracking-widest text-center">
-                                                Master controls auto-tuned to the Oracle's read on your mix.
+                                                We set the controls to match what we heard in your song. Change anything you like.
                                             </p>
                                         </div>
                                     </motion.div>
@@ -939,31 +1014,31 @@ export default function StudioCore() {
                                             <svg className="w-3 h-3 text-ink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                                             </svg>
-                                            Split into stems
+                                            Split into separate tracks
                                         </h3>
                                         <p className="text-[10px] text-ink-400 mb-3 leading-relaxed">
-                                            Free open-source path: scipy HPSS by default; Demucs if installed on the server.
+                                            Splits your song into separate vocal, drum, bass, and instrument tracks. Free, and yours to download.
                                         </p>
 
                                         {!isExtractingStems && !stemsData && (
                                             <Btn variant="ghost" onClick={handleExtractStems} className="w-full shrink-0">
-                                                Bass / drums / vocals / other
+                                                Vocals / drums / bass / everything else
                                             </Btn>
                                         )}
 
                                         {isExtractingStems && (
                                             <LoadingProgressBar
                                                 active={isExtractingStems}
-                                                message="Splitting the mix"
-                                                subMessage="Open-source separation. Longer on full songs."
+                                                message="Pulling the parts apart"
+                                                subMessage="Separating the vocals, drums, bass and the rest. Full songs take longer."
                                                 colorClass="blue"
                                                 estimatedDurationMs={8000}
-                                                speedLabel="open source"
+                                                speedLabel="free"
                                             />
                                         )}
 
-                                        {stemsData && stemsMeta?.note && (
-                                            <p className="font-mono text-[9px] text-ink-400 mb-2 leading-relaxed">{stemsMeta.note}</p>
+                                        {stemsData && stemsMeta?.method && (
+                                            <p className="font-mono text-[9px] text-ink-400 mb-2 leading-relaxed">{describeStemMethod(stemsMeta.method)}</p>
                                         )}
 
                                         {stemsData && (
@@ -986,7 +1061,7 @@ export default function StudioCore() {
 
                                 {!targetFile && (
                                     <div className="flex-1 flex items-center justify-center font-mono text-xs text-ink-700 tracking-widest h-32 text-center">
-                                        Drop your mix to unlock analysis
+                                        Add your song and we will listen to it
                                     </div>
                                 )}
                             </div>
@@ -1011,15 +1086,15 @@ export default function StudioCore() {
                                 <div className="w-full max-w-sm mt-8">
                                     <LoadingProgressBar
                                         active={phase === 'processing'}
-                                        message="Mastering your track"
+                                        message="Mastering your song"
                                         subMessage={
                                             refFile
-                                                ? 'Reference match + EQ + limiter. Full songs often take 1–3 minutes. Keep this tab open.'
-                                                : 'Pure master (DSP + limiter). Usually under a minute for short mixes.'
+                                                ? 'Matching the tone of your reference, then balancing the sound and evening out the volume. Full songs often take 1–3 minutes — keep this tab open.'
+                                                : 'Balancing the sound and evening out the volume. Usually under a minute for short songs.'
                                         }
                                         colorClass="blue"
                                         estimatedDurationMs={refFile ? 120000 : 45000}
-                                        speedLabel={refFile ? '~1–3 min with reference' : '~30–60s pure'}
+                                        speedLabel={refFile ? '~1–3 min with a reference' : '~30–60s on its own'}
                                     />
                                 </div>
                             </div>
@@ -1035,7 +1110,7 @@ export default function StudioCore() {
                         className="flex flex-col gap-6"
                     >
                         {/* Player & Toggle */}
-                        <Panel title="Result" sub="Preview, A/B test, and export" accent="var(--color-audio)">
+                        <Panel title="Your finished track" sub="Play it, compare it with your original, then download it" accent="var(--color-audio)">
                             <div className="flex items-center justify-between flex-wrap gap-6">
                                 <div className="flex items-center gap-6">
                                     {masterAudioUrl && (
@@ -1080,44 +1155,50 @@ export default function StudioCore() {
                                                     }`}
                                                 >
                                                     {masterMode === 'pure-fallback'
-                                                        ? 'Pure fallback'
+                                                        ? 'Reference skipped'
                                                         : masterMode === 'reference'
-                                                          ? 'Reference match'
-                                                          : 'Pure master'}
+                                                          ? 'Matched to your reference'
+                                                          : 'Your song on its own'}
                                                 </span>
                                             )}
                                         </div>
                                         {masterMode === 'pure-fallback' && (
                                             <p className="text-[11px] text-amber-200/90 mb-2 max-w-md leading-relaxed">
-                                                Reference matching failed on the server (memory or similar files). Delivered Pure DSP instead — try a shorter commercial reference next time.
+                                                We could not match your reference this time — it may have been too long, or too close to your own song. You still got a full master made from your song alone. Try a shorter, professionally released reference next time.
                                             </p>
                                         )}
                                         {masterMeters && (
-                                            <div className="mt-2 flex flex-wrap gap-2 font-mono text-[10px] tracking-wide">
+                                            <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[10px] tracking-wide">
                                                 <span className="px-2 py-0.5 rounded border border-white/10 text-ink-200">
-                                                    LUFS {masterMeters.lufs_integrated ?? '—'}
+                                                    Loudness {masterMeters.lufs_integrated ?? '—'} LUFS
                                                 </span>
                                                 <span className="px-2 py-0.5 rounded border border-white/10 text-ink-200">
-                                                    TP {masterMeters.true_peak_db ?? '—'} dB
+                                                    Loudest peak {masterMeters.true_peak_db ?? '—'} dB
                                                 </span>
                                                 <span className="px-2 py-0.5 rounded border border-white/10 text-ink-200">
-                                                    Crest {masterMeters.crest_factor_db ?? '—'} dB
+                                                    Quiet-to-loud range {masterMeters.crest_factor_db ?? '—'} dB
                                                 </span>
                                                 {masterMeters.streaming_ready && (
                                                     <span className="px-2 py-0.5 rounded border border-emerald-500/40 text-emerald-400">
-                                                        Streaming-ready band
+                                                        Loud enough for streaming
                                                     </span>
                                                 )}
+                                                <HelpTip
+                                                    text="Loudness is the overall level streaming services care about. Loudest peak should stay just under 0 dB so nothing crackles. Quiet-to-loud range shows how much life is left between the softest and loudest moments — a bigger number means more breathing room."
+                                                    label="What these numbers mean"
+                                                />
                                             </div>
                                         )}
                                         <div className="flex items-center gap-2 font-mono text-xs text-ink-400 uppercase tracking-widest mt-1">
                                             <Shield size={12} className="text-cyan-400" />
-                                            Profile target {resolvedLufs() ?? 'off'} · limiter −1.0 dBTP
+                                            {resolvedLufs() !== null && resolvedLufs() !== undefined
+                                                ? `Aiming for ${resolvedLufs()} LUFS · peaks held 1 dB below maximum`
+                                                : 'Volume left as you mixed it · peaks held 1 dB below maximum'}
                                         </div>
                                         {sessionMasters.length > 1 && (
                                             <div className="mt-3 flex flex-wrap gap-1.5">
                                                 <span className="font-mono text-[9px] text-ink-500 tracking-widest uppercase self-center mr-1">
-                                                    This session
+                                                    Versions you made today
                                                 </span>
                                                 {sessionMasters.map((m) => (
                                                     <button
@@ -1165,10 +1246,10 @@ export default function StudioCore() {
                                     </button>
                                     <div className="flex flex-col">
                                         <span className="font-display text-xs text-ink-50 font-medium -mb-1">
-                                            {isSovereignMaster ? 'Hearing master' : 'Hearing original'}
+                                            {isSovereignMaster ? 'Hearing the master' : 'Hearing your original'}
                                         </span>
                                         <span className="font-mono text-[9px] text-ink-400 tracking-widest uppercase">
-                                            Toggle A/B preview
+                                            Flip to compare the two
                                         </span>
                                     </div>
                                 </div>
@@ -1176,15 +1257,16 @@ export default function StudioCore() {
                         </Panel>
 
                         {/* Fine-Tuning Console */}
-                        <Panel title="Master controls" sub="Adjust then remaster — knobs apply on the next run" accent="var(--color-audio)" className="relative overflow-hidden">
+                        <Panel title="Shape the sound" sub={`Move a control, then master again — changes apply on the next run. ${NEUTRAL_SLIDER_HINT}`} accent="var(--color-audio)" className="relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
                                 <Settings2 size={200} className="text-cyan-400" />
                             </div>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 relative z-10 w-full max-w-3xl mx-auto mb-6">
                                 <Knob
-                                    label="Sub"
-                                    hint="low-end weight"
+                                    label="Deep bass"
+                                    hint="weight down low"
+                                    help="Adds or removes weight below where most speakers reach. Too much makes phone speakers rattle."
                                     value={knobs.sub}
                                     onChange={(v) => {
                                         setKnobs({ ...knobs, sub: v });
@@ -1192,8 +1274,9 @@ export default function StudioCore() {
                                     }}
                                 />
                                 <Knob
-                                    label="Air"
-                                    hint="top-end shine"
+                                    label="Sparkle"
+                                    hint="shine up top"
+                                    help="The airy top end. More sparkle sounds open; too much sounds harsh."
                                     value={knobs.air}
                                     onChange={(v) => {
                                         setKnobs({ ...knobs, air: v });
@@ -1201,8 +1284,9 @@ export default function StudioCore() {
                                     }}
                                 />
                                 <Knob
-                                    label="Snap"
-                                    hint="punch"
+                                    label="Punch"
+                                    hint="how hard drums hit"
+                                    help="How much the drums hit. More punch feels tighter and more aggressive."
                                     value={knobs.snap}
                                     onChange={(v) => {
                                         setKnobs({ ...knobs, snap: v });
@@ -1210,8 +1294,9 @@ export default function StudioCore() {
                                     }}
                                 />
                                 <Knob
-                                    label="Width"
-                                    hint="stereo space"
+                                    label="Stereo width"
+                                    hint="how wide it spreads"
+                                    help="How wide the sound spreads between left and right. Too wide can sound thin on a single speaker."
                                     value={knobs.width}
                                     onChange={(v) => {
                                         setKnobs({ ...knobs, width: v });
@@ -1223,13 +1308,13 @@ export default function StudioCore() {
                             <div className="flex justify-center mt-8 gap-3 flex-wrap relative z-10">
                                 {knobsDirty && (
                                     <Btn variant="accent" accent="var(--color-audio)" size="sm" onClick={handleMaster}>
-                                        Apply & remaster
+                                        Apply and master again
                                     </Btn>
                                 )}
                                 {masterAudioUrl && (
                                     <>
                                         <Btn variant="ghost" size="sm" onClick={handleDownload}>
-                                            <Download size={14} /> Download master
+                                            <Download size={14} /> Download your master
                                         </Btn>
                                         <Btn variant="ghost" size="sm" onClick={initiateBlindTest}>
                                             <HelpCircle size={14} /> Blind test
@@ -1237,7 +1322,7 @@ export default function StudioCore() {
                                     </>
                                 )}
                                 <Btn variant="ghost" size="sm" onClick={() => setShowAnalytics(true)}>
-                                    <Waves size={14} /> Waveform analytics
+                                    <Waves size={14} /> See the sound
                                 </Btn>
                                 <Btn
                                     variant="ghost"
@@ -1295,14 +1380,14 @@ export default function StudioCore() {
                             <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/60 backdrop-blur-md">
                                 <h2 className="font-display text-xl text-ink-50 tracking-wide flex items-center gap-3">
                                     <Waves className="text-cyan-400" />
-                                    Waveform analytics
+                                    See the sound
                                 </h2>
                                 <div className="flex items-center gap-4">
                                     <button
                                         onClick={() => setShowHeatmap(!showHeatmap)}
                                         className={`font-mono text-[9px] uppercase tracking-widest py-1 px-3 border rounded-full transition-colors ${showHeatmap ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30' : 'bg-transparent text-ink-400 border-white/10'}`}
                                     >
-                                        Heatmap {showHeatmap ? 'on' : 'off'}
+                                        Frequency map {showHeatmap ? 'on' : 'off'}
                                     </button>
                                     <button onClick={() => setShowAnalytics(false)} className="text-ink-400 hover:text-cyan-400 transition-colors">
                                         <X size={24} />
@@ -1313,51 +1398,51 @@ export default function StudioCore() {
                             <div className="p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="flex flex-col gap-4">
-                                        <WaveformViewer url={targetUrl} title="Your original mix" color="#9ca3af" renderHeatmap={showHeatmap} />
-                                        <WaveformViewer url={refUrl} title="Reference track" color="#10b981" renderHeatmap={showHeatmap} />
+                                        <WaveformViewer url={targetUrl} title="Your original song" color="#9ca3af" renderHeatmap={showHeatmap} />
+                                        <WaveformViewer url={refUrl} title="The song you asked us to match" color="#10b981" renderHeatmap={showHeatmap} />
                                     </div>
                                     <div className="flex flex-col h-full glass-obsidian rounded-lg p-6 border border-white/10">
                                         <h3 className="font-mono text-xs text-cyan-400 tracking-widest uppercase mb-4 flex items-center gap-2">
-                                            <Activity size={14} /> What the engine did
+                                            <Activity size={14} /> What we did to your song
                                         </h3>
                                         <div className="text-xs font-mono text-ink-200 space-y-3 flex-1">
                                             <p className="border-l-2 border-cyan-500/40 pl-2">
-                                                <span className="text-cyan-400 font-medium block mb-1">Measured meters</span>
+                                                <span className="text-cyan-400 font-medium block mb-1">How your master measures up</span>
                                                 {masterMeters ? (
                                                     <>
-                                                        Integrated LUFS: <strong className="text-ink-50">{masterMeters.lufs_integrated ?? 'n/a'}</strong>
-                                                        {' · '}True peak: <strong className="text-ink-50">{masterMeters.true_peak_db ?? 'n/a'} dB</strong>
-                                                        {' · '}Crest: <strong className="text-ink-50">{masterMeters.crest_factor_db ?? 'n/a'} dB</strong>
+                                                        Overall loudness: <strong className="text-ink-50">{masterMeters.lufs_integrated ?? 'not measured'}</strong>
+                                                        {' · '}Loudest peak: <strong className="text-ink-50">{masterMeters.true_peak_db ?? 'not measured'} dB</strong>
+                                                        {' · '}Quiet-to-loud range: <strong className="text-ink-50">{masterMeters.crest_factor_db ?? 'not measured'} dB</strong>
                                                         {masterMeters.lufs_method && (
-                                                            <span className="block text-ink-500 mt-1">Method: {masterMeters.lufs_method}</span>
+                                                            <span className="block text-ink-500 mt-1">{describeLoudnessMethod(masterMeters.lufs_method)}</span>
                                                         )}
                                                     </>
                                                 ) : (
-                                                    'Meters unavailable for this run — download and check in your DAW.'
+                                                    'We could not measure this one — download it and check it in your recording software.'
                                                 )}
                                             </p>
                                             <p className="border-l-2 border-cyan-500/40 pl-2">
-                                                <span className="text-cyan-400 font-medium block mb-1">Tone knobs used</span>
-                                                Sub {knobs.sub} · Air {knobs.air} · Snap {knobs.snap} · Width {knobs.width}
+                                                <span className="text-cyan-400 font-medium block mb-1">Settings you used</span>
+                                                Deep bass {knobs.sub} · Sparkle {knobs.air} · Punch {knobs.snap} · Stereo width {knobs.width}
                                                 {knobs.air !== 50 && (
                                                     <span className="block text-ink-500 mt-1">
-                                                        High-shelf air ≈ {((knobs.air - 50) / 10).toFixed(1)} dB @ 10 kHz
+                                                        Sparkle changed the very top of the sound by about {((knobs.air - 50) / 10).toFixed(1)} dB
                                                     </span>
                                                 )}
                                             </p>
                                             <p className="border-l-2 border-white/20 pl-2">
-                                                <span className="text-ink-300 font-medium block mb-1">Mode</span>
+                                                <span className="text-ink-300 font-medium block mb-1">How it was made</span>
                                                 {masterMode === 'reference'
-                                                    ? 'Reference Matchering + Pedalboard chain + true-peak limiter.'
+                                                    ? 'We matched the tone of the song you picked, shaped your sound to suit it, then evened out the volume.'
                                                     : masterMode === 'pure-fallback'
-                                                      ? 'Reference match failed; Pure DSP chain + limiter only.'
-                                                      : 'Pure master — DSP + limiter (no reference match).'}
+                                                      ? 'The reference match did not work, so we shaped and evened out your song on its own.'
+                                                      : 'We shaped your song and evened out its volume on its own — no reference used.'}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="mt-4 border border-cyan-500/20 rounded-lg p-1 bg-cyan-500/10">
-                                    <WaveformViewer url={masterAudioUrl} title="Your master" color="#10b981" renderHeatmap={showHeatmap} />
+                                    <WaveformViewer url={masterAudioUrl} title="Your finished master" color="#10b981" renderHeatmap={showHeatmap} />
                                 </div>
                             </div>
                         </motion.div>
@@ -1373,19 +1458,19 @@ export default function StudioCore() {
                 primaryLabel="Open Studio"
                 steps={[
                     {
-                        title: 'Drop your mix',
-                        body: 'Upload an unmastered WAV or FLAC (under 80 MB). That’s enough for a Pure commercial-style master.',
-                        bullets: ['Stay signed in', 'Stable Wi‑Fi helps for larger files'],
+                        title: 'Add your song',
+                        body: 'Upload the version that has not been mastered yet — a WAV or FLAC under 80 MB. That alone is enough to get a finished, release-ready track.',
+                        bullets: ['Stay signed in', 'A steady internet connection helps with bigger files'],
                     },
                     {
-                        title: 'Reference is optional',
-                        body: 'Add a commercial track in the same genre for Matchering. If the server can’t match, you’ll still get a Pure master.',
-                        bullets: ['Don’t upload the same file twice', 'Shorter refs process faster'],
+                        title: 'A reference is optional',
+                        body: 'Add a released song in the same style and we will steer your track toward that sound. If it does not work out, you still get a finished master made from your song alone.',
+                        bullets: ['Do not upload the same file twice', 'Shorter reference songs finish faster'],
                     },
                     {
-                        title: 'Pick a loudness profile',
-                        body: 'Streaming (−14 LUFS), Club, Podcast, or Off. Nudge Sub/Air/Snap/Width, then Master.',
-                        bullets: ['After mastering, change knobs and hit Apply & remaster', 'Use Blind test to A/B honestly'],
+                        title: 'Pick how loud, then shape it',
+                        body: 'Choose where the song will be played — streaming, a club, or spoken word. Then nudge Deep bass, Sparkle, Punch and Stereo width. Every control sits at 50 for no change.',
+                        bullets: ['After mastering, move a control and hit Apply and master again', 'Use Blind test to pick with your ears, not your eyes'],
                     },
                 ]}
             />
@@ -1429,8 +1514,8 @@ export default function StudioCore() {
                             <div className="p-8 flex flex-col gap-8 relative z-10">
                                 <p className="font-mono text-sm text-ink-200 text-center leading-relaxed max-w-lg mx-auto">
                                     {blindTestWinner
-                                        ? "Reveal: here's which one you picked, no placebo effect involved."
-                                        : "Your master and your original mix are scrambled below. Listen closely and pick the one that sounds better."
+                                        ? "Here is what you actually picked — no guessing, no wishful thinking."
+                                        : "Your master and your original are hidden below in random order. Listen to both and pick the one that sounds better."
                                     }
                                 </p>
 
@@ -1453,7 +1538,7 @@ export default function StudioCore() {
                                             </button>
                                         ) : (
                                             <div className={`p-4 rounded-lg border font-mono tracking-widest text-center text-xs uppercase ${isSovereignA ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-red-900/20 border-red-500/40 text-red-400'}`}>
-                                                {isSovereignA ? "Your master" : "Original mix"}
+                                                {isSovereignA ? "Your master" : "Your original"}
                                                 {blindTestWinner === 'A' && <div className="mt-2 text-[9px] text-ink-400">Your pick</div>}
                                             </div>
                                         )}
@@ -1477,7 +1562,7 @@ export default function StudioCore() {
                                             </button>
                                         ) : (
                                             <div className={`p-4 rounded-lg border font-mono tracking-widest text-center text-xs uppercase ${!isSovereignA ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-red-900/20 border-red-500/40 text-red-400'}`}>
-                                                {!isSovereignA ? "Your master" : "Original mix"}
+                                                {!isSovereignA ? "Your master" : "Your original"}
                                                 {blindTestWinner === 'B' && <div className="mt-2 text-[9px] text-ink-400">Your pick</div>}
                                             </div>
                                         )}

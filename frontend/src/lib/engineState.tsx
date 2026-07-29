@@ -86,6 +86,7 @@ function loadState(): EngineState {
 type Action =
     | { type: 'MASTER'; filename: string; format: string }
     | { type: 'SCOUT'; city: string; genre: string; venues: any[] }
+    | { type: 'ADD_LEAD'; id: string; venueName: string; city: string }
     | { type: 'PITCH'; venueName: string; outreach: string }
     | { type: 'SCAN'; flagCount: number; integrityScore?: number }
     | { type: 'MOVE_LEAD'; id: string; stage: LeadStage }
@@ -114,7 +115,7 @@ function reducer(state: EngineState, action: Action): EngineState {
                     id: makeId('act', now, 'master'),
                     ts: now,
                     kind: 'master',
-                    label: `Mastered ${action.filename} (${action.format.toUpperCase()} · −1.0 dBTP)`,
+                    label: `Mastered ${action.filename} — ready to release (${action.format.toUpperCase()})`,
                     accent: 'audio',
                 }),
             };
@@ -147,8 +148,33 @@ function reducer(state: EngineState, action: Action): EngineState {
                     id: makeId('act', now, 'scout'),
                     ts: now,
                     kind: 'scout',
-                    label: `Scouted ${action.venues.length} venues — ${action.genre} in ${action.city}`,
+                    label: `Found ${action.venues.length} venues — ${action.genre} in ${action.city}`,
                     accent: 'radar',
+                }),
+            };
+        }
+        case 'ADD_LEAD': {
+            // A contact the user typed in by hand. Deliberately does NOT touch
+            // venuesScouted — that stat counts venues the Engine actually found.
+            const key = action.venueName.trim().toLowerCase();
+            if (!key || state.pipeline.some((l) => l.venueName.toLowerCase() === key)) return state;
+            const lead: Lead = {
+                id: action.id,
+                venueName: action.venueName.trim(),
+                city: action.city.trim(),
+                stage: 'scouted',
+                addedAt: now,
+                updatedAt: now,
+            };
+            return {
+                ...state,
+                pipeline: [lead, ...state.pipeline],
+                activity: pushActivity(state, {
+                    id: makeId('act', now, 'lead'),
+                    ts: now,
+                    kind: 'pipeline',
+                    label: `Added ${lead.venueName}${lead.city ? ` — ${lead.city}` : ''} to your contacts`,
+                    accent: 'ember',
                 }),
             };
         }
@@ -166,7 +192,9 @@ function reducer(state: EngineState, action: Action): EngineState {
                     id: makeId('act', now, 'pitch'),
                     ts: now,
                     kind: 'pitch',
-                    label: `Pitched ${action.venueName} via ${action.outreach}`,
+                    label: `Pitched ${action.venueName} by ${
+                        action.outreach === 'call_script' ? 'phone' : action.outreach === 'dm' ? 'DM' : 'email'
+                    }`,
                     accent: 'shark',
                 }),
             };
@@ -184,8 +212,8 @@ function reducer(state: EngineState, action: Action): EngineState {
                     ts: now,
                     kind: 'scan',
                     label:
-                        `Scanned contract — ${action.flagCount} threat${action.flagCount === 1 ? '' : 's'} flagged` +
-                        (action.integrityScore != null ? ` · integrity ${action.integrityScore}/100` : ''),
+                        `Checked a contract — ${action.flagCount} thing${action.flagCount === 1 ? '' : 's'} to push back on` +
+                        (action.integrityScore != null ? ` · fairness ${action.integrityScore}/100` : ''),
                     accent: 'zion',
                 }),
             };
@@ -256,6 +284,7 @@ interface EngineContextValue {
     record: {
         master: (filename: string, format: string) => void;
         scout: (city: string, genre: string, venues: any[]) => void;
+        addLead: (venueName: string, city: string) => void;
         pitch: (venueName: string, outreach: string) => void;
         scan: (flagCount: number, integrityScore?: number) => void;
         moveLead: (id: string, stage: LeadStage) => void;
@@ -346,6 +375,17 @@ export function EngineProvider({ children }: { children: ReactNode }) {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ leads }),
+                }).catch(() => null);
+            }
+        },
+        addLead: (venueName, city) => {
+            const id = makeId('lead', Date.now(), venueName);
+            dispatch({ type: 'ADD_LEAD', id, venueName, city });
+            if (getStoredToken()) {
+                apiJson('/api/crm/leads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, venueName, city, stage: 'scouted' }),
                 }).catch(() => null);
             }
         },

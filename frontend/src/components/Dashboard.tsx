@@ -21,19 +21,28 @@ const tile = {
 };
 
 const STAT_DEFS = [
-    { key: 'mastersCompleted', label: 'Masters', icon: Mic2, accent: 'var(--color-audio)' },
-    { key: 'venuesScouted', label: 'Venues Scouted', icon: RadarIcon, accent: 'var(--color-radar)' },
-    { key: 'pitchesDrafted', label: 'Pitches', icon: Send, accent: 'var(--color-shark)' },
-    { key: 'contractsScanned', label: 'Contracts Scanned', icon: FileWarning, accent: 'var(--color-zion)' },
-    { key: 'threatsFlagged', label: 'Threats Flagged', icon: ShieldAlert, accent: 'var(--color-ember-500)' },
+    { key: 'mastersCompleted', label: 'Tracks mastered', icon: Mic2, accent: 'var(--color-audio)' },
+    { key: 'venuesScouted', label: 'Venues found', icon: RadarIcon, accent: 'var(--color-radar)' },
+    { key: 'pitchesDrafted', label: 'Pitches written', icon: Send, accent: 'var(--color-shark)' },
+    { key: 'contractsScanned', label: 'Contracts checked', icon: FileWarning, accent: 'var(--color-zion)' },
+    { key: 'threatsFlagged', label: 'Risky terms found', icon: ShieldAlert, accent: 'var(--color-ember-500)' },
 ] as const;
 
 const STAGES: { key: LeadStage; label: string }[] = [
-    { key: 'scouted', label: 'Scouted' },
+    { key: 'scouted', label: 'Found' },
     { key: 'pitched', label: 'Pitched' },
-    { key: 'negotiating', label: 'Negotiating' },
+    { key: 'negotiating', label: 'Talking' },
     { key: 'booked', label: 'Booked' },
 ];
+
+/** Plain-language stage names, shared with the lead cards. */
+const STAGE_LABEL: Record<LeadStage, string> = {
+    scouted: 'Found',
+    pitched: 'Pitched',
+    negotiating: 'Talking',
+    booked: 'Booked',
+    dead: 'Archived',
+};
 
 const NEXT: Record<LeadStage, LeadStage | null> = {
     scouted: 'pitched',
@@ -82,17 +91,18 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
             <PageHeader
                 view="dashboard"
                 accent="var(--color-ember-500)"
-                module="COMMAND CENTER"
-                title="Dashboard"
-                desc="Live ops board — real numbers only. Gigs ~8s · pitches ~2s · masters ~35s. CRM syncs to server when online."
+                module="WHERE YOU STAND"
+                title="Home"
+                desc="Everything here counts something you actually did. Nothing is estimated or padded."
                 speedHint="live"
             />
 
             {/* Quick actions — always useful; emphasized on small screens */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
-                    { id: 'radar', label: 'Find Gigs', sub: 'Scan live venues · ~8s', accent: 'var(--color-radar)' },
-                    { id: 'legal', label: 'Scan a contract', sub: 'Flag predatory clauses · ~3s', accent: 'var(--color-zion)' },
+                    { id: 'gigs', label: 'Find gigs', sub: 'Search venues booking your genre', accent: 'var(--color-radar)' },
+                    { id: 'studio', label: 'Master a track', sub: 'Get your mix release-ready', accent: 'var(--color-audio)' },
+                    { id: 'contracts', label: 'Check a contract', sub: 'Spot risky terms in seconds', accent: 'var(--color-zion)' },
                 ].map((a) => (
                     <button
                         key={a.id}
@@ -235,13 +245,13 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                     </div>
                     <div className="space-y-1.5">
                         <div className="text-sm font-medium" style={{ color: sys === 'online' ? 'var(--color-ink-50)' : sys === 'offline' ? 'var(--color-ember-400)' : 'var(--color-ink-400)' }}>
-                            {sys === 'checking' ? 'Checking…' : sys === 'online' ? 'Engine online' : 'Offline'}
+                            {sys === 'checking' ? 'Checking…' : sys === 'online' ? 'Everything working' : "Can't reach the Engine"}
                         </div>
-                        <div className="flex items-center gap-1.5 font-mono text-[9px] tracking-wide text-ink-400">
-                            <Cpu size={10} /> AI {sys !== 'online' ? '—' : keyVerified ? 'ready' : 'no key'}
+                        <div className="flex items-center gap-1.5 text-[10px] text-ink-400">
+                            <Cpu size={10} /> AI tools {sys !== 'online' ? 'unknown' : keyVerified ? 'ready' : 'need a key'}
                         </div>
-                        <div className="flex items-center gap-1.5 font-mono text-[9px] tracking-wide" style={{ color: tmLive ? '#4ade80' : '#8a8a93' }}>
-                            <RadarIcon size={10} /> Ticketmaster {tmLive ? 'live' : 'standby'}
+                        <div className="flex items-center gap-1.5 text-[10px]" style={{ color: tmLive ? '#4ade80' : 'var(--color-ink-500)' }}>
+                            <RadarIcon size={10} /> Live ticket data {tmLive ? 'in use' : 'idle'}
                         </div>
                     </div>
                 </motion.div>
@@ -253,8 +263,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 >
                     <div className="flex items-center justify-between mb-5">
                         <div>
-                            <h3 className="font-display text-lg text-ink-50 tracking-wide">Booking Pipeline</h3>
-                            <p className="font-mono text-[10px] text-ink-400 tracking-widest uppercase mt-0.5">
+                            <h3 className="font-display text-lg text-ink-50 tracking-wide">Who you're working</h3>
+                            <p className="text-[11px] text-ink-400 mt-0.5">
                                 {activeLeads.length} active · {bookedCount} booked{deadCount > 0 ? ` · ${deadCount} archived` : ''}
                             </p>
                         </div>
@@ -264,13 +274,15 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                     {activeLeads.length === 0 ? (
                         <div className="flex-1 flex flex-col items-center justify-center text-center py-14 border border-dashed border-white/10 rounded-lg">
                             <RadarIcon size={30} className="text-ink-400 mb-4" />
-                            <p className="text-ink-50 text-sm mb-1">Pipeline empty</p>
-                            <p className="font-mono text-[10px] text-ink-400 tracking-widest uppercase mb-5">Run a scout to populate real leads</p>
+                            <p className="text-ink-50 text-sm mb-1">No venues yet</p>
+                            <p className="text-[12px] text-ink-400 mb-5 max-w-xs leading-relaxed">
+                                Search for venues booking your genre and they'll show up here as leads you can work.
+                            </p>
                             <button
-                                onClick={() => onNavigate('radar')}
+                                onClick={() => onNavigate('gigs')}
                                 className="group flex items-center gap-2 rounded-full bg-orange-500/90 hover:bg-orange-500 transition-colors px-5 py-2.5 font-display font-medium text-sm text-ink-950"
                             >
-                                Open Gig Radar
+                                Find gigs
                                 <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
                             </button>
                         </div>
@@ -317,9 +329,11 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                     </div>
 
                     {!hasAnyActivity ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-center py-10">
+                        <div className="flex-1 flex flex-col items-center justify-center text-center py-10 px-3">
                             <Radio size={24} className="text-ink-400 mb-3" />
-                            <p className="font-mono text-[10px] text-ink-400 tracking-widest uppercase">No operations logged yet</p>
+                            <p className="text-[12px] text-ink-400 leading-relaxed">
+                                Nothing yet. Everything you do in the Engine shows up here.
+                            </p>
                         </div>
                     ) : (
                         <div className="space-y-3 overflow-y-auto max-h-[420px] pr-1 custom-scrollbar">
@@ -360,11 +374,14 @@ function LeadCard({ lead, onMove }: { lead: Lead; onMove: (id: string, stage: Le
                     </span>
                 )}
             </div>
-            <div className="mt-1 font-mono text-[9px] text-ink-400 tracking-wide truncate">{lead.city}</div>
+            <div className="mt-1 text-[10px] text-ink-400 truncate">{lead.city}</div>
             <div className="mt-2 flex items-center gap-2 flex-wrap">
                 {typeof lead.reputationScore === 'number' && (
-                    <span className="font-mono text-[9px] text-ink-200 bg-white/5 rounded px-1.5 py-0.5 tabular-nums">
-                        REP {lead.reputationScore}
+                    <span
+                        className="text-[9px] text-ink-200 bg-white/5 rounded px-1.5 py-0.5 tabular-nums"
+                        title="How established this venue looks, out of 100"
+                    >
+                        Rep {lead.reputationScore}
                     </span>
                 )}
                 {typeof lead.grossPotential === 'number' && lead.grossPotential > 0 && (
@@ -377,9 +394,9 @@ function LeadCard({ lead, onMove }: { lead: Lead; onMove: (id: string, stage: Le
                 {next ? (
                     <button
                         onClick={() => onMove(lead.id, next)}
-                        className="flex-1 font-mono text-[9px] tracking-widest uppercase text-orange-300 border border-orange-500/30 hover:bg-orange-500/10 rounded px-2 py-1 transition-colors"
+                        className="flex-1 text-[10px] text-orange-300 border border-orange-500/30 hover:bg-orange-500/10 rounded px-2 py-1 transition-colors"
                     >
-                        → {next}
+                        Mark {STAGE_LABEL[next].toLowerCase()} →
                     </button>
                 ) : (
                     <span className="flex-1 flex items-center justify-center gap-1 font-mono text-[9px] tracking-widest uppercase text-emerald-400">

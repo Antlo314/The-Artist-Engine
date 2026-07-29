@@ -7,7 +7,7 @@ import SplitSheetGenerator from './SplitSheetGenerator';
 import { PageHeader, Segmented, StepHint, Btn } from './ui/Shell';
 import Walkthrough from './ui/Walkthrough';
 import CoachPrompt from './ui/CoachPrompt';
-import { hasSeenTour } from '../lib/onboarding';
+import { shouldOpenViewTour } from '../lib/onboarding';
 
 const LEGAL_ACCENT = 'var(--color-zion)';
 
@@ -16,7 +16,7 @@ type LegalTab = 'zion' | 'codex' | 'recoupment' | 'splits';
 export default function LegalCore() {
     const [activeTab, setActiveTab] = useState<LegalTab>('zion');
     const [codexQuery, setCodexQuery] = useState('');
-    const [showLegalTour, setShowLegalTour] = useState(() => !hasSeenTour('legal'));
+    const [showLegalTour, setShowLegalTour] = useState(() => shouldOpenViewTour('legal'));
     const [journeyHint, setJourneyHint] = useState(false);
 
     const openCodexTerm = (term: string) => {
@@ -29,33 +29,33 @@ export default function LegalCore() {
             <PageHeader
                 view="legal"
                 accent={LEGAL_ACCENT}
-                module="ZION LEGAL"
-                title="Legal"
-                desc="Contract scans in seconds — predatory clauses in plain language. Not legal advice."
+                module="KNOW WHAT YOU'RE SIGNING"
+                title="Contracts"
+                desc="Paste a contract and see what it really says, in plain English, in seconds."
                 speedHint="~3s"
             />
             <StepHint
-                steps={['Scan a deal', 'Look up terms', 'Model the money', 'Paper splits']}
+                steps={['Scan a contract', 'Look up a word', 'Do the money math', 'Write down splits']}
                 accent={LEGAL_ACCENT}
             />
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-ink-200 leading-relaxed">
-                Not legal advice and not an attorney–client relationship. Free rule linter + AI scan are educational —
-                have a qualified entertainment lawyer review any deal before you sign.
+                This is a fast first read, not legal advice. For anything you&apos;re about to sign, have a lawyer look
+                at it.
             </div>
-            <CoachPrompt id="legal-flow-tip" accent={LEGAL_ACCENT} title="Legal tip">
-                Paste a contract or offer into Scanner first. Tap any red-flag term to open it in the Codex. Then model
-                recoupment or generate a split sheet.
+            <CoachPrompt id="legal-flow-tip" accent={LEGAL_ACCENT} title="Where to start">
+                Paste a contract or an offer into the first tab. Tap any highlighted word to see what it means. Then
+                work out the money, or write down who wrote what.
             </CoachPrompt>
 
             {journeyHint && activeTab === 'zion' && (
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-violet-500/25 bg-violet-500/10 px-3 py-2.5">
-                    <p className="text-xs text-ink-200">Scan complete — next: model the economics or look up a term.</p>
+                    <p className="text-xs text-ink-200">Done — next, work out the money or look up a word you didn&apos;t know.</p>
                     <div className="flex gap-2">
                         <Btn variant="ghost" size="sm" onClick={() => setActiveTab('recoupment')}>
-                            Open Recoup
+                            Advance calculator
                         </Btn>
                         <Btn variant="ghost" size="sm" onClick={() => setActiveTab('codex')}>
-                            Open Codex
+                            Dictionary
                         </Btn>
                     </div>
                 </div>
@@ -64,10 +64,10 @@ export default function LegalCore() {
             <div className="flex flex-col flex-1 min-h-0 space-y-4 md:space-y-6">
                 <Segmented
                     options={[
-                        { value: 'zion' as LegalTab, label: 'Scanner' },
-                        { value: 'codex' as LegalTab, label: 'Codex' },
-                        { value: 'recoupment' as LegalTab, label: 'Recoup' },
-                        { value: 'splits' as LegalTab, label: 'Splits' },
+                        { value: 'zion' as LegalTab, label: 'Scan a contract' },
+                        { value: 'codex' as LegalTab, label: 'Dictionary' },
+                        { value: 'recoupment' as LegalTab, label: 'Advance calculator' },
+                        { value: 'splits' as LegalTab, label: 'Split sheet' },
                     ]}
                     value={activeTab}
                     onChange={setActiveTab}
@@ -105,22 +105,25 @@ export default function LegalCore() {
                 open={showLegalTour}
                 accent={LEGAL_ACCENT}
                 onClose={() => setShowLegalTour(false)}
-                primaryLabel="Open Scanner"
+                primaryLabel="Scan a contract"
                 steps={[
                     {
-                        title: 'Scanner first',
-                        body: 'Paste text or drop a PDF/DOCX. Choose Contract or Offer. Flags and integrity score land in seconds.',
-                        bullets: ['Educational only — not a lawyer', 'Export rebuttal language for your attorney'],
+                        title: 'Start with a contract',
+                        body: 'Paste the text or drop in a PDF or Word file. Say whether it is a contract or a gig offer. In a few seconds you get a fairness score and a list of things worth pushing back on.',
+                        bullets: [
+                            'A fast first read, not legal advice',
+                            'Download the report and take it to a lawyer',
+                        ],
                     },
                     {
-                        title: 'Codex is your dictionary',
-                        body: 'Search industry terms (in perpetuity, 360, recoupment). Tap a scanner flag to jump here.',
-                        bullets: ['CRITICAL / HIGH / WARNING levels'],
+                        title: 'Look up any word',
+                        body: 'The Dictionary explains the words that show up in music contracts — in perpetuity, 360 deal, recoupment. Tap a highlighted word in your results to jump straight to it.',
+                        bullets: ['Each word is marked walk away, push back, read closely or good for you'],
                     },
                     {
-                        title: 'Money & splits',
-                        body: 'Recoup models advances and 360 cuts. Splits generates a clean writer share sheet for your files.',
-                        bullets: ['Export scenarios as text', 'Fill writers before sharing'],
+                        title: 'Money and songwriting credit',
+                        body: 'The advance calculator shows how long it takes to pay an advance back out of your royalties. The split sheet records who wrote what percentage of a song.',
+                        bullets: ['Download your numbers as a text file', 'Fill in every writer before you share it'],
                     },
                 ]}
             />

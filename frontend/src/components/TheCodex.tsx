@@ -6,195 +6,195 @@ import { EmptyState } from './ui/Shell';
 export const codexEntries = [
     {
         term: "In Perpetuity",
-        translation: "Forever. Literally until the end of time.",
+        translation: "Forever. There is no end date.",
         dangerLevel: "CRITICAL",
-        meaning: "When a contract says they own your masters 'in perpetuity', it means your children's children will never see a dime from your creation. You surrender the copyright to the corporation forever. Never sign this without a massive, life-changing advance."
+        meaning: "If a label owns your recordings 'in perpetuity', they own them forever — not for ten years, not until the deal ends. Forever. You can never get those songs back, and neither can your kids. Only worth considering if the money on the table changes your life."
     },
     {
         term: "Cross-Collateralization",
-        translation: "Your successes pay for your failures.",
+        translation: "Money you make gets used to cover money you lost.",
         dangerLevel: "CRITICAL",
-        meaning: "If Album 1 tanks and loses $50k, but Album 2 is a smash hit, you won't get paid for Album 2 until it earns enough to pay back the $50k you lost on Album 1. The label pools all your projects together to minimize their risk while maximizing yours."
+        meaning: "Say your first album loses the label $50,000 and your second one does great. You still get paid nothing on the second album until it has earned back that $50,000. They treat all your projects as one big tab, so their risk goes down and yours goes up."
     },
     {
         term: "360 Deal",
-        translation: "The label takes a cut of EVERYTHING.",
+        translation: "The label takes a cut of everything you earn, not just music.",
         dangerLevel: "CRITICAL",
-        meaning: "A Multiple Rights agreement where the label takes a percentage of your touring, merchandise, endorsements, and sometimes even acting gigs, despite only funding your recorded music. Avoid unless they are providing massive, proven infrastructure in those other areas."
+        meaning: "The label takes a percentage of your ticket sales, merch, sponsorships, sometimes even acting work — even though the only thing they paid for was the recording. Only accept it if they are genuinely doing work in those areas and can prove it."
     },
     {
         term: "Work For Hire",
-        translation: "You are an employee, not an owner.",
+        translation: "You are treated as staff, not as the owner of the song.",
         dangerLevel: "CRITICAL",
-        meaning: "By signing a 'work for hire' clause, you legally declare that you never owned the copyright to begin with. The label or producer is considered the 'author' of the work from inception. Highly predatory for featured artists."
+        meaning: "Signing this says that legally you never owned the song or recording at all — the label or producer counts as the creator from the moment it was made. You get paid a fee and that's it. No ownership, no future royalties from it."
     },
     {
         term: "Recoupment",
-        translation: "Paying back the loan before you make a profit.",
+        translation: "Paying the advance back out of your royalties.",
         dangerLevel: "CRITICAL",
-        meaning: "An advance is not a gift; it is a loan. Recoupment is the process of the label keeping your royalties until that loan (and all recording/marketing expenses) is paid off. Standard, but watch out for 'All-In' recoupment where they take from live shows too."
+        meaning: "An advance is not a gift, it's money lent against your future earnings. Until it is paid off, your share of the money goes straight back to the label and you see nothing. Recording and marketing costs usually get added to that tab too. Check whether they also take from your live shows."
     },
     {
         term: "Leaving Member Clause",
-        translation: "Trap doors for band breakups.",
+        translation: "What happens to each of you if the band splits up.",
         dangerLevel: "CRITICAL",
-        meaning: "If a band breaks up, this clause gives the label the right to keep the remaining members, drop the ones who left, or even force the leaving member into a solo deal under the same terrible terms. It prevents artists from escaping bad deals by disbanding."
+        meaning: "If the band breaks up, this lets the label keep whoever they want, drop whoever they want, and often drag the person who left into a solo deal on the same bad terms. It means you can't escape a bad contract just by walking away from the band."
     },
     {
         term: "Controlled Composition",
-        translation: "A forced discount on your own mechanical royalties.",
+        translation: "A forced discount on the money you're owed as the songwriter.",
         dangerLevel: "HIGH",
-        meaning: "If you write your own songs, the label owes you mechanical royalties. This clause forcibly caps the amount they pay you (usually at 75% of the statutory rate) and limits it to only 10 songs per album. It steals your publishing revenue to save the label money."
+        meaning: "If you wrote the song, you are owed a set amount every time it is sold or streamed. This clause cuts that payment down (usually to 75% of the normal rate) and often only pays you for ten songs per album no matter how many you wrote. It is money taken straight out of your songwriting income."
     },
     {
         term: "Net Profits",
-        translation: "Hollywood Accounting.",
+        translation: "Profit left over after they subtract whatever they like.",
         dangerLevel: "HIGH",
-        meaning: "Never agree to a percentage of 'Net Profits'. The label will deduct 'marketing', 'breakage', 'packaging', and 'distribution' costs until the 'Net Profit' magically equals zero. Always fight for a percentage of 'Gross Revenue'."
+        meaning: "Never agree to a percentage of 'net profits'. The label subtracts marketing, packaging, distribution and other costs first, and there is always a way to make that leftover number come out at zero. Ask for a percentage of the money coming in instead."
     },
     {
         term: "Black Box Royalties",
-        translation: "Unclaimed money the industry keeps.",
+        translation: "Money owed to somebody that nobody claimed.",
         dangerLevel: "HIGH",
-        meaning: "Royalties that remain unclaimed (usually mechanicals) because the publisher or writer couldn't be located. After a certain time, societies distribute this money based on market share, meaning the biggest labels/publishers get your unclaimed cash."
+        meaning: "Royalties that pile up because the company holding them can't work out who to pay — usually because paperwork was never filed. After a while it gets shared out among the biggest labels and publishers instead. Registering your songs properly is how you stop your money ending up here."
     },
     {
         term: "Exploitation",
-        translation: "The right to use your music however they want.",
+        translation: "Their right to make money from your music however they choose.",
         dangerLevel: "HIGH",
-        meaning: "In legal terms, 'exploit' just means 'to make money from'. But broad exploitation clauses allow labels to use your music in ways you might hate (e.g., political campaigns, embarrassing commercials) unless you have Mutual Consent."
+        meaning: "In a contract, 'exploit' just means 'earn money from'. The problem is how wide the wording is: it can let them put your song in a political ad or a commercial you hate. Ask for a clause saying they need your written OK first."
     },
     {
         term: "Moral Rights",
-        translation: "The right to protect your artistic integrity.",
+        translation: "Your right to stop your work being twisted into something else.",
         dangerLevel: "HIGH",
-        meaning: "The right to not have your work mutated, distorted, or used in a derogatory way. Many standard US contracts force you to waive your moral rights, allowing them to drastically alter your music without your permission."
+        meaning: "This is the right not to have your music chopped up, remixed or used in a way that makes you look bad. Most US contracts ask you to sign that right away, which lets them change your music however they want without asking you."
     },
     {
         term: "Option Periods",
-        translation: "The label can keep you, but you can't leave.",
+        translation: "They can choose to keep you. You can't choose to leave.",
         dangerLevel: "WARNING",
-        meaning: "Options give the label the *right* but not the *obligation* to record more albums with you. If you blow up, they exercise the option and keep you cheaply. If you flop, they drop you. Always negotiate for firm commitments or fewer options."
+        meaning: "An option lets the label decide later whether to make another album with you — they are not required to. If you take off, they keep you at the old price. If you don't, they drop you. Push for fewer options, or for a firm promise of a second album."
     },
     {
         term: "Right of First Refusal",
-        translation: "You must offer it to them before anyone else.",
+        translation: "You have to bring them any other offer first.",
         dangerLevel: "WARNING",
-        meaning: "If you want to sign a publishing or merch deal elsewhere, you must bring the competing offer to your current label first. If they match it, you MUST sign with them. It kills your leverage in the open market."
+        meaning: "If someone else offers you a publishing or merch deal, you must show it to your current label first. If they match the offer, you have to go with them. It makes other companies less likely to bid for you at all, because they know they can be outmatched at the last second."
     },
     {
         term: "Packaging Deduction",
-        translation: "A fake fee from the CD era.",
+        translation: "A charge for physical packaging that doesn't exist anymore.",
         dangerLevel: "WARNING",
-        meaning: "A legacy clause where labels deduct 20%-25% of your royalties for the 'cost of packaging' the CD/Vinyl. But they apply this deduction to digital streams and downloads too, where there is zero packaging cost. It's pure theft."
+        meaning: "An old clause that takes 20-25% off your royalties to cover the cost of the CD case or vinyl sleeve. Plenty of contracts still apply it to streams and downloads, where there is nothing to package. Ask for it to be struck out."
     },
     {
         term: "Minimum Delivery Commitment",
-        translation: "The bare minimum you must provide.",
+        translation: "How much music you're required to hand in.",
         dangerLevel: "WARNING",
-        meaning: "The exact number of masters you must deliver to satisfy the term or option. Be careful: labels often stipulate that albums must be 'commercially satisfactory,' meaning they can reject your album and claim you haven't fulfilled your commitment."
+        meaning: "The number of finished recordings you owe them before the deal is satisfied. Watch for wording that says the music must be 'commercially satisfactory' — that lets them reject what you turn in and say you still owe them, keeping you stuck in the deal."
     },
     {
         term: "Indemnification",
-        translation: "If we get sued, YOU pay for it.",
+        translation: "If someone sues them over your music, you pay the bill.",
         dangerLevel: "WARNING",
-        meaning: "You agree to protect the label against any legal claims regarding your music (e.g., uncleared samples). If they get sued, this clause forces you to pay their legal fees out of your own pocket or royalties."
+        meaning: "You promise to cover the label's legal costs for any claim about your music — most commonly a sample you used without permission. That money comes out of your own pocket or your royalties. Clear every sample before you turn anything in."
     },
     {
         term: "Force Majeure",
-        translation: "Acts of God.",
+        translation: "Emergencies that put the deal on pause.",
         dangerLevel: "WARNING",
-        meaning: "Suspends the contract during extraordinary events (war, pandemics, strikes). Labels use this to indefinitely pause their obligations to you. Ensure there is a hard time limit (e.g., 6 months) after which you can terminate if they still aren't functioning."
+        meaning: "It pauses everyone's obligations during things nobody controls — war, a pandemic, a strike. The risk is a pause with no end date, which leaves you signed to a label doing nothing for you. Ask for a hard limit, like six months, after which you can walk."
     },
     {
         term: "Territory",
-        translation: "Where they control your rights.",
+        translation: "Which parts of the world this deal covers.",
         dangerLevel: "WARNING",
-        meaning: "Usually defined as 'The Universe'. If you have a strong following in Japan, but you are signing to a US indie label, restrict the territory to the US so you can license your music separately in Japan for a massive secondary advance."
+        meaning: "Most contracts claim the whole world by default. If a US label is signing you but you already have a following in, say, Japan, try to limit them to the US. Then you can make a separate deal for Japan and get paid twice."
     },
     {
         term: "Administration Deal",
-        translation: "They handle the paperwork, you keep the copyright.",
+        translation: "They do your paperwork and chase your money. You keep ownership.",
         dangerLevel: "SAFE",
-        meaning: "A publishing deal where you retain 100% of your copyright. The administrator simply registers your songs and collects the money worldwide for a small percentage (usually 10-20%) for a limited amount of time (3-5 years)."
+        meaning: "A publishing arrangement where you still own your songs outright. The company registers them everywhere, collects what you're owed around the world, and takes a small fee (usually 10-20%) for a set number of years (usually 3-5). The friendliest kind of publishing deal."
     },
     {
         term: "Co-Publishing Deal",
-        translation: "Splitting the pie.",
+        translation: "You hand over part of the song income in exchange for cash up front.",
         dangerLevel: "SAFE",
-        meaning: "The most common publishing deal for successful writers. You give up 50% of the publisher's share (so 25% of the total revenue), but you get an advance and keep the other 75%. Better than a full publishing deal, but worse than Admin."
+        meaning: "Song income is normally split into two halves: the writer's half, which is always yours, and the publisher's half. In this deal you give away half of that publisher half — a quarter of the total — and keep the rest, plus an advance. Better than a full publishing deal, not as good as an admin deal."
     },
     {
         term: "Sync Licensing",
-        translation: "Getting placed in TV, Movies, and Video Games.",
+        translation: "Getting your song used in a TV show, film, ad or game.",
         dangerLevel: "SAFE",
-        meaning: "Synchronization. When your music is synchronized to a visual medium. This pays a massive upfront fee AND generates ongoing performance royalties every time the show/movie airs. The holy grail of alternative income."
+        meaning: "You get a one-off fee for allowing the song to be used, which can be big, and then you get paid again every time that show or film is broadcast. One of the most reliable ways for an independent artist to make real money."
     },
     {
         term: "Key Man Clause",
-        translation: "The parachute if your favorite executive leaves.",
+        translation: "If the person who believed in you leaves, you can leave too.",
         dangerLevel: "SAFE",
-        meaning: "A clause that says if the specific A&R rep or President who signed you (and understands your vision) leaves the label, you have the right to terminate your contract. Without this, you could be stuck at a label where nobody cares about you."
+        meaning: "Names the specific person at the label who signed you and gets your vision. If they quit or get fired, this clause lets you end the contract. Without it, you can end up stuck at a company where nobody knows who you are."
     },
     {
         term: "Reversion Clause",
-        translation: "Your masters eventually come back to you.",
+        translation: "Your recordings come back to you after a set number of years.",
         dangerLevel: "SAFE",
-        meaning: "A highly sought-after clause stating that after a certain period (e.g., 7 or 10 years after the term ends), the copyright to the master recordings reverts from the label back to the artist. This is true generational wealth building."
+        meaning: "Says that a set time after the deal ends — often 7 or 10 years — ownership of the recordings passes from the label back to you. This is the single most valuable thing you can win in a record deal. Ask for it every time."
     },
     {
         term: "Mutual Consent",
-        translation: "They can't do it unless you agree.",
+        translation: "They can't do it unless you say yes in writing.",
         dangerLevel: "SAFE",
-        meaning: "Ensures the label cannot make major decisions—like pairing you with a brand, remixing a song, or releasing unapproved photos—without your explicit written approval. Crucial for protecting your brand identity."
+        meaning: "Means the label can't make big calls on your behalf — putting you with a brand, releasing a remix, publishing photos you haven't approved — without your written OK. This is how you keep control of how you look and sound."
     },
     {
         term: "Audit Rights",
-        translation: "The right to investigate their math.",
+        translation: "Your right to check their numbers.",
         dangerLevel: "SAFE",
-        meaning: "The legal right to hire an independent accountant to examine the label's books to ensure they are paying you correctly. You want the right to audit annually, with a long time window (2-3 years) to object to statements."
+        meaning: "Lets you hire your own accountant to go through the label's books and confirm they've paid you correctly. Underpayment is common and usually not deliberate. Ask to be allowed to check once a year, with two or three years to raise a problem with any statement."
     },
     {
         term: "Gross Revenue",
-        translation: "Money before the label touches it.",
+        translation: "The money coming in, before anyone takes costs out.",
         dangerLevel: "SAFE",
-        meaning: "Income calculated *before* any expenses are deducted. If you negotiate a royalty based on 'Gross' or 'At Source', you are protecting yourself from the label inflating their overhead costs to drain your royalty pool."
+        meaning: "If your percentage is based on the money as it arrives, rather than on what's left after expenses, the label can't shrink your payment by adding costs. Always try to be paid on this rather than on 'net profits'."
     },
     {
         term: "Pay or Play",
-        translation: "They pay you even if they shelf you.",
+        translation: "They pay you even if they decide not to release the record.",
         dangerLevel: "SAFE",
-        meaning: "If the label decides not to record or release your album, this clause forces them to pay you a union-scale settlement or a pre-agreed sum, and immediately releases you from the contract so you can sign elsewhere."
+        meaning: "If the label changes its mind and never records or releases your album, this makes them pay you an agreed amount anyway and let you out of the contract, so you're free to sign somewhere else instead of sitting on the shelf."
     },
     {
         term: "Release Commitment",
         translation: "They actually have to put the music out.",
         dangerLevel: "SAFE",
-        meaning: "A clause forcing the label to commercially release your album within a specific timeframe (e.g., 120 days of delivery). If they fail to release it, you can demand to be released from the contract. Prevents getting 'shelved'."
+        meaning: "Sets a deadline — say 120 days after you hand the album in — by which the label has to release it. Miss the deadline and you can ask to be let out of the deal. Without this, a label can sign you and then just sit on your music."
     },
     {
         term: "Escalations",
-        translation: "Your royalty rate goes up as you sell more.",
+        translation: "Your percentage goes up as the song sells more.",
         dangerLevel: "SAFE",
-        meaning: "A clause where your royalty percentage automatically increases based on sales thresholds. For example, your base rate is 15%, but escalates to 16% after 500k sales, and 17% after 1M sales. Always ask for escalations."
+        meaning: "Your share automatically rises once you pass certain sales points. For example: 15% to start, 16% after 500,000 sales, 17% after a million. It costs the label nothing unless you succeed, so it's an easy thing to ask for."
     },
     {
         term: "Favored Nations",
-        translation: "Nobody gets a better deal than you.",
+        translation: "Nobody else on the project gets a better deal than you.",
         dangerLevel: "SAFE",
-        meaning: "A clause stating that if any other party on the project (like a featured artist or co-writer) negotiates a higher royalty rate or better terms, your contract automatically upgrades to match theirs. Ultimate equalization."
+        meaning: "If another person on the record — a guest artist, a co-writer — negotiates a better percentage than yours, your deal automatically rises to match. It stops you finding out later that you were the only one who took less."
     },
     {
         term: "Sunset Clause",
-        translation: "Phasing out your old manager's commission.",
+        translation: "An old manager's cut shrinks to nothing over a few years.",
         dangerLevel: "SAFE",
-        meaning: "When you fire a manager, they are usually entitled to commissions on deals they brought you. A Sunset Clause phases this out over time (e.g., 20% year 1, 10% year 2, 0% year 3) so you aren't paying two managers forever."
+        meaning: "When you part ways with a manager, they usually keep earning from deals they set up. This shrinks that over time — say 20% the first year, 10% the second, nothing after that — so you aren't paying an old manager and a new one at once, forever."
     },
     {
         term: "Cure Period",
-        translation: "A second chance to fix a mistake.",
+        translation: "A warning and a chance to fix it before you're in real trouble.",
         dangerLevel: "SAFE",
-        meaning: "If you breach the contract (e.g., deliver an album late), a 'cure period' requires the label to send you a formal warning and give you a specific amount of time (e.g., 30 days) to fix the mistake before they can sue or terminate."
+        meaning: "If you break a term of the deal — turning an album in late, for example — this makes them tell you in writing and give you a set amount of time, often 30 days, to put it right before they can sue you or end the contract."
     }
 ];
 

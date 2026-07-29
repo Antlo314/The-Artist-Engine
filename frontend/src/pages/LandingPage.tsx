@@ -1,6 +1,6 @@
 import { useEffect, useRef, Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowDown, Radar, Scale, AudioWaveform, Swords } from 'lucide-react';
+import { ArrowRight, ArrowDown, Radar, Scale, AudioWaveform, Handshake, Users } from 'lucide-react';
 import MarketingNav from '../components/MarketingNav';
 // Three.js vinyl is heavy — load after first paint so LCP isn't blocked.
 const VinylScene = lazy(() => import('../components/three/VinylScene'));
@@ -16,52 +16,82 @@ const PILLARS = [
         id: '01',
         icon: AudioWaveform,
         accent: 'var(--color-audio)',
-        name: 'AUDIO MASTER CORE',
-        headline: 'Commercial masters. ~35 seconds.',
-        copy: 'Reference-matched mastering driven by real DSP — RMS, EQ curve, loudness and stereo field matched to any record you point it at. Full songs measure ~35s live — faster than typical online mastering waits.',
-        bullets: ['Reference-match engine', 'Sub / Air / Snap / Width controls', 'WAV · MP3 · FLAC in ~35s'],
+        name: 'STUDIO',
+        headline: 'Your mix, ready to release.',
+        copy: 'Upload a finished mix and the Studio masters it — balancing the tone, evening out the volume, and bringing the track up to the loudness streaming services expect. It listens first and tells you in plain words what it would change. A full song takes about 35 seconds.',
+        bullets: ['Simple sliders: bass, sparkle, punch, width', 'A/B your original against the master', 'WAV · MP3 · FLAC in about 35 seconds'],
         image: '/site/neural_audio_mockup.png',
     },
     {
         id: '02',
         icon: Radar,
         accent: 'var(--color-radar)',
-        name: 'GIG RADAR ARRAY',
-        headline: 'Real venues. Verified in ~8s.',
-        copy: 'The war room scans live ticketing data for rooms actively booking your genre — then layers AI strategy on every verified target: payout models, reputation scores, leverage angles, and who to talk to. Full scans measure ~8 seconds live.',
-        bullets: ['Ticketmaster-verified targets', 'Reputation + payout intel', 'Pitches in ~2s — email, call, DM'],
+        name: 'FIND GIGS',
+        headline: 'Real venues, in about 8 seconds.',
+        copy: 'Tell it your city, your genre, and how big a room you want to play. It searches live ticketing and touring data for venues actually booking your kind of music, then adds an estimate of what each room pays, how far ahead it books, and who to contact.',
+        bullets: ['Live ticketing and touring data', 'Pay estimates and a contact where one is public', 'Every venue saved to your Roster'],
         image: '/site/gig_radar_mockup.png',
     },
     {
         id: '03',
-        icon: Swords,
+        icon: Handshake,
         accent: 'var(--color-shark)',
-        name: 'SHARK PROTOCOL',
-        headline: 'Every offer, countered.',
-        copy: 'An AI negotiator trained on predatory industry tactics reads every promoter offer, prices your leverage, and drafts the counter — email, call script, or DM — in your voice, before you lose the room. Counters land in ~2–3 seconds.',
-        bullets: ['Offer decomposition', 'Leverage-priced counters', 'Email · Call · DM in ~2s'],
+        name: 'PITCH & DEALS',
+        headline: 'The email, written. The offer, read.',
+        copy: 'Pick a venue and get a booking email, call script, or DM drafted in your voice, with your bio and links already in it. Paste in an offer and get a plain-word read on it — including deals that quietly take more than they give. Put two offers side by side and see which one treats you better.',
+        bullets: ['Email · call script · DM in about 2 seconds', 'A plain-word read on any offer you get', 'Two offers compared side by side'],
         image: null,
+        mock: {
+            label: 'An offer, read out loud',
+            footer: 'Drafted for you in about 2 seconds',
+            lines: [
+                { tone: 'quiet', text: 'They offered: “$150 flat, 90-minute set, and we take 30% of your merch.”' },
+                { tone: 'warn', text: 'That is below the going rate for a room this size — and a 30% merch cut is steep.' },
+                { tone: 'warn', text: 'You have room to ask: they have a Thursday to fill.' },
+                { tone: 'good', text: 'Suggested reply: $400 guaranteed, plus a share of the door after 200 tickets.' },
+            ],
+        },
     },
     {
         id: '04',
         icon: Scale,
         accent: 'var(--color-zion)',
-        name: 'ZION LEGAL SENTINEL',
-        headline: 'Predatory clauses, flagged in ~3s.',
-        copy: 'Forensic contract analysis across PDF, DOCX, or raw text. Recoupment traps, perpetuity grabs, and 180-day payout games get flagged and translated into plain language — before you sign. Measured ~3 seconds live.',
-        bullets: ['PDF / DOCX / text ingestion', 'Clause-level risk flags', 'Plain-language in ~3s'],
+        name: 'CONTRACTS',
+        headline: 'Know what it says before you sign.',
+        copy: 'Drop in a PDF, a Word file, or pasted text. It reads the contract clause by clause and flags the terms that commonly hurt artists — signing your recordings away forever, paying the label back out of your own share, long waits before money reaches you — and explains each one in plain words. It is a first read, not legal advice.',
+        bullets: ['PDF · Word · pasted text', 'Clause-by-clause flags in about 3 seconds', 'Plain-English dictionary, advance calculator, split sheets'],
         image: '/site/zion_defense_mockup.png',
+    },
+    {
+        id: '05',
+        icon: Users,
+        accent: 'var(--color-ember-500)',
+        name: 'ROSTER',
+        headline: 'Everyone you know, in one place.',
+        copy: 'Your address book and your to-do list. Every venue you find lands here as a lead you can move from found, to pitched, to talking, to booked. Add the booker you met at a show by hand. And when someone asks for a press kit, build one from your public releases.',
+        bullets: ['A pipeline that reflects what is really happening', 'Tasks tied to a specific venue', 'A press kit built from your releases'],
+        image: null,
+        mock: {
+            label: 'Your pipeline, honestly',
+            footer: 'Yours to export any time',
+            lines: [
+                { tone: 'quiet', text: 'Found — The Echo Room, Atlanta · holds 350' },
+                { tone: 'quiet', text: 'Pitched — Blue Room, Nashville · emailed Tuesday' },
+                { tone: 'warn', text: 'Talking — The Hall, Charlotte · they asked for a date' },
+                { tone: 'good', text: 'Booked — Bell House, Richmond · March 14' },
+            ],
+        },
     },
 ];
 
 const STATS = [
-    { value: 230, suffix: 'K+', label: 'live events searchable' },
-    { value: 35, suffix: 's', label: 'avg full-song master' },
-    { value: 8, suffix: 's', label: 'avg venue scan' },
-    { value: 2, suffix: 's', label: 'avg call script' },
+    { value: 230, suffix: 'K+', label: 'live events to search' },
+    { value: 35, suffix: 's', label: 'to master a full song' },
+    { value: 8, suffix: 's', label: 'to search for venues' },
+    { value: 2, suffix: 's', label: 'to draft a pitch' },
 ];
 
-const MARQUEE = ['MASTER', 'SCOUT', 'NEGOTIATE', 'PROTECT'];
+const MARQUEE = ['GIGS', 'MASTERS', 'PITCHES', 'CONTRACTS', 'CONTACTS'];
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -165,7 +195,7 @@ export default function LandingPage() {
                         </span>
                         <span className="block overflow-visible pb-[0.18em]">
                             <span className="hero-word inline-block text-transparent bg-clip-text bg-gradient-to-br from-ember-400 via-ember-500 to-ember-600">
-                                sovereign
+                                independent
                             </span>
                         </span>
                         <span className="block overflow-visible pb-[0.2em]">
@@ -176,8 +206,9 @@ export default function LandingPage() {
                     </h1>
 
                     <p className="hero-fade mt-6 md:mt-8 max-w-xl text-ink-200 text-[15px] md:text-lg font-light leading-relaxed">
-                        Master your records. Find real rooms. Counter every offer.
-                        Kill predatory contracts. One source — no middlemen.
+                        Find real gigs, master your tracks, write the pitches, and read the
+                        contracts — with your contacts and your to-do list right beside them.
+                        One workspace, built for the actual job.
                     </p>
 
                     <div className="hero-fade mt-8 md:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -194,7 +225,7 @@ export default function LandingPage() {
                             onClick={() => navigate('/features')}
                             className="rounded-full border hairline hover:border-ink-400/60 transition-colors px-8 py-4 font-display font-medium tracking-wide text-ink-200 hover:text-ink-50 w-full sm:w-auto"
                         >
-                            View Architecture
+                            See what's inside
                         </button>
                     </div>
                 </div>
@@ -238,9 +269,9 @@ export default function LandingPage() {
 
             {/* ============ PILLARS ============ */}
             <section className="relative max-w-7xl mx-auto px-6 md:px-10 pt-28 pb-8">
-                <p className="font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-4">The four pillars</p>
+                <p className="font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-4">What's inside</p>
                 <h2 className="text-cinema text-4xl md:text-6xl max-w-3xl">
-                    An entire back office,<br />running autonomously.
+                    The whole job,<br />in one place.
                 </h2>
             </section>
 
@@ -283,25 +314,32 @@ export default function LandingPage() {
                                         />
                                     </div>
                                 ) : (
-                                    /* Shark Protocol — live terminal card */
-                                    <div className="pillar-visual glass-obsidian glass-obsidian-hover rounded-2xl p-6 font-mono text-xs leading-relaxed">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <span className="h-2.5 w-2.5 rounded-full bg-ember-600" />
-                                            <span className="h-2.5 w-2.5 rounded-full bg-ink-700" />
-                                            <span className="h-2.5 w-2.5 rounded-full bg-ink-700" />
-                                            <span className="ml-3 text-ink-400 tracking-widest uppercase text-[9px]">shark_protocol.exe</span>
-                                        </div>
-                                        <p className="text-ink-400">&gt; OFFER RECEIVED — “$150 flat, 90-min set, merch cut 30%”</p>
-                                        <p className="text-ember-400 mt-3">&gt; ANALYSIS: below market for verified 450-cap room.</p>
-                                        <p className="text-ember-400">&gt; LEVERAGE: Thursday cancellation. They need you.</p>
-                                        <p className="text-ink-50 mt-3">&gt; COUNTER DRAFTED: $400 guarantee + door split after 200
-                                            <span className="inline-block w-2 h-4 bg-ember-500 ml-1 animate-pulse align-middle" />
+                                    /* Plain-language sample card — no image needed */
+                                    <div className="pillar-visual glass-obsidian glass-obsidian-hover rounded-2xl p-6 md:p-7">
+                                        <p
+                                            className="text-[10px] tracking-[0.25em] uppercase mb-5"
+                                            style={{ color: p.accent }}
+                                        >
+                                            {p.mock?.label}
                                         </p>
-                                        <div className="mt-6 flex items-center justify-between border-t hairline pt-4">
-                                            <div className="flex items-center gap-2 text-ink-400 text-[10px] tracking-widest uppercase">
-                                                <Icon size={13} style={{ color: p.accent }} /> Negotiation Core
-                                            </div>
-                                            <span className="text-[10px] text-ember-500 tracking-widest uppercase">Armed</span>
+                                        <div className="space-y-3.5">
+                                            {(p.mock?.lines || []).map((line) => (
+                                                <p
+                                                    key={line.text}
+                                                    className={`text-sm leading-relaxed pl-3 border-l-2 ${
+                                                        line.tone === 'good'
+                                                            ? 'text-emerald-300 border-emerald-500/50'
+                                                            : line.tone === 'warn'
+                                                            ? 'text-ink-50 border-ember-500/60'
+                                                            : 'text-ink-300 border-white/10'
+                                                    }`}
+                                                >
+                                                    {line.text}
+                                                </p>
+                                            ))}
+                                        </div>
+                                        <div className="mt-6 flex items-center gap-2 border-t hairline pt-4 text-ink-400 text-[11px]">
+                                            <Icon size={13} style={{ color: p.accent }} /> {p.mock?.footer}
                                         </div>
                                     </div>
                                 )}
@@ -331,10 +369,10 @@ export default function LandingPage() {
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-ember-600/10 blur-[120px] pointer-events-none" />
                 <div className="relative max-w-4xl mx-auto px-6 text-center">
                     <p className="finale-reveal font-mono text-[10px] tracking-[0.35em] text-ember-500 uppercase mb-6">
-                        No label. No leash.
+                        No label. No manager's cut.
                     </p>
                     <h2 className="finale-reveal text-cinema text-5xl md:text-7xl mb-10">
-                        Run your empire<br />from the source.
+                        Run your own<br />career.
                     </h2>
                     <div className="finale-reveal flex flex-col sm:flex-row justify-center gap-4">
                         <button

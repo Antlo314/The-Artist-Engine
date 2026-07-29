@@ -46,7 +46,7 @@ export default function MarketingNav() {
                             : 'text-ink-400 hover:text-ink-50'
                     }`}
                 >
-                    Architecture
+                    Features
                 </button>
 
                 <button

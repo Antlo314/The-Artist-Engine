@@ -6,7 +6,7 @@ import { downloadText, downloadJson } from '../lib/exportUtils';
 import { useAuth } from '../lib/auth';
 import Walkthrough from './ui/Walkthrough';
 import CoachPrompt from './ui/CoachPrompt';
-import { hasSeenTour, resetOnboarding } from '../lib/onboarding';
+import { shouldOpenViewTour, resetOnboarding } from '../lib/onboarding';
 
 interface ArtistProfileProps {
     profile: any;
@@ -46,7 +46,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
     const [epk, setEpk] = useState<any | null>(null);
     const [epkBusy, setEpkBusy] = useState(false);
     const [epkErr, setEpkErr] = useState<string | null>(null);
-    const [showProfileTour, setShowProfileTour] = useState(() => !hasSeenTour('profile'));
+    const [showProfileTour, setShowProfileTour] = useState(() => shouldOpenViewTour('profile'));
     const [tourResetNote, setTourResetNote] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const stats = me?.profile?.stats || {};
@@ -139,25 +139,25 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
             <PageHeader
                 view="profile"
                 accent="#eab308"
-                module="IDENTITY"
+                module="WHO YOU ARE"
                 title="Profile"
-                desc="Powers Find Gigs defaults, pitch footers, and your free EPK pack."
+                desc="Everything the Engine writes for you — pitches, press kits — pulls from here."
             />
-            <CoachPrompt id="profile-power-tip" accent="#eab308" title="Profile tip">
-                Fill alias, city, genre, bio, and one streaming link — pitch drafts and scouts get smarter. Saved to your
-                account (server profile), not just this browser.
+            <CoachPrompt id="profile-power-tip" accent="#eab308" title="Worth five minutes">
+                Fill in your artist name, city, genre, a short bio, and one streaming link. Pitches get noticeably
+                stronger, and gig searches start pre-filled. This is saved to your account, not just this browser.
             </CoachPrompt>
 
             {me?.profile?.stats && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                        ['Masters', stats.masters_total],
-                        ['Scouts', stats.scouts_total],
-                        ['Pitches', stats.pitches_total],
-                        ['Open leads', stats.leads_open],
+                        ['Tracks mastered', stats.masters_total],
+                        ['Gig searches', stats.scouts_total],
+                        ['Pitches written', stats.pitches_total],
+                        ['Contacts in play', stats.leads_open],
                     ].map(([label, val]) => (
                         <div key={String(label)} className="glass-obsidian border border-white/10 rounded-xl p-3">
-                            <p className="font-mono text-[9px] tracking-widest uppercase text-ink-500">{label}</p>
+                            <p className="text-[11px] text-ink-400">{label}</p>
                             <p className="font-display text-xl tabular-nums mt-0.5">{Number(val) || 0}</p>
                         </div>
                     ))}
@@ -165,7 +165,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
             )}
 
             {/* Completeness */}
-            <Panel title="Profile power" sub={`${score.pct}% ready for stronger pitches`} accent="#eab308" sheen>
+            <Panel title="How ready you are" sub={`${score.pct}% — the fuller this is, the better your pitches read`} accent="#eab308" sheen>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="relative w-20 h-20 shrink-0">
                         <svg viewBox="0 0 36 36" className="w-20 h-20 -rotate-90">
@@ -204,7 +204,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
             </Panel>
 
             {(email || me) && (
-                <Panel title="Account" sub="Signed-in user" accent="#eab308">
+                <Panel title="Account" sub="Your sign-in and app settings" accent="#eab308">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="min-w-0">
                             <p className="text-sm text-ink-50 truncate">
@@ -244,7 +244,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-7 space-y-6">
-                    <Panel title="Identity" sub="Used to personalize pitches & scouts" accent="#eab308" sheen>
+                    <Panel title="About you" sub="Used in every pitch and search" accent="#eab308" sheen>
                         <div className="flex flex-col sm:flex-row gap-6">
                             <div className="shrink-0 flex flex-col items-center gap-2">
                                 <div
@@ -271,7 +271,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                             </div>
 
                             <div className="flex-1 space-y-4">
-                                <Field label="Artist / project alias">
+                                <Field label="Artist or band name" hint="Spell it the way it appears on your releases.">
                                     <input
                                         type="text"
                                         value={profile.artistAlias || ''}
@@ -280,7 +280,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                         className={inputCls}
                                     />
                                 </Field>
-                                <Field label="One-liner / bio" hint="Appended to pitch drafts">
+                                <Field label="Short bio" hint="Two or three sentences. This gets attached to every pitch.">
                                     <textarea
                                         value={profile.bio || profile.oneLiner || ''}
                                         onChange={(e) => setField('bio', e.target.value)}
@@ -290,7 +290,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                     />
                                 </Field>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <Field label="Manager name">
+                                    <Field label="Manager name" hint="Managing yourself? Use your own name.">
                                         <input
                                             type="text"
                                             value={profile.agentName || ''}
@@ -309,7 +309,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                         />
                                     </Field>
                                 </div>
-                                <Field label="Routing email">
+                                <Field label="Email bookers should reply to">
                                     <input
                                         type="email"
                                         value={profile.agentEmail || ''}
@@ -319,7 +319,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                     />
                                 </Field>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <Field label="Home city">
+                                    <Field label="Home city" hint="Pre-fills your gig searches.">
                                         <input
                                             type="text"
                                             value={profile.homeCity || ''}
@@ -328,7 +328,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                             className={inputCls}
                                         />
                                     </Field>
-                                    <Field label="Primary genre">
+                                    <Field label="Main genre">
                                         <input
                                             type="text"
                                             value={profile.primaryGenre || ''}
@@ -338,7 +338,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                         />
                                     </Field>
                                 </div>
-                                <Field label="Target markets" hint="Optional — comma-separated cities">
+                                <Field label="Cities you want to play" hint="Optional. Separate them with commas.">
                                     <input
                                         type="text"
                                         value={profile.targetMarkets || ''}
@@ -369,9 +369,9 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                         </div>
                     </Panel>
 
-                    <Panel title="Links & proof" sub="Injected into pitch footers" accent="#eab308">
+                    <Panel title="Where people can hear you" sub="Added to the bottom of every pitch" accent="#eab308">
                         <div className="space-y-4">
-                            <Field label="Primary web / social">
+                            <Field label="Website or main social">
                                 <input
                                     type="text"
                                     value={profile.agentSocial || ''}
@@ -408,7 +408,7 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                         className={inputCls}
                                     />
                                 </Field>
-                                <Field label="SoundCloud / other">
+                                <Field label="SoundCloud or anywhere else">
                                     <input
                                         type="url"
                                         value={profile.otherUrl || ''}
@@ -424,46 +424,50 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
 
                 <div className="lg:col-span-5 flex flex-col gap-6">
                     <Panel
-                        title="Business notes"
-                        sub="Private notes on this device — not a bank connection"
+                        title="What you ask for"
+                        sub="Private notes, saved on this device only"
                         accent="#eab308"
                     >
+                        <p className="text-xs text-ink-400 mb-4 leading-relaxed">
+                            Your own reminders for when a booker asks. Nothing here is sent anywhere or shown to anyone.
+                        </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <Field label="Working capital note (USD)">
+                            <Field label="Your usual fee" hint="What you normally ask for a headline set.">
                                 <input
                                     type="text"
-                                    value={profile.treasuryBalance || ''}
-                                    onChange={(e) => setField('treasuryBalance', e.target.value)}
-                                    placeholder="Optional"
+                                    value={profile.usualFee || ''}
+                                    onChange={(e) => setField('usualFee', e.target.value)}
+                                    placeholder="e.g. $600 guarantee"
                                     className={inputCls}
                                 />
                             </Field>
-                            <Field label="Crypto note (ETH)">
+                            <Field label="Your lowest yes" hint="The number below which you'd rather pass.">
                                 <input
                                     type="text"
-                                    value={profile.cryptoBalance || ''}
-                                    onChange={(e) => setField('cryptoBalance', e.target.value)}
-                                    placeholder="Optional"
+                                    value={profile.floorFee || ''}
+                                    onChange={(e) => setField('floorFee', e.target.value)}
+                                    placeholder="e.g. $350 + door split"
                                     className={inputCls}
                                 />
                             </Field>
                         </div>
                         <div className="mt-4">
-                            <Field label="Payout address (self-reported)">
+                            <Field label="How you like to be paid" hint="Deposit terms, payment method, invoicing notes.">
                                 <input
                                     type="text"
-                                    value={profile.cryptoAddress || ''}
-                                    onChange={(e) => setField('cryptoAddress', e.target.value)}
-                                    placeholder="0x…"
-                                    className={`${inputCls} font-mono`}
+                                    value={profile.payoutPreference || ''}
+                                    onChange={(e) => setField('payoutPreference', e.target.value)}
+                                    placeholder="e.g. 50% deposit on booking, rest same night"
+                                    className={inputCls}
                                 />
                             </Field>
                         </div>
                     </Panel>
 
-                    <Panel title="EPK pack (free)" sub="MusicBrainz + Cover Art Archive + your bio" accent="#eab308" sheen>
+                    <Panel title="Your releases" sub="Free — looked up from public music databases" accent="#eab308" sheen>
                         <p className="text-xs text-ink-400 mb-3 leading-relaxed">
-                            Pull open metadata and cover-art URLs, then export with your identity fields.
+                            A quick check of what's publicly listed under your artist name. The full press kit you can
+                            send to bookers lives in Roster.
                         </p>
                         <Btn
                             variant="accent"
@@ -482,21 +486,21 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                                         /* ignore */
                                     }
                                 } catch (e: any) {
-                                    setEpkErr(e?.message || 'EPK fetch failed');
+                                    setEpkErr(e?.message || "Couldn't look that up. Try again in a moment.");
                                 } finally {
                                     setEpkBusy(false);
                                 }
                             }}
                         >
-                            {epkBusy ? 'Fetching…' : 'Build EPK from MusicBrainz'}
+                            {epkBusy ? 'Looking up…' : 'Find my releases'}
                         </Btn>
                         {epkErr && <p className="text-sm text-red-400 mt-2">{epkErr}</p>}
                         {epk?.artist && (
                             <div className="mt-4 space-y-3">
                                 <div className="text-sm text-ink-50 font-medium">{epk.artist.name}</div>
-                                <div className="font-mono text-[10px] text-ink-400 uppercase tracking-widest">
-                                    {epk.artist.type || 'Artist'} · {epk.artist.country || '—'} · MB score{' '}
-                                    {epk.artist.score ?? '—'}
+                                <div className="text-[11px] text-ink-400">
+                                    {epk.artist.type || 'Artist'}
+                                    {epk.artist.country ? ` · ${epk.artist.country}` : ''}
                                 </div>
                                 {(profile.bio || profile.oneLiner) && (
                                     <p className="text-xs text-ink-200 leading-relaxed border-l-2 border-yellow-500/40 pl-2">
@@ -599,17 +603,18 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                         )}
                     </Panel>
 
-                    <Panel title="Coming soon (not free yet)" accent="#8a8a93">
+                    <Panel title="Not built yet" accent="var(--color-ink-500)">
                         <p className="text-xs text-ink-400 mb-3 leading-relaxed">
-                            Investor honesty: these need paid partners or compliance. They are not demo-faked.
+                            Being straight with you: these are on the roadmap, not in the app. Nothing here is faked
+                            behind a demo.
                         </p>
                         <ul className="space-y-3">
                             {[
-                                'Outcome tracking across email inbox + CRM automations',
-                                'Bank / instant artist payouts',
-                                'Streaming & social analytics suites (paid data)',
-                                'E-sign + versioned contract vault',
-                                'PRO registration automation + DSP one-click distro',
+                                'Tracking whether your emails actually got replies',
+                                'Getting paid directly through the Engine',
+                                'Streaming and social stats in one dashboard',
+                                'Signing contracts in-app and keeping every version',
+                                'Registering songs with your PRO and sending them to streaming services',
                             ].map((t) => (
                                 <li key={t} className="flex gap-3">
                                     <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-ink-400 shrink-0" />
@@ -626,21 +631,21 @@ export default function ArtistProfile({ profile, setProfile }: ArtistProfileProp
                 open={showProfileTour}
                 accent="#eab308"
                 onClose={() => setShowProfileTour(false)}
-                primaryLabel="Fill my profile"
+                primaryLabel="Fill in my profile"
                 steps={[
                     {
-                        title: 'Identity feeds the Engine',
-                        body: 'Alias, city, and genre pre-fill Find Gigs. Manager contact lands in pitch headers.',
-                        bullets: ['Saved only in this browser for now', 'Avatar is optional but helps completeness'],
+                        title: 'This page powers the rest',
+                        body: 'Your artist name, city, and genre pre-fill every gig search. Your manager details go at the top of every pitch.',
+                        bullets: ['Saved to your account, not just this browser', 'A photo is optional but makes the page feel like yours'],
                     },
                     {
-                        title: 'Bio + links = proof',
-                        body: 'Your one-liner and Spotify/Apple/IG links are appended to draft pitches automatically.',
-                        bullets: ['Aim for 75%+ profile power', 'Export EPK with MusicBrainz metadata'],
+                        title: 'Your bio and links do the selling',
+                        body: 'Bookers click your music before they answer you. Everything you add here gets attached to the pitches the Engine writes.',
+                        bullets: ['One good streaming link beats four empty ones', 'Aim to get the readiness meter above 75%'],
                     },
                     {
-                        title: 'Replay tours anytime',
-                        body: 'Use Replay tours under Account to re-show welcome and pillar walkthroughs for demos.',
+                        title: 'Lost? Replay the tours',
+                        body: 'Under Account you can bring back the welcome tour and all the little tips you dismissed.',
                     },
                 ]}
             />

@@ -5,7 +5,7 @@
 
 const STORAGE_KEY = 'engine_tour_v1';
 
-export type TourId = 'welcome' | 'studio' | 'radar' | 'legal' | 'profile';
+export type TourId = 'welcome' | 'studio' | 'radar' | 'legal' | 'profile' | 'deals' | 'roster';
 
 export type TourMap = Partial<Record<TourId, boolean>>;
 
@@ -30,6 +30,15 @@ function writeMap(map: TourMap) {
 
 export function hasSeenTour(id: TourId): boolean {
     return Boolean(readMap()[id]);
+}
+
+/**
+ * Should a per-screen tour open right now?
+ * No — if the user has not finished the welcome tour yet. Otherwise two
+ * dialogs stack on top of each other on a brand-new account.
+ */
+export function shouldOpenViewTour(id: TourId): boolean {
+    return hasSeenTour('welcome') && !hasSeenTour(id);
 }
 
 export function markTourSeen(id: TourId) {

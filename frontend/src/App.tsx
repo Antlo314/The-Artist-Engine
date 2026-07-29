@@ -36,7 +36,7 @@ export default function App() {
                         <Route path="/pricing" element={<PricingPage />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route
-                            path="/engine"
+                            path="/engine/:view?"
                             element={
                                 <RequireAuth>
                                     <EngineCore />
