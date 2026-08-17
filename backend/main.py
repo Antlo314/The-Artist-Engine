@@ -1209,6 +1209,29 @@ async def scout_gigs(request: ScoutRequest, user: AppUser = Depends(require_foun
              logs.append(f"Sorry — the search didn't work this time: {str(final_err)}")
              return {"status": "error", "error": str(final_err), "log": "\n".join(logs)}
 
+@app.get("/api/cron/warm-gigs")
+async def warm_gigs(request: Request):
+    """Vercel Cron hits this every 4 hours so Ticketmaster stays warm."""
+    secret = os.getenv("CRON_SECRET")
+    auth = request.headers.get("authorization") or ""
+    vercel_cron = request.headers.get("x-vercel-cron")
+    if secret and auth != f"Bearer {secret}" and not vercel_cron:
+        raise HTTPException(status_code=401, detail="cron only")
+
+    city = "Atlanta"
+    count = 0
+    if ticketmaster_available():
+        try:
+            venues = await fetch_ticketmaster_venues(
+                city=city, genre="hip hop", radius="50", timeframe="month",
+                country_code="US",
+            )
+            count = len(venues or [])
+        except Exception as err:
+            return {"ok": False, "error": str(err), "city": city}
+    return {"ok": True, "city": city, "venues": count}
+
+
 # ---------------------------------------------------------------------------
 # PILLAR 2.5: GIG RADAR (Auto-Pitch Generator)
 # ---------------------------------------------------------------------------

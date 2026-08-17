@@ -1,4 +1,11 @@
 {
+    "fluid": true,
+    "crons": [
+        {
+            "path": "/api/cron/warm-gigs",
+            "schedule": "0 */4 * * *"
+        }
+    ],
     "buildCommand": "cd frontend && npm install && npm run build",
     "outputDirectory": "frontend/dist",
     "framework": "vite",
